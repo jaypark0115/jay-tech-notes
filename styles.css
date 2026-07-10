@@ -1859,6 +1859,30 @@ body.home-page .doc-section > p {
   color: #475569;
 }
 
+body.home-page .lead {
+  margin-bottom: 44px;
+}
+
+body.home-page .home-panels {
+  margin: 40px 0 58px;
+}
+
+body.home-page .chapter-switcher {
+  margin: 0 0 76px;
+}
+
+body.home-page .doc-section + .doc-section {
+  margin-top: 96px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+body.home-page .project-grid,
+body.home-page .sitemap-grid {
+  margin-top: 42px;
+  margin-bottom: 66px;
+}
+
 body.home-page .home-panel {
   border-top-color: var(--accent);
 }
@@ -2048,5 +2072,22 @@ body.home-page .sitemap-number {
   .pdf-viewer {
     height: 72vh;
     min-height: 520px;
+  }
+
+  body.home-page .lead {
+    margin-bottom: 34px;
+  }
+
+  body.home-page .home-panels {
+    margin: 32px 0 46px;
+  }
+
+  body.home-page .chapter-switcher {
+    margin-bottom: 58px;
+  }
+
+  body.home-page .doc-section + .doc-section {
+    margin-top: 72px;
+    padding-top: 14px;
   }
 }
