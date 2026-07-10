@@ -23,8 +23,8 @@ https://jaypark0115.github.io/jay-tech-notes/
 ### SNN 연구 노트
 
 1. [fashion-mnist-sa-snn](https://github.com/jaypark0115/fashion-mnist-sa-snn): Fashion-MNIST Sensory Adaptation SNN 논문 본편 코드
-2. [SA 기반 SNN 안정성 분석 논문 PDF](https://jaypark0115.github.io/jay-tech-notes/snn-paper.html)
-3. [학술대회 포스터 PDF](https://jaypark0115.github.io/jay-tech-notes/snn-poster.html)
+2. [SA 기반 SNN 안정성 분석 논문 PDF](https://jaypark0115.github.io/jay-tech-notes/snn-paper.html): 2026년도 대한전자공학회 하계학술대회 논문집 포스터 세션 부문 811-814p 게재 논문
+3. [학술대회 포스터 PDF](https://jaypark0115.github.io/jay-tech-notes/snn-poster.html): 2026.6.23.(화) 발표 포스터
 4. [fashion-mnist-sa-1250-extension](https://github.com/jaypark0115/fashion-mnist-sa-1250-extension): 1250-neuron 후속 확장 연구 코드
 
 ### NRV DVS 캘리브레이션 설명
