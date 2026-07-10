@@ -1961,6 +1961,32 @@ body.home-page .sitemap-number {
   line-height: 1.75;
 }
 
+.project-card-compact {
+  min-height: 190px;
+  padding-bottom: 24px;
+}
+
+.project-card-compact .sitemap-number {
+  width: 48px;
+  height: 48px;
+  margin: 24px 26px 14px;
+  font-size: 0.9rem;
+}
+
+.project-card-compact small {
+  margin: 0 26px 10px;
+}
+
+.project-card-compact h2 {
+  margin: 0 26px 12px;
+  font-size: 1.12rem;
+}
+
+.project-card-compact p {
+  margin: 0 26px;
+  line-height: 1.65;
+}
+
 .pdf-actions {
   display: flex;
   justify-content: flex-end;
