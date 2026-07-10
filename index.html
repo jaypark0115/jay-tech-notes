@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="제가 정리한 기술 글, 실험 기록, NRV DVS 캘리브레이션 한국어 설명 모음." />
+    <meta name="description" content="제가 정리한 기술 글, SNN 연구 기록, NRV DVS 캘리브레이션 한국어 설명 모음." />
     <title>Jay Tech Notes</title>
     <link rel="stylesheet" href="styles.css" />
     <script src="script.js" defer></script>
@@ -30,6 +30,14 @@
           <div class="home-panels" aria-label="페이지 소개">
             <section class="home-panel">
               <span>공개 글 묶음</span>
+              <h2>SNN 연구 기록</h2>
+              <p>
+                Fashion-MNIST 환경에서 Sensory Adaptation 기반 SNN을 분석한
+                논문, 포스터, 공개 코드 저장소를 한 묶음으로 정리했습니다.
+              </p>
+            </section>
+            <section class="home-panel">
+              <span>공개 글 묶음</span>
               <h2>NRV DVS 캘리브레이션</h2>
               <p>
                 이벤트 카메라 캘리브레이션을 처음 보는 사람도 따라갈 수 있도록
@@ -49,10 +57,63 @@
           <nav class="chapter-switcher" aria-label="현재 공개된 글 묶음">
             <span class="chapter-switcher-label">현재 공개된 글 묶음</span>
             <div>
+              <a href="#snn-research">SNN 연구 노트</a>
               <a href="#nrv-dvs-calibration">NRV DVS 캘리브레이션 설명</a>
               <a href="#github-projects">GitHub 프로젝트 링크</a>
             </div>
           </nav>
+
+          <section class="doc-section visible" id="snn-research">
+            <h2>SNN 연구 노트</h2>
+            <p>
+              Fashion-MNIST 환경에서 Sensory Adaptation 기반 Spiking Neural Network의
+              안정성을 분석한 논문과 포스터, 그리고 해당 연구에 사용한 공개 코드
+              저장소를 함께 묶었습니다. 논문 본편은 625-neuron 기준 안정성 분석이고,
+              후속 확장 연구는 1250-neuron 구조에서 SA 성능을 개선한 결과입니다.
+            </p>
+            <div class="project-grid collection-card-grid">
+              <a class="project-card" href="https://github.com/jaypark0115/fashion-mnist-sa-snn" target="_blank" rel="noopener noreferrer">
+                <img class="project-thumb" src="assets/snn-paper-thumb.jpg" alt="Fashion-MNIST SA SNN 논문 첫 페이지" />
+                <span class="sitemap-number">01</span>
+                <small>Paper code</small>
+                <h2>fashion-mnist-sa-snn</h2>
+                <p>
+                  논문 본편에 사용한 Fashion-MNIST SA/SFA 비교 코드입니다.
+                  625-neuron 기준 SA 61.44%, SFA 66.49% 결과와 실행 방법을 정리했습니다.
+                </p>
+              </a>
+              <a class="project-card" href="snn-paper.html">
+                <img class="project-thumb" src="assets/snn-paper-thumb.jpg" alt="Fashion-MNIST SA SNN 논문 미리보기" />
+                <span class="sitemap-number">02</span>
+                <small>Paper PDF</small>
+                <h2>SA 기반 SNN 안정성 분석 논문</h2>
+                <p>
+                  대한전자공학회 하계학술대회 논문집에 제출한
+                  Fashion-MNIST Sensory Adaptation 안정성 분석 논문 PDF를 봅니다.
+                </p>
+              </a>
+              <a class="project-card" href="snn-poster.html">
+                <img class="project-thumb" src="assets/snn-poster-thumb.jpg" alt="Fashion-MNIST SA SNN 포스터 미리보기" />
+                <span class="sitemap-number">03</span>
+                <small>Poster PDF</small>
+                <h2>학술대회 포스터</h2>
+                <p>
+                  논문 요약과 함께 1250-neuron 후속 확장 결과
+                  SA 75.97%, SFA/VTH 73.96%를 포함한 발표 포스터입니다.
+                </p>
+              </a>
+              <a class="project-card" href="https://github.com/jaypark0115/fashion-mnist-sa-1250-extension" target="_blank" rel="noopener noreferrer">
+                <img class="project-thumb" src="assets/snn-poster-thumb.jpg" alt="Fashion-MNIST SA 1250-neuron extension 포스터 영역" />
+                <span class="sitemap-number">04</span>
+                <small>Extension code</small>
+                <h2>fashion-mnist-sa-1250-extension</h2>
+                <p>
+                  논문 후속 연구 저장소입니다. 안정 SA 파라미터를 유지하면서
+                  excitatory/inhibitory 뉴런을 각각 1250개로 확장한 실험을 정리했습니다.
+                </p>
+              </a>
+            </div>
+          </section>
 
           <section class="doc-section visible" id="nrv-dvs-calibration">
             <h2>NRV DVS 캘리브레이션 설명</h2>

@@ -1,8 +1,7 @@
 # Jay Tech Notes
 
 제가 직접 작성하고 정리한 기술 글, 실험 기록, 논문 메모를 모아두는 개인 페이지입니다.
-현재는 NRV DVS 캘리브레이션을 처음 보는 사람도 흐름을 이해할 수 있도록,
-캘리브레이션 설명 글 3개를 먼저 공개해두었습니다.
+현재는 Fashion-MNIST SNN 연구 자료와 NRV DVS 캘리브레이션 설명 글을 공개해두었습니다.
 
 NRV DVS 캘리브레이션 설명은 제가 NRV 이벤트 카메라에 맞는 캘리브레이션 방법을
 직접 찾아보고, 실제 설명 흐름에 맞게 다시 정리한 글 묶음입니다.
@@ -21,6 +20,13 @@ https://jaypark0115.github.io/jay-tech-notes/
 
 ## 목차
 
+### SNN 연구 노트
+
+1. [fashion-mnist-sa-snn](https://github.com/jaypark0115/fashion-mnist-sa-snn): Fashion-MNIST Sensory Adaptation SNN 논문 본편 코드
+2. [SA 기반 SNN 안정성 분석 논문 PDF](https://jaypark0115.github.io/jay-tech-notes/snn-paper.html)
+3. [학술대회 포스터 PDF](https://jaypark0115.github.io/jay-tech-notes/snn-poster.html)
+4. [fashion-mnist-sa-1250-extension](https://github.com/jaypark0115/fashion-mnist-sa-1250-extension): 1250-neuron 후속 확장 연구 코드
+
 ### NRV DVS 캘리브레이션 설명
 
 1. [카메라 캘리브레이션이란?](https://jaypark0115.github.io/jay-tech-notes/01-camera-calibration.html)
@@ -35,8 +41,10 @@ https://jaypark0115.github.io/jay-tech-notes/
 ## 구성
 
 - `index.html`: Jay Tech Notes 첫 화면과 현재 공개된 글 목록
+- `snn-paper.html`: Fashion-MNIST SA 기반 SNN 안정성 분석 논문 PDF 보기 페이지
+- `snn-poster.html`: Fashion-MNIST SA 기반 SNN 학술대회 포스터 PDF 보기 페이지
 - `01-camera-calibration.html`: 카메라 캘리브레이션 기본 개념
 - `02-dvs-calibration-method.html`: NRV DVS 캘리브레이션 방법
 - `03-capture-preparation.html`: 촬영 환경과 준비
 - `styles.css`: 페이지 공통 스타일과 첫 화면 전용 스타일
-- `assets/`: 설명에 사용한 이미지 자료
+- `assets/`: 설명에 사용한 이미지, 논문/포스터 PDF, 카드 썸네일 자료

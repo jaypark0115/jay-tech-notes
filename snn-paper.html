@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Fashion-MNIST 환경에서의 Sensory Adaptation 기반 SNN 안정성 분석 논문 PDF."
+    />
+    <title>SA 기반 SNN 안정성 분석 논문 — Jay Tech Notes</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body class="home-page pdf-page">
+    <div class="site-shell">
+      <main class="content-wrap" id="top">
+        <article class="content">
+          <div class="document-kicker">
+            <span>SNN 연구 노트</span>
+            <div class="kicker-actions">
+              <span class="draft-label">논문 PDF</span>
+            </div>
+          </div>
+
+          <a class="home-link" href="index.html#snn-research">← SNN 연구 노트로 돌아가기</a>
+
+          <nav class="chapter-switcher" aria-label="SNN 연구 자료 이동">
+            <span class="chapter-switcher-label">SNN 자료</span>
+            <div>
+              <a class="current" href="snn-paper.html" aria-current="page">논문 PDF</a>
+              <a href="snn-poster.html">포스터 PDF</a>
+              <a href="https://github.com/jaypark0115/fashion-mnist-sa-snn" target="_blank" rel="noopener noreferrer">논문 코드</a>
+              <a href="https://github.com/jaypark0115/fashion-mnist-sa-1250-extension" target="_blank" rel="noopener noreferrer">확장 코드</a>
+            </div>
+          </nav>
+
+          <h1>Fashion-MNIST SA 기반 SNN 안정성 분석 논문</h1>
+          <p class="lead">
+            Fashion-MNIST 환경에서 Sensory Adaptation(SA) 기반 Spiking Neural Network의
+            안정성을 분석한 대한전자공학회 하계학술대회 논문입니다.
+          </p>
+
+          <div class="source-note" role="note">
+            <strong>핵심 결과</strong>
+            <span>
+              625-neuron Fashion-MNIST 실험에서 SA는 SFA보다 정확도는 낮았지만
+              평균 spike 수와 활성 뉴런 수를 줄였습니다. 논문 기준 결과는
+              SA 61.44%, SFA 66.49%입니다.
+            </span>
+          </div>
+
+          <div class="pdf-actions">
+            <a class="pdf-open-link" href="assets/snn-sa-fashion-mnist-paper.pdf" target="_blank" rel="noopener noreferrer">
+              PDF 새 창으로 열기
+            </a>
+          </div>
+
+          <section class="pdf-viewer-section" aria-label="논문 PDF 보기">
+            <iframe
+              class="pdf-viewer"
+              src="assets/snn-sa-fashion-mnist-paper.pdf"
+              title="Fashion-MNIST SA 기반 SNN 안정성 분석 논문 PDF"
+            ></iframe>
+          </section>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>
