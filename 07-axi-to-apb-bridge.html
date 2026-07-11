@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="숭실대학교 동계 학부생연구인턴 최종 프로젝트 AXI-to-APB Bridge 설계와 검증 기록." />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>AXI-to-APB Bridge 설계와 검증 - SoC/FPGA 학습 노트</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="site-shell">
+      <main class="content-wrap" id="top">
+        <article class="content">
+          <div class="document-kicker">
+            <span>SoC/FPGA 학습 노트</span>
+            <div class="kicker-actions"><span class="draft-label">숭실대 학부생연구인턴</span></div>
+          </div>
+          <a class="home-link" href="index.html#hardware-notes">← SoC/FPGA 학습 노트로 돌아가기</a>
+          <nav class="chapter-switcher" aria-label="SoC bus 글 이동">
+            <span class="chapter-switcher-label">SoC bus 글 목록</span>
+            <div>
+              <a href="04-apb-bus.html">1. APB</a>
+              <a href="05-ahb-bus.html">2. AHB</a>
+              <a href="06-axi-bus.html">3. AXI</a>
+              <a class="current" href="07-axi-to-apb-bridge.html" aria-current="page">4. AXI-to-APB Bridge</a>
+            </div>
+          </nav>
+
+          <h1 id="axi-to-apb-bridge">4. AXI-to-APB Bridge 설계와 검증</h1>
+          <p class="lead">
+            최종 프로젝트는 앞에서 배운 AXI와 APB를 실제 RTL로 연결하는 AXI-to-APB Bridge 구현이었습니다.
+            Bridge는 서로 다른 bus protocol 사이의 번역기입니다. AXI 쪽에서는 채널별 handshake로 요청이 들어오고,
+            APB 쪽에서는 setup-enable phase로 register access가 진행됩니다. 저는 AXI slave 입력을 받아 APB master 신호로
+            변환하고, 4개 register를 가진 APB slave와 연결해 write/read transaction을 testbench, waveform, log로 검증했습니다.
+          </p>
+
+          <div class="scope-note" role="note">
+            <strong>이 페이지의 범위</strong>
+            <span>AXI-to-APB Bridge의 구현 구조, write/read FSM, APB slave register, task 기반 testbench, 최종 PASS 로그와 waveform 검증 결과를 설명합니다.</span>
+          </div>
+
+          <section class="doc-section searchable-section" id="bridge-role" data-search-title="Bridge 역할">
+            <h3>4.1 Bridge가 필요한 이유</h3>
+            <p>
+              SoC 안에서는 모든 블록이 같은 bus protocol을 쓰지 않습니다. 고성능 master나 interconnect는 AXI처럼 채널이 분리된
+              protocol을 사용할 수 있고, 주변장치 register는 APB처럼 단순한 control bus에 붙는 경우가 많습니다. AXI-to-APB Bridge는
+              이 둘 사이에서 AXI 요청을 받아 APB register access로 바꿔 주는 블록입니다.
+            </p>
+            <p>
+              예를 들어 software가 AXI 경로를 통해 어떤 하드웨어 register에 값을 쓰려고 하면, bridge는 AXI write address와 write data를
+              받아 APB의 PADDR, PWRITE, PWDATA, PSEL, PENABLE로 변환합니다. read도 마찬가지로 AXI read address를 APB read transfer로
+              바꾼 뒤, APB에서 읽은 값을 AXI R channel로 돌려줍니다. 이 프로젝트는 SoC에서 software와 hardware register가 만나는
+              가장 작은 end-to-end loop를 직접 구현한 경험이었습니다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="bridge-structure" data-search-title="Bridge 구현 구조">
+            <h3>4.2 구현 구조: AXI 요청을 APB 전송으로 바꾸기</h3>
+            <p>
+              최종 구조는 AXI 요청을 받는 bridge RTL, APB register를 제공하는 slave block, 그리고 두 블록을 연결하는 top module로
+              구성했습니다. write와 read는 서로 다른 FSM으로 나누어 처리했습니다. write FSM은 AXI의 AW/W handshake가 끝난 뒤
+              APB write setup-enable transfer를 만들고, 완료 후 AXI B response를 반환합니다. read FSM은 AXI AR 요청을 받은 뒤
+              APB read transfer를 수행하고, 읽은 register 값을 AXI R channel로 반환합니다.
+            </p>
+            <p>
+              APB slave는 0x0, 0x4, 0x8, 0xC 주소에 대응하는 4개 register를 갖도록 구성했습니다. testbench에서는 각 주소에 값을
+              write한 뒤 다시 readback하여 기대값과 비교했습니다. 구현 범위는 single transfer 중심으로 제한했기 때문에 burst나
+              outstanding transaction은 다루지 않았고, 대신 한 번의 register access가 정확한 순서로 끝나는지 검증하는 데 집중했습니다.
+            </p>
+
+            <div class="axi-flow" aria-label="AXI-to-APB 변환 흐름">
+              <div><span>01</span><strong>AXI 요청 수신</strong><p>AW/W 또는 AR channel에서 주소, 데이터, read/write 요청을 받습니다.</p></div>
+              <div><span>02</span><strong>Bridge FSM</strong><p>write FSM과 read FSM이 APB transfer 순서에 맞게 상태를 전환합니다.</p></div>
+              <div><span>03</span><strong>APB 제어신호 생성</strong><p>PSEL, PENABLE, PWRITE와 주소·데이터 신호를 setup/enable phase에 맞춥니다.</p></div>
+              <div><span>04</span><strong>Register access 검증</strong><p>4개 register에 write한 뒤 readback 값과 timing을 testbench로 확인합니다.</p></div>
+            </div>
+          </section>
+
+          <section class="doc-section searchable-section" id="testbench" data-search-title="Testbench 검증">
+            <h3>4.3 Task 기반 testbench 검증</h3>
+            <p>
+              검증은 단순히 시뮬레이션을 한 번 실행하는 방식이 아니라, testbench task로 write/read transaction을 반복 생성하는 방식으로
+              구성했습니다. write task는 AXI write 주소와 data를 넣고 APB register가 갱신되는지 확인했고, read task는 같은 주소를 다시 읽어
+              기대값과 비교했습니다. handshake 누락, response 오류, read last 조건을 확인하도록 검증 루틴을 만들었고,
+              최종 로그에서는 <code>PASS: 4REG write/read + timing OK</code>를 확인했습니다.
+            </p>
+            <div class="concept-callout">
+              <span>검증 초점</span>
+              <h4>한 번 동작하는 파형보다, 반복 가능한 read/write 검증 루틴을 만드는 데 집중했습니다</h4>
+              <p>
+                register 4개를 대상으로 write와 readback을 반복하면서, APB transfer complete와 AXI response가 올바른 순서로
+                발생하는지 확인했습니다. 이 과정에서 구현, testbench, waveform, log가 같은 결과를 가리키도록 맞췄습니다.
+              </p>
+            </div>
+          </section>
+
+          <section class="doc-section searchable-section" id="waveform" data-search-title="파형 검증">
+            <h3>4.4 Waveform으로 확인한 write/read 동작</h3>
+            <figure class="doc-figure wide-figure">
+              <div class="figure-label">AXI write 요청이 APB write transfer로 변환되는 파형</div>
+              <img src="assets/soongsil-axi-write-waveform.png" alt="AXI write channel과 APB write transfer 신호가 함께 표시된 SimVision 파형" />
+              <figcaption>
+                AXI write address/data handshake 이후 APB의 PSEL, PENABLE, PWRITE가 순서대로 생성되고,
+                register address와 write data가 전달되는 것을 확인했습니다. 이 파형에서는 AXI의 channel handshake와
+                APB의 setup-enable phase가 어떤 순서로 연결되는지를 보는 것이 핵심입니다.
+              </figcaption>
+            </figure>
+
+            <figure class="doc-figure wide-figure">
+              <div class="figure-label">APB read 결과가 AXI read data로 반환되는 파형</div>
+              <img src="assets/soongsil-axi-read-waveform.png" alt="AXI read channel과 APB read transfer 신호가 함께 표시된 SimVision 파형" />
+              <figcaption>
+                AXI read 요청이 APB read transfer로 변환되고, APB slave의 register data가 AXI read data channel로
+                반환되는 흐름을 파형으로 검증했습니다. read path에서는 AR 요청, APB read, R data 반환의 순서가 맞는지 확인했습니다.
+              </figcaption>
+            </figure>
+          </section>
+
+          <section class="doc-section searchable-section" id="meaning" data-search-title="이 경험의 의미">
+            <h3>4.5 이 경험이 이후 시스템 설계와 연결되는 지점</h3>
+            <p>
+              이 프로젝트를 통해 bus protocol을 단순 이론이 아니라 실제 RTL 구조와 검증 루틴으로 다뤄 보았습니다.
+              특히 센서나 FPGA가 포함된 비전 시스템에서는 알고리즘 이전에 register 설정, data path 제어,
+              host와 하드웨어 사이의 통신 구조가 안정적으로 동작해야 합니다. APB/AHB/AXI 학습과 AXI-to-APB Bridge 경험은
+              이후 이벤트센서 시스템이나 FPGA 기반 비전 가속기를 다룰 때, 하드웨어 블록이 소프트웨어와 어떤 방식으로
+              연결되고 검증되어야 하는지 이해하는 기반이 되었습니다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="bridge-references" data-search-title="Bridge 참고 자료">
+            <h3>4.6 참고한 공식 자료</h3>
+            <p>
+              Bridge 구현 설명은 숭실대 최종 프로젝트 자료와 Arm AMBA specification 구조를 함께 기준으로 정리했습니다.
+              AXI와 APB의 protocol detail은 각각 공식 specification을 참고하는 것이 가장 정확합니다.
+            </p>
+            <ul class="technical-references">
+              <li><a href="https://www.arm.com/architecture/system-architectures/amba/amba-specifications" target="_blank" rel="noopener noreferrer">Arm AMBA Specifications</a></li>
+              <li><a href="https://developer.arm.com/documentation/ihi0022/latest/" target="_blank" rel="noopener noreferrer">Arm AMBA AXI Protocol Specification</a></li>
+              <li><a href="https://developer.arm.com/documentation/ihi0024/latest/" target="_blank" rel="noopener noreferrer">Arm AMBA APB Protocol Specification</a></li>
+            </ul>
+          </section>
+
+          <footer class="page-footer">
+            <a href="06-axi-bus.html">← 이전: AXI</a>
+            <a href="#top">맨 위로 ↑</a>
+          </footer>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="숭실대학교 동계 학부생연구인턴에서 학습한 AHB bus, phase pipeline, ready response 정리." />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>AHB Pipelined Bus - SoC/FPGA 학습 노트</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="site-shell">
+      <main class="content-wrap" id="top">
+        <article class="content">
+          <div class="document-kicker">
+            <span>SoC/FPGA 학습 노트</span>
+            <div class="kicker-actions"><span class="draft-label">숭실대 학부생연구인턴</span></div>
+          </div>
+          <a class="home-link" href="index.html#hardware-notes">← SoC/FPGA 학습 노트로 돌아가기</a>
+          <nav class="chapter-switcher" aria-label="SoC bus 글 이동">
+            <span class="chapter-switcher-label">SoC bus 글 목록</span>
+            <div>
+              <a href="04-apb-bus.html">1. APB</a>
+              <a class="current" href="05-ahb-bus.html" aria-current="page">2. AHB</a>
+              <a href="06-axi-bus.html">3. AXI</a>
+              <a href="07-axi-to-apb-bridge.html">4. AXI-to-APB Bridge</a>
+            </div>
+          </nav>
+
+          <h1 id="ahb-pipelined-bus">2. AHB Pipelined Bus</h1>
+          <p class="lead">
+            AHB는 APB보다 더 빠른 SoC 내부 전송을 다루기 위해 학습한 bus입니다. APB가 주변장치 register를
+            단순하게 읽고 쓰는 통로라면, AHB는 여러 slave가 붙어 있는 system bus에서 주소 선택, data 반환,
+            ready 응답이 어떻게 이어지는지 보여 줍니다. 핵심은 address phase와 data phase가 분리되어 있고,
+            두 phase가 pipeline처럼 겹쳐 흐를 수 있다는 점입니다.
+          </p>
+
+          <div class="scope-note" role="note">
+            <strong>이 페이지의 범위</strong>
+            <span>AHB topology, address/data phase 중첩, HREADY/HRESP, AHB 기반 register/SRAM 접근 실습을 설명합니다.</span>
+          </div>
+
+          <section class="doc-section searchable-section" id="ahb-apb-difference" data-search-title="AHB와 APB 차이">
+            <h3>2.1 APB 다음에 AHB를 배운 이유</h3>
+            <p>
+              APB에서는 하나의 peripheral register를 선택하고 setup-enable 순서로 전송을 끝내는 구조를 먼저 익혔습니다.
+              하지만 실제 SoC에는 register 제어만 있는 것이 아니라, 메모리나 여러 하드웨어 블록 사이에서 더 많은 데이터를
+              더 빠르게 옮겨야 하는 경로도 존재합니다. AHB는 이런 system-level transfer를 이해하기 위한 단계였습니다.
+            </p>
+            <p>
+              처음 보는 사람에게 AHB의 차이를 한 문장으로 말하면, APB는 “선택한 register 하나를 차분히 읽고 쓰는 버스”이고,
+              AHB는 “다음 주소 요청을 준비하면서 현재 data transfer도 함께 처리하는 파이프라인형 버스”입니다. 그래서 AHB에서는
+              어떤 cycle의 주소가 어떤 cycle의 data와 대응되는지 구분하는 것이 중요합니다.
+            </p>
+            <div class="concept-callout">
+              <span>초심자 관점</span>
+              <h4>AHB는 주소 단계와 데이터 단계가 한 박자 어긋나며 이어지는 구조입니다</h4>
+              <p>
+                APB처럼 한 전송을 setup-enable으로 단순히 닫는 것이 아니라, 현재 data phase가 진행되는 동안 다음 address phase가
+                준비될 수 있습니다. 이 때문에 파형을 볼 때 주소와 데이터의 대응 관계를 phase 단위로 추적해야 합니다.
+              </p>
+            </div>
+          </section>
+
+          <section class="doc-section searchable-section" id="ahb-topology" data-search-title="AHB topology">
+            <h3>2.2 Master, decoder, mux, slave 구조</h3>
+            <p>
+              AHB에서 master는 주소와 control 정보를 내보내고, decoder는 주소 범위에 따라 어떤 slave가 선택될지 결정합니다.
+              선택된 slave는 read data와 response를 내보내며, 여러 slave의 반환 신호는 mux를 거쳐 master로 돌아갑니다.
+              즉 AHB를 이해하려면 하나의 신호만 보는 것이 아니라, master가 보낸 주소가 decoder를 거쳐 slave select로 바뀌고,
+              slave response가 다시 master 쪽으로 돌아오는 전체 경로를 봐야 합니다.
+            </p>
+            <dl class="step-definitions">
+              <div><dt>Master</dt><dd>주소와 read/write control을 내보내는 쪽입니다. CPU, DMA, test master 같은 블록이 될 수 있습니다.</dd></div>
+              <div><dt>Decoder</dt><dd>주소 범위를 보고 어떤 slave를 선택할지 결정합니다. 선택 결과는 HSEL 계열 신호로 표현됩니다.</dd></div>
+              <div><dt>Slave</dt><dd>선택된 주소에 대해 data를 반환하거나 write data를 받아 내부 register/memory를 갱신합니다.</dd></div>
+              <div><dt>Mux</dt><dd>여러 slave의 read data와 response 중 현재 선택된 slave의 값을 master 쪽으로 돌려보냅니다.</dd></div>
+            </dl>
+          </section>
+
+          <section class="doc-section searchable-section" id="ahb-phase" data-search-title="AHB address data phase">
+            <h3>2.3 Address phase와 Data phase</h3>
+            <p>
+              AHB transfer에서 HADDR, HTRANS, HSIZE 같은 신호는 address phase에서 의미를 가집니다. 이 phase에서 “어디에,
+              어떤 크기로, 어떤 종류의 전송을 할 것인지”가 정해집니다. 그에 대응하는 실제 data transfer는 다음 data phase에서
+              진행됩니다. 따라서 파형에서는 현재 보이는 data가 바로 같은 cycle의 address와 연결되는 것이 아니라, 앞선 address
+              phase와 연결될 수 있습니다.
+            </p>
+            <p>
+              HREADY는 bus가 다음 phase로 넘어가도 되는지를 알려 주는 신호입니다. slave가 바로 응답하지 못하면 HREADY가 낮아지고,
+              이 동안 bus는 hold됩니다. HRESP는 전송 응답 상태를 나타냅니다. 실습에서는 HREADY가 timing을 멈추는 조건과,
+              response가 정상적으로 반환되는 흐름을 확인하면서 APB보다 복잡한 bus timing을 익혔습니다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="ahb-lab" data-search-title="AHB Lab 실습">
+            <h3>2.4 AHB 실습에서 최종 프로젝트로 이어진 부분</h3>
+            <p>
+              실습에서는 AHB register access block과 AHB+SRAM 구조를 통해 주소 decode, slave select, data return, response 처리를
+              확인했습니다. APB에서 register access의 기본 조건을 익혔다면, AHB에서는 phase가 분리된 bus에서 timing과 ready가
+              어떻게 전체 전송을 제어하는지 배웠습니다.
+            </p>
+            <p>
+              이 경험은 AXI 학습으로 이어졌습니다. AXI에서는 AHB보다 더 세분화된 채널과 valid-ready handshake가 등장하지만,
+              결국 “요청이 들어오고, 내부 전송이 진행되고, 응답이 돌아온다”는 큰 구조는 같습니다. AHB는 APB와 AXI 사이에서
+              system bus를 phase와 response 관점으로 바라보게 해 준 중간 단계였습니다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="ahb-references" data-search-title="AHB 참고 자료">
+            <h3>2.5 참고한 공식 자료</h3>
+            <p>
+              Arm의 AMBA specification 페이지는 AMBA 계열 interface/protocol을 한곳에 정리하고 있으며, AHB protocol specification도
+              별도로 제공합니다. 이 페이지는 숭실대 수업자료와 Arm AMBA specification 구조를 함께 참고해 초심자용 설명으로 다시 정리했습니다.
+            </p>
+            <ul class="technical-references">
+              <li><a href="https://www.arm.com/architecture/system-architectures/amba/amba-specifications" target="_blank" rel="noopener noreferrer">Arm AMBA Specifications</a></li>
+              <li><a href="https://developer.arm.com/documentation/ihi0033/latest/" target="_blank" rel="noopener noreferrer">Arm AMBA AHB Protocol Specification</a></li>
+            </ul>
+          </section>
+
+          <footer class="page-footer">
+            <a href="04-apb-bus.html">← 이전: APB</a>
+            <a href="06-axi-bus.html">다음: AXI →</a>
+          </footer>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>

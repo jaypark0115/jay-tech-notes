@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="제가 정리한 기술 글, SNN 연구 기록, NRV DVS 캘리브레이션 한국어 설명 모음." />
+    <meta name="description" content="제가 정리한 기술 글, SNN 연구 기록, NRV DVS 캘리브레이션, SoC/FPGA bus 학습 노트 모음." />
     <title>Jay Tech Notes</title>
     <link rel="stylesheet" href="styles.css" />
     <script src="script.js" defer></script>
@@ -52,6 +52,14 @@
                 별도의 글 묶음으로 정리합니다.
               </p>
             </section>
+            <section class="home-panel">
+              <span>학습 노트 묶음</span>
+              <h2>SoC/FPGA Bus</h2>
+              <p>
+                숭실대 학부생연구인턴에서 정리한 APB, AHB, AXI와
+                AXI-to-APB Bridge 구현·검증 흐름을 나누어 정리했습니다.
+              </p>
+            </section>
           </div>
 
           <nav class="chapter-switcher" aria-label="현재 공개된 글 묶음">
@@ -60,6 +68,7 @@
               <a href="#snn-research">SNN 연구 노트</a>
               <a href="#nrv-dvs-calibration">NRV DVS 캘리브레이션 설명</a>
               <a href="#github-projects">GitHub 프로젝트 링크</a>
+              <a href="#hardware-notes">SoC/FPGA 학습 노트</a>
             </div>
           </nav>
 
@@ -180,8 +189,41 @@
               </a>
             </div>
           </section>
+          <section class="doc-section visible" id="hardware-notes">
+            <h2>SoC/FPGA 학습 노트</h2>
+            <p>
+              숭실대학교 차세대반도체학과 동계 학부생연구인턴에서 학습한
+              APB, AHB, AXI bus protocol과 AXI-to-APB Bridge 최종 프로젝트를
+              개념별로 나누어 정리했습니다. 첫 화면에서는 각 개념으로 들어가는
+              입구만 제공하고, 자세한 설명은 개별 페이지에서 확인할 수 있습니다.
+            </p>
+            <div class="sitemap-grid hardware-card-grid">
+              <a class="sitemap-card" href="04-apb-bus.html">
+                <span class="sitemap-number">01</span>
+                <h2>APB Control Bus</h2>
+                <p>Peripheral register 제어를 위한 setup-enable transfer, PSEL/PENABLE/PREADY, register map 기반 read/write 구조를 설명합니다.</p>
+              </a>
+              <a class="sitemap-card" href="05-ahb-bus.html">
+                <span class="sitemap-number">02</span>
+                <h2>AHB Pipelined Bus</h2>
+                <p>Master, decoder, mux, slave topology와 address/data phase 중첩, HREADY/HRESP 기반 timing을 정리합니다.</p>
+              </a>
+              <a class="sitemap-card" href="06-axi-bus.html">
+                <span class="sitemap-number">03</span>
+                <h2>AXI Channel Bus</h2>
+                <p>AW/W/B, AR/R 채널 분리와 valid-ready handshake, single transfer 중심 구현 범위를 설명합니다.</p>
+              </a>
+              <a class="sitemap-card" href="07-axi-to-apb-bridge.html">
+                <span class="sitemap-number">04</span>
+                <h2>AXI-to-APB Bridge</h2>
+                <p>AXI 요청을 APB register access로 변환한 Verilog RTL, testbench, write/read waveform, PASS 로그를 정리합니다.</p>
+              </a>
+            </div>
+          </section>
 </article>
       </main>
     </div>
   </body>
 </html>
+
+

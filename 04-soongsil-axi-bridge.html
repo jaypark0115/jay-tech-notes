@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="숭실대 SoC/FPGA bus 학습 노트 분리 안내 페이지." />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>SoC/FPGA Bus 학습 노트 — Jay Tech Notes</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body class="home-page">
+    <div class="site-shell">
+      <main class="content-wrap" id="top">
+        <article class="content">
+          <div class="document-kicker">
+            <span>SoC/FPGA 학습 노트</span>
+            <div class="kicker-actions"><span class="draft-label">분리 안내</span></div>
+          </div>
+          <a class="home-link" href="index.html#hardware-notes">← Jay Tech Notes로 돌아가기</a>
+          <h1>SoC/FPGA Bus 학습 노트</h1>
+          <p class="lead">
+            이 노트는 한 페이지짜리 정리문이 아니라 APB, AHB, AXI, AXI-to-APB Bridge로 나누어 다시 정리했습니다.
+            아래 카드에서 원하는 개념으로 이동할 수 있습니다.
+          </p>
+          <div class="sitemap-grid hardware-card-grid">
+            <a class="sitemap-card" href="04-apb-bus.html"><span class="sitemap-number">01</span><h2>APB Control Bus</h2><p>Peripheral register 제어와 setup-enable transfer를 설명합니다.</p></a>
+            <a class="sitemap-card" href="05-ahb-bus.html"><span class="sitemap-number">02</span><h2>AHB Pipelined Bus</h2><p>Address/data phase 중첩과 HREADY/HRESP timing을 설명합니다.</p></a>
+            <a class="sitemap-card" href="06-axi-bus.html"><span class="sitemap-number">03</span><h2>AXI Channel Bus</h2><p>독립 채널과 valid-ready handshake를 설명합니다.</p></a>
+            <a class="sitemap-card" href="07-axi-to-apb-bridge.html"><span class="sitemap-number">04</span><h2>AXI-to-APB Bridge</h2><p>Verilog RTL 구현과 testbench/waveform 검증을 설명합니다.</p></a>
+          </div>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>
