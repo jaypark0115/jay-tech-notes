@@ -185,8 +185,12 @@ assign wRdEn_OutBuf   = (wRdEn && iPaddr[15:11] == 5'b01100) ? 1'b1 : 1'b0;
 assign wRdAddr_OutBuf = iPaddr[10:2];</code></pre>
             </div>
             <figure class="doc-figure wide-figure">
-              <div class="figure-label">APB to SP-SRAM timing</div>
-              <img src="assets/soongsil-pdf-apb-lab3-sram-timing.png" alt="APB to SP-SRAM timing" />
+              <div class="figure-label">SP-SRAM read/write timing</div>
+              <img src="assets/soongsil-pdf-apb-lab3-sram-local-timing.png" alt="SP-SRAM read/write timing" />
+            </figure>
+            <figure class="doc-figure wide-figure">
+              <div class="figure-label">APB-to-SRAM conversion timing</div>
+              <img src="assets/soongsil-pdf-apb-lab3-sram-conversion-timing.png" alt="APB-to-SRAM conversion timing" />
             </figure>
           </section>
 
