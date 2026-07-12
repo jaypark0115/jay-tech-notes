@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="숭실대학교 동계 학부생연구인턴 최종 프로젝트 AXI-to-APB Bridge 설계와 검증 기록." />
+    <meta name="description" content="숭실대학교 동계 학부생연구인턴 최종 프로젝트 AXI-to-APB Bridge 설계와 검증 설명." />
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
@@ -26,115 +26,108 @@
               <a href="04-apb-bus.html">1. APB</a>
               <a href="05-ahb-bus.html">2. AHB</a>
               <a href="06-axi-bus.html">3. AXI</a>
-              <a class="current" href="07-axi-to-apb-bridge.html" aria-current="page">4. AXI-to-APB Bridge</a>
+              <a class="current" href="07-axi-to-apb-bridge.html">4. AXI-to-APB Bridge</a>
             </div>
           </nav>
 
-          <h1 id="axi-to-apb-bridge">4. AXI-to-APB Bridge 설계와 검증</h1>
+          <h1>4. AXI-to-APB Bridge 설계와 검증</h1>
           <p class="lead">
-            최종 프로젝트는 앞에서 배운 AXI와 APB를 직접 연결하는 AXI-to-APB Bridge 구현이었습니다. Bridge는 서로 다른 bus protocol 사이의
-            번역기입니다. AXI 쪽에서는 channel별 VALID/READY handshake로 요청이 들어오고, APB 쪽에서는 setup-enable phase로 register access가
-            진행됩니다. 저는 이 사이를 Verilog FSM으로 연결하고, 4개 register를 가진 APB slave와 testbench로 write/read 동작을 검증했습니다.
+            최종 프로젝트에서 한 일은 AXI와 APB를 각각 따로 아는 데서 끝내지 않고, AXI 요청을 APB register access로 바꾸는 중간 회로를 직접 만든 것이다.
+            AXI 쪽에서는 AW/W/B, AR/R 채널 handshake가 들어오고, APB 쪽에서는 PSEL/PENABLE 기반 transfer가 나가야 한다.
+            이 차이를 Verilog FSM으로 연결하고, 4개 register를 가진 APB slave와 testbench로 write/read 동작을 검증했다.
           </p>
-
-          <div class="scope-note" role="note">
+          <div class="scope-note">
             <strong>이 페이지의 범위</strong>
-            <span>Axi2Apb RTL, APB slave register, top 연결, task 기반 testbench, write/read waveform, 최종 PASS 로그를 설명합니다.</span>
+            <span>Axi2Apb RTL, write/read FSM, ApbSlave 4-register target, top 연결, task 기반 AXI master testbench, waveform/log 검증을 정리합니다.</span>
           </div>
 
-          <section class="doc-section searchable-section" id="bridge-role" data-search-title="Bridge 역할">
+          <section class="doc-section searchable-section" id="why-bridge" data-search-title="Bridge 구현 이유">
             <h3>4.1 왜 AXI-to-APB Bridge를 구현했는가</h3>
             <p>
-              SoC 안에서는 모든 블록이 같은 bus를 쓰지 않습니다. 고성능 master나 interconnect는 AXI처럼 채널이 분리된 protocol을 사용할 수 있고,
-              주변장치 register는 APB처럼 단순한 control bus에 붙는 경우가 많습니다. AXI-to-APB Bridge는 이 둘 사이에서 AXI 요청을 받아
-              APB register access로 바꿔 주는 블록입니다.
+              SoC 안에서는 고성능 master와 단순 주변장치가 같은 protocol을 쓰지 않는 경우가 많다. CPU나 DMA 같은 master는 AXI interconnect를 통해 접근하고,
+              peripheral register는 APB처럼 단순한 control bus에 붙는다. AXI-to-APB bridge는 이 사이에서 AXI transaction을 받아 APB transfer로 바꿔 주는 번역기 역할을 한다.
             </p>
             <p>
-              예를 들어 software가 AXI 경로로 어떤 register에 값을 쓰려고 하면, bridge는 AXI write address와 write data를 받은 뒤 APB의
-              PADDR, PWRITE, PWDATA, PSEL, PENABLE로 변환해야 합니다. read도 마찬가지로 AXI read address를 APB read transfer로 바꾸고,
-              APB slave에서 읽은 값을 AXI R channel로 돌려줍니다. 이 프로젝트는 software가 bus를 통해 hardware register에 접근하는
-              가장 작은 end-to-end loop를 직접 구현한 경험이었습니다.
-            </p>
-          </section>
-
-          <section class="doc-section searchable-section" id="fsm-design" data-search-title="FSM 설계">
-            <h3>4.2 FSM으로 protocol 변환 순서를 설계</h3>
-            <p>
-              Bridge 구현의 중심은 FSM이었습니다. write 쪽은 AXI AW 요청을 받고, W data를 받은 뒤, APB setup-enable transfer를 만들고,
-              마지막에 AXI B response를 반환하는 순서로 구성했습니다. read 쪽은 AXI AR 요청을 받은 뒤, APB read setup-enable transfer를 만들고,
-              APB에서 읽은 data를 AXI R channel로 반환하는 순서로 구성했습니다.
+              이 프로젝트의 제한 조건은 비교적 명확했다. 32-bit data, single burst, OKAY response를 기준으로 하고,
+              APB slave는 0x0000, 0x0004, 0x0008, 0x000C에 대응하는 4개의 32-bit register를 가진다.
+              제한된 조건이지만, AXI handshake를 닫고 APB setup/enable을 만들고 다시 AXI response를 반환하는 end-to-end loop가 들어 있다.
             </p>
             <figure class="doc-figure wide-figure">
-              <div class="figure-label">강의 현장 - FSM과 timing diagram 정리</div>
-              <img src="assets/soongsil-fsm-whiteboard.jpg" alt="FSM과 timing diagram을 설명한 숭실대 강의 화이트보드 사진" />
+              <div class="figure-label">강의 필기 - AXI-to-APB FSM 정리</div>
+              <img src="assets/soongsil-fsm-whiteboard.jpg" alt="AXI-to-APB Bridge FSM 필기 사진" />
               <figcaption>
-                수업에서는 FSM을 state diagram과 timing diagram으로 연결해 설명했습니다. 최종 프로젝트에서도 이 관점으로 write/read FSM을 나누고, 각 상태에서 어떤 bus 신호를 만들어야 하는지 정리했습니다.
+                최종 프로젝트를 시작하기 전에 write/read FSM을 먼저 그려서,
+                AXI handshake와 APB setup-enable phase가 어느 state에서 연결되는지 정리했다.
               </figcaption>
             </figure>
-            <div class="axi-flow" aria-label="AXI-to-APB 변환 흐름">
-              <div><span>01</span><strong>AXI 요청 수신</strong><p>AW/W 또는 AR channel에서 주소와 data 또는 read 요청을 받습니다.</p></div>
-              <div><span>02</span><strong>Bridge FSM</strong><p>write FSM과 read FSM이 APB transfer 순서에 맞게 상태를 전환합니다.</p></div>
-              <div><span>03</span><strong>APB 제어신호 생성</strong><p>PSEL, PENABLE, PWRITE, PADDR, PWDATA를 setup/enable phase에 맞춥니다.</p></div>
-              <div><span>04</span><strong>AXI 응답 반환</strong><p>write는 B response, read는 R data와 RLAST를 AXI 쪽으로 돌려줍니다.</p></div>
+          </section>
+
+          <section class="doc-section searchable-section" id="fsm" data-search-title="FSM 설계">
+            <h3>4.2 FSM으로 protocol 변환 순서를 설계</h3>
+            <p>
+              write FSM은 AXI write address를 받는 상태, write data를 받는 상태, APB setup과 enable을 만드는 상태,
+              마지막으로 AXI B response를 반환하는 상태로 나눴다. 실제 상태 이름은 xW_Idle, xW_AwReady, xW_WValid,
+              xW_Setup, xW_Enable, xW_BValid로 두었다. APB transfer가 끝나려면 iPREADY가 올라와야 하므로,
+              xW_Enable에서 iPREADY를 보고 B response 단계로 넘어가게 했다.
+            </p>
+            <p>
+              read FSM은 xR_Idle, xR_ArReady, xR_Setup, xR_Enable, xR_RValid 순서로 구성했다.
+              AR handshake로 read 주소를 받은 뒤 APB read setup/enable을 만들고, APB slave에서 나온 iPRDATA를 AXI R channel의 oS_RData로 반환한다.
+              write와 read를 한 FSM에 섞지 않은 이유는 AXI에서 write path와 read path가 독립 채널로 움직이기 때문이다.
+            </p>
+            <div class="axi-flow">
+              <div><span>W1</span><strong>AW/W 수신</strong><p>AXI write 주소와 data handshake를 각각 확인한다.</p></div>
+              <div><span>W2</span><strong>APB write</strong><p>PSEL, PENABLE, PWRITE, PADDR, PWDATA를 만들어 register에 쓴다.</p></div>
+              <div><span>R1</span><strong>AR 수신</strong><p>AXI read 주소를 받고 APB read transfer를 시작한다.</p></div>
+              <div><span>R2</span><strong>R 반환</strong><p>APB PRDATA를 AXI RDATA로 돌려주고 RVALID/RLAST를 닫는다.</p></div>
             </div>
           </section>
 
-          <section class="doc-section searchable-section" id="implementation" data-search-title="최종 프로젝트 구현">
+          <section class="doc-section searchable-section" id="blocks" data-search-title="최종 프로젝트 블록">
             <h3>4.3 최종 프로젝트에서 만든 블록</h3>
             <p>
-              최종 결과는 세 개의 RTL 블록과 하나의 testbench로 정리할 수 있습니다. <code>Axi2Apb.v</code>는 AXI slave 입력을 받아 APB master 신호를
-              만드는 bridge입니다. <code>ApbSlave.v</code>는 0x0, 0x4, 0x8, 0xC 주소에 대응하는 4개 32-bit register를 제공합니다. <code>Prj_Axi_Top.v</code>는
-              bridge와 slave를 연결하는 상위 모듈이고, <code>TbTop_Prj_Axi.v</code>는 AXI master 역할을 하며 write/read transaction을 생성합니다.
+              최종 결과물은 bridge, APB slave, top, testbench 네 부분으로 나눌 수 있다. Axi2Apb 모듈은 AXI slave처럼 보이는 입력을 받아 APB master 신호를 만든다.
+              ApbSlave 모듈은 rA, rB, rC, rD 네 register를 가지고, PSEL/PENABLE/PWRITE/PREADY 조건에서 write를 commit하며,
+              read에서는 주소에 따라 PRDATA를 mux로 반환한다. Top 모듈은 둘을 내부 APB wire로 연결했다.
+            </p>
+            <p>
+              testbench는 단순히 한 번 파형을 보기 위한 코드가 아니라 AXI master 역할을 하도록 만들었다. write task와 read task를 두고,
+              AWVALID, WVALID, ARVALID을 일정 cycle 유지한 뒤 READY와 만나는지 확인했다. 이후 4개 register에 값을 쓰고 다시 읽어 기대값과 비교했다.
+              최종 로그에서는 <code>PASS: 4REG write/read + timing OK</code>가 출력되었다.
             </p>
             <div class="lab-timeline">
-              <article>
-                <span>Axi2Apb</span>
-                <h4>Protocol conversion</h4>
-                <p>AXI AW/W/B, AR/R 흐름을 APB setup-enable transfer로 변환하는 write/read FSM을 구현했습니다.</p>
-              </article>
-              <article>
-                <span>ApbSlave</span>
-                <h4>4-register target</h4>
-                <p>4개 register에 대해 write commit과 read data mux를 구현해 bridge가 접근할 목적지 block을 만들었습니다.</p>
-              </article>
-              <article>
-                <span>Testbench</span>
-                <h4>반복 검증</h4>
-                <p>task 기반 write/read 시나리오로 4개 주소를 쓰고 다시 읽어 기대값과 비교했습니다.</p>
-              </article>
+              <article><span>Axi2Apb</span><h4>protocol conversion</h4><p>AXI AW/W/B, AR/R handshake를 APB setup-enable transfer로 바꿨다.</p></article>
+              <article><span>ApbSlave</span><h4>4-register target</h4><p>0x0000~0x000C 주소의 네 register에 대해 write commit과 read mux를 구현했다.</p></article>
+              <article><span>Testbench</span><h4>AXI master model</h4><p>task 기반 write/read 시나리오로 timeout, response, readback을 함께 확인했다.</p></article>
             </div>
           </section>
 
-          <section class="doc-section searchable-section" id="waveform" data-search-title="파형 검증">
+          <section class="doc-section searchable-section" id="waveforms" data-search-title="최종 파형과 로그">
             <h3>4.4 Waveform과 log로 확인한 최종 동작</h3>
             <p>
-              검증은 파형만 보는 방식으로 끝내지 않고, testbench에서 write/read task를 만들어 반복 가능한 검증 루틴으로 구성했습니다.
-              각 register에 값을 쓴 뒤 다시 readback하고, handshake timeout, response 오류, last 조건을 확인했습니다. 최종 로그에서는
-              <code>PASS: 4REG write/read + timing OK</code>를 확인했습니다.
+              검증할 때는 “파형이 그럴듯해 보인다”에서 멈추지 않았다. write에서는 AWREADY와 WREADY가 VALID와 만난 뒤 APB write transfer가 생성되는지,
+              APB slave가 PREADY를 올린 뒤 BVALID/BRESP가 반환되는지 봤다. read에서는 AR handshake 이후 APB read가 일어나고,
+              읽은 PRDATA가 RDATA로 돌아오는지 확인했다.
             </p>
             <figure class="doc-figure wide-figure">
               <div class="figure-label">AXI write 요청이 APB write transfer로 변환되는 파형</div>
               <img src="assets/soongsil-axi-write-waveform.png" alt="AXI write channel과 APB write transfer 신호가 함께 표시된 SimVision 파형" />
-              <figcaption>
-                AXI write address/data handshake 이후 APB의 PSEL, PENABLE, PWRITE가 순서대로 생성되고, register address와 write data가 전달되는 것을 확인했습니다.
-              </figcaption>
+              <figcaption>AXI write address/data handshake 이후 APB의 PSEL, PENABLE, PWRITE, PADDR, PWDATA가 순서대로 만들어지고 register write로 이어지는지 확인했다.</figcaption>
             </figure>
             <figure class="doc-figure wide-figure">
               <div class="figure-label">APB read 결과가 AXI read data로 반환되는 파형</div>
               <img src="assets/soongsil-axi-read-waveform.png" alt="AXI read channel과 APB read transfer 신호가 함께 표시된 SimVision 파형" />
-              <figcaption>
-                AXI read 요청이 APB read transfer로 변환되고, APB slave의 register data가 AXI read data channel로 반환되는 흐름을 검증했습니다.
-              </figcaption>
+              <figcaption>AXI AR 요청이 APB read transfer로 바뀌고, APB slave의 PRDATA가 AXI RDATA/RVALID/RLAST로 반환되는 흐름을 검증했다.</figcaption>
             </figure>
           </section>
 
-          <section class="doc-section searchable-section" id="meaning" data-search-title="이 경험의 의미">
+          <section class="doc-section searchable-section" id="meaning" data-search-title="이 실습의 의미">
             <h3>4.5 이 실습이 이후 시스템 설계와 연결되는 지점</h3>
             <p>
-              이 프로젝트를 통해 bus protocol을 이론이 아니라 RTL 구조와 검증 루틴으로 다뤄 보았습니다. 특히 센서나 FPGA가 포함된 비전 시스템에서는
-              알고리즘 이전에 register 설정, data path 제어, host와 하드웨어 사이의 통신 구조가 안정적으로 동작해야 합니다. APB/AHB/AXI Lab과
-              AXI-to-APB Bridge 경험은 이후 이벤트센서 시스템이나 FPGA 기반 비전 가속기를 다룰 때, 하드웨어 블록이 소프트웨어와 어떤 방식으로
-              연결되고 검증되어야 하는지 이해하는 기반이 되었습니다.
+              이 실습에서 남은 것은 AXI와 APB의 정의를 외운 것이 아니라, protocol을 RTL 상태기계와 검증 루틴으로 닫아 본 경험이다.
+              센서나 FPGA가 들어간 비전 시스템에서도 host가 register를 설정하고, hardware block이 상태를 반환하며, data path가 정상적으로 열리는지 확인해야 한다.
+              AXI-to-APB bridge를 만들면서 배운 주소 decode, handshake, ready/response, testbench 기반 readback 검증은 이후 이벤트센서 시스템이나 FPGA 기반 비전 가속기를 볼 때
+              하드웨어와 소프트웨어 사이의 접점을 읽는 기준이 되었다.
             </p>
           </section>
 

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="숭실대학교 동계 학부생연구인턴에서 학습한 AHB bus, Lab5 register access, Lab6 SRAM access 정리." />
+    <meta name="description" content="숭실대학교 동계 학부생연구인턴 AHB address/data phase와 SRAM wait-state 실습 설명." />
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
@@ -24,40 +24,37 @@
             <span class="chapter-switcher-label">SoC bus 글 목록</span>
             <div>
               <a href="04-apb-bus.html">1. APB</a>
-              <a class="current" href="05-ahb-bus.html" aria-current="page">2. AHB</a>
+              <a class="current" href="05-ahb-bus.html">2. AHB</a>
               <a href="06-axi-bus.html">3. AXI</a>
               <a href="07-axi-to-apb-bridge.html">4. AXI-to-APB Bridge</a>
             </div>
           </nav>
 
-          <h1 id="ahb-pipelined-bus">2. AHB Pipelined Bus</h1>
+          <h1>2. AHB Pipelined Bus</h1>
           <p class="lead">
-            AHB는 APB보다 더 큰 SoC 내부 연결을 이해하기 위해 다룬 bus입니다. APB가 주변장치 register 제어에 적합했다면,
-            AHB는 master, decoder, mux, slave가 있는 system bus 구조와 address/data phase가 겹쳐 흐르는 pipeline timing을 보여 줍니다.
-            숭실대 인턴에서는 Lab5에서 AHB register access를 구현하고, Lab6에서 AHB-to-SRAM 접근으로 확장했습니다.
+            AHB에서 처음 크게 달라진 부분은 “주소를 보는 cycle”과 “data를 처리하는 cycle”이 분리된다는 점이었다.
+            APB는 setup-enable 두 단계를 같은 transfer 안에서 따라가면 됐지만, AHB는 address phase와 data phase가 겹쳐 흐른다.
+            그래서 파형을 볼 때 지금 보이는 HWDATA나 HRDATA가 어느 HADDR와 짝인지 한 박자 늦춰서 추적해야 했다.
           </p>
-
-          <div class="scope-note" role="note">
+          <div class="scope-note">
             <strong>이 페이지의 범위</strong>
-            <span>AHB topology, address/data phase, HREADY/HRESP, Lab5 register access, Lab6 SP-SRAM access를 설명합니다.</span>
+            <span>AHB topology, HSEL/HTRANS/HREADY, address/data phase, Lab5 AHB register block, Lab6 AHB-to-SP-SRAM wait-state 검증을 정리합니다.</span>
           </div>
 
-          <section class="doc-section searchable-section" id="ahb-why" data-search-title="AHB를 배운 이유">
+          <section class="doc-section searchable-section" id="ahb-role" data-search-title="AHB를 배운 이유">
             <h3>2.1 APB 다음에 AHB를 배운 이유</h3>
             <p>
-              APB를 통해 register를 어떻게 읽고 쓰는지 배운 뒤, 수업은 AHB로 넘어갔습니다. 이유는 SoC에서 모든 블록이 APB처럼
-              단순한 제어만 하는 것은 아니기 때문입니다. 여러 master와 slave가 연결되고, 주소 decode와 data return이 분리되며,
-              ready 신호가 전체 timing을 제어하는 구조를 보려면 AHB 같은 system bus를 봐야 합니다.
-            </p>
-            <p>
-              수업 현장에서는 AHB와 AXI의 사용 조건도 비교했습니다. AHB는 구조가 비교적 단순하고 단일 master나 내부 IP 연결에 적합한 반면,
-              AXI는 더 높은 성능과 확장성을 목표로 합니다. 이 구분을 먼저 잡아야 AXI-to-APB Bridge가 왜 필요한지도 이해할 수 있습니다.
+              APB만 보면 SoC bus가 register 제어용 통로처럼 느껴질 수 있다. 하지만 SoC 안에는 CPU, DMA, GPU/NPU, memory controller처럼
+              더 빠른 데이터 이동이 필요한 블록들이 있다. 수업자료에서는 APB, AHB, AXI를 비교하면서 APB는 단순 주변장치 제어,
+              AHB는 high-speed internal data bus, AXI는 더 큰 확장성과 독립 채널 구조로 설명했다. AHB 실습은 그 중간 단계였다.
+              아직 AXI처럼 다섯 채널로 쪼개지지는 않지만, APB보다 bus system에 가까운 구조를 가진다.
             </p>
             <figure class="doc-figure wide-figure">
-              <div class="figure-label">강의 현장 - AHB와 AXI 사용 조건 비교</div>
-              <img src="assets/soongsil-lecture-ahb-vs-axi.jpg" alt="AHB와 AXI 사용 조건을 비교한 숭실대 강의 현장 사진" />
+              <div class="figure-label">강의 필기 - AHB와 AXI 사용 조건 비교</div>
+              <img src="assets/soongsil-lecture-ahb-vs-axi.jpg" alt="강의 중 정리한 AHB와 AXI 비교 필기" />
               <figcaption>
-                강의에서는 AHB가 단순성과 빠른 검증에 유리한 경우, AXI가 다중 master와 고대역폭 처리에 필요한 경우를 구분해 설명했습니다.
+                강의에서는 AHB가 단순성과 검증 용이성에 유리하고, AXI가 고성능/확장성에 유리하다는 차이를 먼저 잡았다.
+                이 비교가 뒤의 AXI-to-APB bridge 이해로 이어졌다.
               </figcaption>
             </figure>
           </section>
@@ -65,65 +62,61 @@
           <section class="doc-section searchable-section" id="ahb-topology" data-search-title="AHB topology">
             <h3>2.2 Master, decoder, mux, slave 구조</h3>
             <p>
-              AHB에서 master는 주소와 제어 정보를 내보내고, decoder는 주소 범위에 따라 어떤 slave가 선택될지 결정합니다.
-              선택된 slave는 data와 response를 반환하고, mux는 여러 slave 중 현재 선택된 slave의 값을 master 쪽으로 돌려보냅니다.
-              따라서 AHB는 하나의 register만 보는 것이 아니라, 주소가 slave select로 바뀌고 response가 다시 master로 돌아오는 전체 경로를 봐야 합니다.
+              AHB는 master가 주소와 제어신호를 내고, decoder가 주소 범위에 맞는 slave를 선택한 뒤,
+              mux가 선택된 slave의 response와 read data를 master로 돌려주는 구조다. Lab5의 작은 register block만 보면 단순해 보이지만,
+              실제로는 HADDR가 곧바로 register만 고르는 것이 아니라 HSEL을 통해 어떤 slave를 선택할지 먼저 결정한다.
+              이 구조를 이해해야 여러 peripheral이 같은 bus에 붙을 때 address map이 왜 중요한지 보인다.
             </p>
             <div class="bus-map-grid">
-              <article><span>Master</span><h4>요청 시작</h4><p>주소, read/write 방향, transfer type을 발생시킵니다.</p></article>
-              <article><span>Decoder</span><h4>주소 해석</h4><p>주소 범위를 보고 어떤 slave가 선택될지 결정합니다.</p></article>
-              <article><span>Slave / Mux</span><h4>응답 반환</h4><p>선택된 slave의 data와 response를 master로 돌려보냅니다.</p></article>
+              <article><span>Master</span><h4>요청 생성</h4><p>HADDR, HWRITE, HTRANS로 어느 주소를 읽거나 쓸지 낸다.</p></article>
+              <article><span>Decoder</span><h4>slave 선택</h4><p>주소 범위를 보고 HSEL을 만들어 해당 slave만 반응하도록 한다.</p></article>
+              <article><span>Mux</span><h4>응답 회수</h4><p>선택된 slave의 HRDATA, HREADY, HRESP를 master 쪽으로 돌려준다.</p></article>
             </div>
           </section>
 
-          <section class="doc-section searchable-section" id="ahb-phase" data-search-title="AHB address data phase">
+          <section class="doc-section searchable-section" id="phase" data-search-title="Address phase와 Data phase">
             <h3>2.3 Address phase와 Data phase</h3>
             <p>
-              AHB의 핵심은 address phase와 data phase가 분리되어 있다는 점입니다. 어떤 cycle에서 HADDR, HTRANS, HWRITE 같은 주소/제어 신호가
-              들어오면, 실제 data 처리는 다음 data phase에서 진행됩니다. 동시에 다음 transfer의 address phase가 시작될 수 있기 때문에,
-              파형을 볼 때 현재 보이는 data가 어느 address와 대응되는지 phase 단위로 추적해야 합니다.
+              AHB RTL에서 가장 조심한 부분은 phase latch였다. Lab5의 interface block은 HREADYin이 1일 때 HSEL, HTRANS, HWRITE, HADDR를 register에 잡아 두고,
+              다음 data phase에서 그 latched value를 기준으로 register write/read enable을 만든다. 즉 data phase에서 쓰는 주소는 현재 HADDR가 아니라
+              이전 address phase에서 잡아 둔 주소다.
             </p>
             <p>
-              HREADY는 다음 phase로 넘어가도 되는지를 결정합니다. HREADY가 낮으면 bus는 hold되고, 다음 주소 phase도 진행되지 않습니다.
-              Lab6에서는 synchronous SRAM read 특성 때문에 read 시점에 wait가 필요했고, 이때 HREADY가 bus timing을 어떻게 멈추는지 확인했습니다.
+              이 차이 때문에 파형을 볼 때 HADDR와 HWDATA를 같은 세로줄에서만 보면 헷갈린다. address phase에서 0x7000_0000이 들어오고,
+              다음 cycle의 data phase에서 HWDATA가 들어올 때 register A write가 일어난다. HREADY가 낮으면 이 진행 자체가 멈추기 때문에,
+              HREADY는 단순 완료 신호가 아니라 bus phase를 전진시킬지 결정하는 신호로 이해했다.
             </p>
           </section>
 
-          <section class="doc-section searchable-section" id="ahb-labs" data-search-title="AHB Lab 실습">
+          <section class="doc-section searchable-section" id="ahb-labs" data-search-title="AHB Lab 진행">
             <h3>2.4 AHB 계열 Lab에서 한 일</h3>
             <p>
-              Lab5에서는 AHB slave interface를 가진 register block을 구현했습니다. address phase에서 HSEL, HTRANS, HWRITE, HADDR를 latch하고,
-              data phase에서 register A/B write 또는 register C read를 수행하는 구조입니다. APB보다 중요한 점은 write/read enable이 현재 cycle의
-              raw address가 아니라, 한 phase 앞에서 latch된 주소와 제어 정보를 기준으로 만들어진다는 점이었습니다.
+              Lab5에서는 AHB slave interface를 가진 register block을 만들었다. register map은 0x0000 입력 A, 0x0004 입력 B, 0x0008 출력 C였고,
+              A+B 결과가 1 clock 뒤 출력 register로 연결됐다. APB Lab2와 기능은 비슷하지만, 구현 기준은 달랐다. APB에서는 PSEL/PENABLE 조건을 봤다면,
+              AHB에서는 HSEL이 선택되어 있고 HTRANS가 NonSeq 또는 Seq이며, HREADYin이 1인 phase에서 latch된 주소를 기준으로 동작을 만들었다.
             </p>
             <p>
-              Lab6에서는 같은 AHB interface를 SP-SRAM 접근으로 확장했습니다. write는 바로 SRAM에 기록할 수 있어 zero-wait로 처리했고,
-              read는 synchronous SRAM 특성상 data가 한 클럭 뒤에 나오기 때문에 one-wait로 처리했습니다. 이를 통해 bus protocol과 memory timing을
-              맞추는 일이 단순 기능 구현과 다르다는 점을 확인했습니다.
+              Lab6에서는 AHB access를 SP-SRAM으로 확장했다. 주소 0x7000_4000, 0x7000_4004, 0x7000_4008, 0x7000_400C가 4개의 SRAM entry로 연결됐다.
+              write는 data phase에서 바로 SRAM에 기록할 수 있어 zero-wait로 처리했다. 반면 synchronous SRAM read는 read data가 다음 clock에 나오기 때문에 one-wait가 필요했다.
+              이 부분에서 bus protocol과 memory macro timing을 맞추는 일이 별도 설계 문제가 된다는 것을 봤다.
             </p>
             <div class="lab-timeline">
-              <article>
-                <span>Lab5</span>
-                <h4>AHB register access</h4>
-                <p>HSEL/HTRANS/HWRITE/HADDR를 latch하고, data phase에서 register write/read를 수행했습니다.</p>
-              </article>
-              <article>
-                <span>Lab6</span>
-                <h4>AHB to SP-SRAM</h4>
-                <p>SRAM write/read timing을 AHB HREADY와 연결해 zero-wait write, one-wait read를 검증했습니다.</p>
-              </article>
+              <article><span>Lab5</span><h4>AHB register access</h4><p>HSEL/HTRANS/HWRITE/HADDR를 latch하고 data phase에서 register write/read를 수행했다.</p></article>
+              <article><span>Lab6</span><h4>AHB to SP-SRAM</h4><p>write는 zero-wait, read는 synchronous SRAM 특성 때문에 one-wait로 처리했다.</p></article>
+              <article><span>검증 기준</span><h4>phase와 wait-state</h4><p>HREADY가 phase 진행을 멈추고 다시 풀어 주는 지점을 파형에서 확인했다.</p></article>
             </div>
           </section>
 
-          <section class="doc-section searchable-section" id="ahb-waveform" data-search-title="AHB 파형 검증">
+          <section class="doc-section searchable-section" id="ahb-waveforms" data-search-title="AHB 파형 검증">
             <h3>2.5 파형으로 확인한 AHB 동작</h3>
+            <p>
+              AHB 파형에서는 신호 이름보다 phase 대응을 우선해서 봤다. HTRANS가 NonSeq로 올라간 주소 phase, 그 다음 data phase의 HWDATA/HRDATA,
+              그리고 HREADY가 wait-state를 만드는 구간을 함께 봐야 실제 transfer가 보인다.
+            </p>
             <figure class="doc-figure wide-figure">
               <div class="figure-label">Lab5 - AHB register access waveform</div>
               <img src="assets/soongsil-lab5-ahb-waveform.png" alt="Lab5 AHB register access SimVision 파형" />
-              <figcaption>
-                Lab5 파형에서는 HTRANS, HWRITE, HADDR, HWDATA, HRDATA가 address/data phase 구조에 맞게 움직이는지 확인했습니다.
-                특히 address phase에서 잡은 정보가 다음 data phase의 register access로 이어지는 흐름을 보았습니다.
-              </figcaption>
+              <figcaption>Lab5 파형에서는 address phase에서 잡은 HADDR/HWRITE가 다음 data phase의 register access로 이어지는지 확인했다.</figcaption>
             </figure>
           </section>
 

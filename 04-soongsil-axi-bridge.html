@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="숭실대 SoC/FPGA bus 학습 노트 분리 안내 페이지." />
+    <meta name="description" content="숭실대 SoC/FPGA bus 학습 노트 입구 페이지." />
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
@@ -17,34 +17,84 @@
         <article class="content">
           <div class="document-kicker">
             <span>SoC/FPGA 학습 노트</span>
-            <div class="kicker-actions"><span class="draft-label">분리 안내</span></div>
+            <div class="kicker-actions"><span class="draft-label">숭실대 학부생연구인턴</span></div>
           </div>
           <a class="home-link" href="index.html#hardware-notes">← Jay Tech Notes로 돌아가기</a>
           <h1>SoC/FPGA Bus 학습 노트</h1>
           <p class="lead">
-            이 노트는 한 페이지짜리 요약문이 아니라 APB, AHB, AXI, AXI-to-APB Bridge로 나누어 정리했습니다.
-            각 페이지는 수업자료에서 다룬 개념, Lab별 RTL/TB 실습, 파형 검증 이미지를 함께 보도록 구성했습니다.
+            이 노트는 숭실대학교 차세대반도체학과 동계 학부생연구인턴에서 진행한 APB, AHB, AXI,
+            AXI-to-APB Bridge 실습을 정리한 글입니다. 단순히 bus 이름을 설명하는 페이지가 아니라,
+            수업자료의 register map과 Lab 코드, SimVision 파형, 최종 프로젝트 로그를 기준으로
+            내가 어떤 순서로 이해했고 어떤 부분을 직접 확인했는지 남겼습니다.
           </p>
-          <div class="sitemap-grid hardware-card-grid">
-            <a class="sitemap-card" href="04-apb-bus.html"><span class="sitemap-number">01</span><h2>APB Control Bus</h2><p>Lab2~4의 register, SRAM, interrupt 실습을 설명합니다.</p></a>
-            <a class="sitemap-card" href="05-ahb-bus.html"><span class="sitemap-number">02</span><h2>AHB Pipelined Bus</h2><p>Lab5~6의 AHB register/SRAM 실습과 HREADY timing을 설명합니다.</p></a>
-            <a class="sitemap-card" href="06-axi-bus.html"><span class="sitemap-number">03</span><h2>AXI Channel Bus</h2><p>Lab7의 AXI slave channel handshake를 설명합니다.</p></a>
-            <a class="sitemap-card" href="07-axi-to-apb-bridge.html"><span class="sitemap-number">04</span><h2>AXI-to-APB Bridge</h2><p>최종 protocol conversion RTL과 PASS 검증을 설명합니다.</p></a>
+          <div class="scope-note">
+            <strong>읽는 순서</strong>
+            <span>
+              APB에서 register access를 먼저 잡고, AHB에서 phase와 wait-state를 본 뒤,
+              AXI의 channel handshake를 이해하고, 마지막으로 AXI-to-APB Bridge에서 protocol 변환을 구현한 흐름입니다.
+            </span>
           </div>
-          <section class="doc-section visible" id="lab-flow">
-            <h2>수업자료 기준 Lab 진행 흐름</h2>
+
+          <div class="hardware-card-grid">
+            <a class="project-card project-card-compact" href="04-apb-bus.html">
+              <span class="project-thumb">APB</span>
+              <strong>APB Control Bus</strong>
+              <small>register map, setup/enable phase, SRAM, interrupt 실습</small>
+            </a>
+            <a class="project-card project-card-compact" href="05-ahb-bus.html">
+              <span class="project-thumb">AHB</span>
+              <strong>AHB Pipelined Bus</strong>
+              <small>master/decoder/slave, address/data phase, SP-SRAM wait-state</small>
+            </a>
+            <a class="project-card project-card-compact" href="06-axi-bus.html">
+              <span class="project-thumb">AXI</span>
+              <strong>AXI Channel Bus</strong>
+              <small>AW/W/B, AR/R, VALID/READY handshake, Lab7 AXI slave</small>
+            </a>
+            <a class="project-card project-card-compact" href="07-axi-to-apb-bridge.html">
+              <span class="project-thumb">BRG</span>
+              <strong>AXI-to-APB Bridge</strong>
+              <small>write/read FSM, APB slave 4-register target, testbench PASS 검증</small>
+            </a>
+          </div>
+
+          <section class="doc-section searchable-section" id="flow" data-search-title="수업자료 기준 Lab 진행 흐름">
+            <h3>수업자료 기준 Lab 진행 흐름</h3>
             <p>
-              숭실대 강의자료의 흐름은 환경 구축에서 시작해 APB, AHB, AXI를 차례로 다루고,
-              마지막에는 AXI 요청을 APB register access로 변환하는 프로젝트로 이어졌습니다.
-              아래 흐름은 각 개념 페이지가 어떤 Lab 근거를 바탕으로 작성되었는지 보여 주기 위한 요약입니다.
+              전체 과정은 APB register 실습에서 시작해 SRAM과 interrupt로 확장되고, AHB의 phase 구조,
+              AXI의 channel 구조, 최종 AXI-to-APB protocol conversion으로 이어졌다. 이 순서가 중요하다.
+              APB를 먼저 해 봐야 register map과 setup/enable을 알 수 있고, AHB를 거치며 phase와 wait-state를 이해한 뒤,
+              AXI에서 channel별 handshake를 분리해서 볼 수 있었다. 최종 프로젝트는 이 세 가지를 한 번에 묶어
+              AXI 요청을 APB register 접근으로 바꾼 작업이었다.
             </p>
             <div class="lab-timeline">
-              <article><span>Lab1</span><h4>환경 및 Testbench</h4><p>Linux, Xcelium, SimVision, Verilog testbench 실행 흐름을 확인했습니다.</p></article>
-              <article><span>Lab2~4</span><h4>APB 기반 제어</h4><p>Register access에서 SRAM, interrupt/mask 구조까지 APB 제어 범위를 확장했습니다.</p></article>
-              <article><span>Lab5~6</span><h4>AHB 기반 접근</h4><p>AHB register access와 SP-SRAM 접근을 통해 phase pipeline과 HREADY timing을 확인했습니다.</p></article>
-              <article><span>Lab7 / Project</span><h4>AXI와 Bridge</h4><p>AXI slave channel handshake를 검증한 뒤 AXI-to-APB Bridge 최종 프로젝트로 연결했습니다.</p></article>
+              <article>
+                <span>Lab2~4</span>
+                <h4>APB 기반 register/SRAM/interrupt</h4>
+                <p>주소 decode, write commit, read mux, start command, pending/mask register를 실습했다.</p>
+              </article>
+              <article>
+                <span>Lab5~6</span>
+                <h4>AHB register와 SP-SRAM</h4>
+                <p>address/data phase, HREADY, zero-wait write와 one-wait read를 확인했다.</p>
+              </article>
+              <article>
+                <span>Lab7</span>
+                <h4>AXI slave register block</h4>
+                <p>AW/W/B와 AR/R 채널을 분리해 VALID/READY handshake를 검증했다.</p>
+              </article>
+              <article>
+                <span>Project</span>
+                <h4>AXI-to-APB Bridge</h4>
+                <p>write/read FSM으로 protocol을 변환하고 4-register readback PASS를 확인했다.</p>
+              </article>
             </div>
           </section>
+
+          <footer class="page-footer">
+            <a href="index.html#hardware-notes">← Jay Tech Notes로 돌아가기</a>
+            <a href="04-apb-bus.html">APB부터 읽기 →</a>
+          </footer>
         </article>
       </main>
     </div>
