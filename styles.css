@@ -2586,8 +2586,24 @@ body.troubleshooting-page .troubleshooting-figure img {
 
 /* Keep the troubleshooting article's reference images secondary to the explanation. */
 body.troubleshooting-page .doc-figure {
-  width: min(100%, 480px);
   margin: 1.5rem auto 2rem;
+}
+
+/* Each troubleshooting reference has a different aspect ratio. */
+body.troubleshooting-page .figure-flash-failure {
+  width: min(100%, 880px);
+}
+
+body.troubleshooting-page .figure-qspi-board {
+  width: min(100%, 560px);
+}
+
+body.troubleshooting-page .figure-erase-result {
+  width: min(100%, 460px);
+}
+
+body.troubleshooting-page .figure-program-result {
+  width: min(100%, 620px);
 }
 
 body.troubleshooting-page .doc-figure figcaption {
