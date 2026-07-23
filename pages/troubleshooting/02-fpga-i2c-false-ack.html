@@ -109,13 +109,23 @@
 
             <figure class="doc-figure troubleshooting-figure figure-i2c-architecture">
               <img
-                src="../../assets/i2c-architecture.svg"
-                alt="여러 컨트롤러와 타깃이 SDA와 SCL 두 라인을 공유하는 I2C 버스 구조"
+                src="../../assets/i2c-shared-bus.png"
+                alt="여러 컨트롤러와 대상 장치가 풀업된 SDA와 SCL을 공유하는 I2C 버스 구조"
               />
               <figcaption>
-                I²C 장치가 SDA와 SCL을 공유하는 구조입니다. 원본: Mayayu,
-                <a href="https://commons.wikimedia.org/wiki/File:I2C_Architecture.svg" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>,
-                <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 3.0</a>.
+                여러 컨트롤러와 대상 장치가 풀업된 SDA와 SCL 두 라인을 공유하는 I²C 기본
+                구조입니다.
+              </figcaption>
+            </figure>
+
+            <figure class="doc-figure troubleshooting-figure figure-i2c-data-stream">
+              <img
+                src="../../assets/i2c-data-stream.png"
+                alt="시작 조건, 7비트 주소, 읽기 쓰기 비트, ACK, 8비트 데이터와 정지 조건을 나타낸 I2C 전송 파형"
+              />
+              <figcaption>
+                주소와 읽기·쓰기 비트를 보낸 뒤 9번째 클럭에서 ACK를 확인하고, 이어서 8비트
+                데이터를 주고받는 I²C 전송 흐름입니다.
               </figcaption>
             </figure>
 
@@ -188,7 +198,7 @@
               필요하지만, 실제로 활성화되지 않은 내부 포트까지 결합한 것이 문제였습니다.
             </p>
 
-            <pre class="log-block"><code>assign __i2c_o.sda =
+            <pre class="log-block code-block-light"><code>assign __i2c_o.sda =
     cam_selected
         ? (cam_i2c_bus_temp_arr[0].sda &amp;
            cam_i2c_bus_temp_arr[1].sda &amp;
@@ -241,7 +251,7 @@
               AND 연산에 포함했습니다. SDA 출력 enable도 같은 기준으로 처리했습니다.
             </p>
 
-            <pre class="log-block"><code>generate
+            <pre class="log-block code-block-light"><code>generate
     if (CAMERA_NUM == 1) begin
         assign __i2c_o.sda = cam_selected
             ? cam_i2c_bus_temp_arr[0].sda : sda;
@@ -334,24 +344,6 @@ endgenerate</code></pre>
               좁히고, 필요한 Verilog와 여러 프로그램의 코드를 읽어 직접 원인을 찾고 수정할
               수 있게 됐습니다.
             </p>
-          </section>
-
-          <section class="doc-section searchable-section reference-section" id="references" data-search-title="참고 자료">
-            <h3>8. 참고 자료</h3>
-            <ul>
-              <li>
-                NXP Semiconductors,
-                <a href="https://www.nxp.com/docs/en/user-guide/UM10204.pdf" target="_blank" rel="noopener noreferrer">
-                  I²C-bus specification and user manual (UM10204)
-                </a>
-              </li>
-              <li>
-                Mayayu,
-                <a href="https://commons.wikimedia.org/wiki/File:I2C_Architecture.svg" target="_blank" rel="noopener noreferrer">
-                  I2C Architecture.svg
-                </a>, CC BY-SA 3.0
-              </li>
-            </ul>
           </section>
 
           <div class="bottom-author">by jy</div>

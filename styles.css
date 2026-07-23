@@ -2443,7 +2443,8 @@ body.home-page .sitemap-number {
 
 /* NRV FPGA troubleshooting pages are scoped so other article styles stay unchanged. */
 #nrv-fpga-troubleshooting .troubleshooting-card-grid {
-  grid-template-columns: minmax(0, 360px);
+  grid-template-columns: repeat(2, minmax(0, 360px));
+  justify-content: start;
   gap: 18px;
   margin-bottom: 36px;
 }
@@ -2611,7 +2612,11 @@ body.troubleshooting-page .figure-i2c-ports {
 }
 
 body.troubleshooting-page .figure-i2c-architecture {
-  width: min(100%, 680px);
+  width: min(100%, 760px);
+}
+
+body.troubleshooting-page .figure-i2c-data-stream {
+  width: min(100%, 920px);
 }
 
 body.troubleshooting-page .figure-i2c-waveform {
@@ -2649,6 +2654,22 @@ body.troubleshooting-page .log-block {
   background: #10131a;
   color: #e8edf5;
   font: 0.88rem/1.65 "Cascadia Mono", Consolas, monospace;
+}
+
+body.troubleshooting-page .code-block-light {
+  border-color: #ccd4de;
+  border-left-color: var(--nrv-red);
+  background: #f6f8fa;
+  color: #182230;
+  font: 0.9rem/1.75 "Cascadia Mono", Consolas, "Courier New", monospace;
+  letter-spacing: 0;
+  tab-size: 4;
+}
+
+body.troubleshooting-page .code-block-light code {
+  color: inherit;
+  font: inherit;
+  letter-spacing: 0;
 }
 
 body.troubleshooting-page .address-math {
