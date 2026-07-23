@@ -2606,6 +2606,22 @@ body.troubleshooting-page .figure-program-result {
   width: min(100%, 620px);
 }
 
+body.troubleshooting-page .figure-i2c-ports {
+  width: min(100%, 820px);
+}
+
+body.troubleshooting-page .figure-i2c-architecture {
+  width: min(100%, 680px);
+}
+
+body.troubleshooting-page .figure-i2c-waveform {
+  width: min(100%, 880px);
+}
+
+body.troubleshooting-page .figure-camera-system {
+  width: min(100%, 920px);
+}
+
 body.troubleshooting-page .doc-figure figcaption {
   padding: 0.7rem 0.8rem;
   font-size: 0.78rem;
