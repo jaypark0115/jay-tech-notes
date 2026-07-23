@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="미연결 FPGA 카메라 포트가 I²C SDA를 Low로 만들면서 가짜 ACK가 발생한 원인과 수정 과정."
+    />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>FPGA I²C 가짜 ACK 해결 기록 — Jay Tech Notes</title>
+    <link rel="stylesheet" href="../../styles.css" />
+    <script src="../../script.js" defer></script>
+  </head>
+  <body class="troubleshooting-page">
+    <div class="site-shell">
+      <main class="content-wrap" id="top">
+        <article class="content">
+          <div class="document-kicker">
+            <span>NRV FPGA 트러블슈팅 노트</span>
+            <div class="kicker-actions">
+              <span class="draft-label">Troubleshooting · 02</span>
+            </div>
+          </div>
+
+          <a class="home-link" href="../../index.html">← Jay Tech Notes로 돌아가기</a>
+
+          <nav class="chapter-switcher" aria-label="NRV FPGA 트러블슈팅 글 목록">
+            <span class="chapter-switcher-label">트러블슈팅 글 목록</span>
+            <div>
+              <a href="01-fx10-external-spi-flash.html">
+                1. FX10 외부 QSPI 플래시 쓰기 실패
+              </a>
+              <a class="current" href="02-fpga-i2c-false-ack.html" aria-current="page">
+                2. FPGA I²C 가짜 ACK
+              </a>
+            </div>
+          </nav>
+
+          <h1>FPGA I²C 디바이스 인식 오류: 미연결 포트가 가짜 ACK를 만든 문제</h1>
+          <p class="lead">
+            센서가 연결되지 않았는데도 FX10이 센서 레지스터 쓰기에 대한 ACK를 받은 것처럼
+            동작했습니다. 오실로스코프로 각 I²C 포트를 직접 측정하고 FPGA의 SDA 결합 로직을
+            따라가 보니, 사용하지 않는 카메라 포트의 기본 Low 값이 최종 SDA를 강제로 Low로
+            만들고 있었습니다. 유효한 포트만 결합하도록 Verilog를 수정해 실제 센서가 없을
+            때는 ACK가 발생하지 않도록 해결했습니다.
+          </p>
+
+          <div class="troubleshooting-summary" aria-label="문제 해결 요약">
+            <div class="summary-row">
+              <strong>증상</strong>
+              <span>센서 미연결 상태에서도 ACK 구간의 SDA가 Low로 내려감</span>
+            </div>
+            <div class="summary-row">
+              <strong>확인 방법</strong>
+              <span>Device port별 SDA/SCL 파형 측정과 FPGA RTL 신호 추적</span>
+            </div>
+            <div class="summary-row">
+              <strong>원인</strong>
+              <span>미사용 포트 1~3의 Low 값까지 AND 연산에 포함됨</span>
+            </div>
+            <div class="summary-row">
+              <strong>해결</strong>
+              <span><code>CAMERA_NUM</code>에 따라 실제 사용하는 포트만 선택적으로 결합</span>
+            </div>
+          </div>
+
+          <nav class="jump-links" aria-label="페이지 내 이동">
+            <a href="#system">시스템 구성</a>
+            <a href="#i2c-basics">ACK 원리</a>
+            <a href="#measurement">측정 과정</a>
+            <a href="#root-cause">원인 분석</a>
+            <a href="#solution">수정</a>
+            <a href="#verification">검증</a>
+            <a href="#lessons">배운 점</a>
+          </nav>
+
+          <section class="doc-section searchable-section" id="system" data-search-title="시스템 구성">
+            <h3>1. FX10·FPGA·카메라 연결 구성</h3>
+            <p>
+              FX10 FMC 보드와 FPGA 보드에는 카메라를 연결할 수 있는 Device port 0~3이
+              구현되어 있습니다. 오류를 확인할 당시 실제 센서는 0번 포트 하나에만 연결했고,
+              나머지 1~3번 포트는 사용하지 않았습니다. FPGA 쪽 I²C는 3.3 V, 센서 쪽 I²C는
+              1.8 V이므로 두 논리 전압 레벨 사이에는 레벨 컨버터를 적용했습니다.
+            </p>
+
+            <figure class="doc-figure troubleshooting-figure figure-i2c-ports">
+              <img
+                src="../../assets/fx10-fpga-i2c-device-ports.jpg"
+                alt="FX10 FMC 보드, FPGA 보드, DVS 카메라와 Device port 0부터 3까지의 위치"
+              />
+              <figcaption>
+                FPGA 보드의 Device port 0~3 위치입니다. 실제 연결 포트 수와 RTL에서 정의한
+                포트 수가 다른 상태가 이번 문제의 출발점이었습니다.
+              </figcaption>
+            </figure>
+          </section>
+
+          <section class="doc-section searchable-section" id="i2c-basics" data-search-title="I2C ACK 원리">
+            <h3>2. 센서가 없으면 ACK가 나오지 않아야 하는 이유</h3>
+            <p>
+              I²C는 SDA와 SCL 두 신호를 여러 장치가 공유하는 버스입니다. 두 라인은 풀업에
+              의해 기본적으로 High를 유지하고, 장치는 필요한 순간에만 라인을 Low로
+              당깁니다. 한 바이트를 전송한 뒤 9번째 클럭에서 수신 장치가 SDA를 Low로
+              당기면 ACK, High로 남으면 NACK입니다.
+            </p>
+
+            <figure class="doc-figure troubleshooting-figure figure-i2c-architecture">
+              <img
+                src="../../assets/i2c-architecture.svg"
+                alt="여러 컨트롤러와 타깃이 SDA와 SCL 두 라인을 공유하는 I2C 버스 구조"
+              />
+              <figcaption>
+                I²C 장치가 SDA와 SCL을 공유하는 구조입니다. 원본: Mayayu,
+                <a href="https://commons.wikimedia.org/wiki/File:I2C_Architecture.svg" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>,
+                <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 3.0</a>.
+              </figcaption>
+            </figure>
+
+            <div class="warning-note">
+              <strong>정상 조건</strong>
+              <span>
+                전송한 주소에 응답할 센서가 없다면 ACK 구간에서 SDA를 Low로 당길 장치도
+                없어야 합니다. 따라서 SDA는 High로 남고 FX10은 NACK로 판단해야 합니다.
+              </span>
+            </div>
+          </section>
+
+          <section class="doc-section searchable-section" id="measurement" data-search-title="오실로스코프 측정">
+            <h3>3. 오실로스코프로 포트를 하나씩 확인</h3>
+            <p>
+              센서를 분리한 상태에서 FX10이 센서 레지스터에 쓰기 트랜잭션을 보내도록 한 뒤,
+              각 Device port의 I²C 신호를 직접 측정했습니다. 단발성 구간을 놓치지 않도록
+              오실로스코프의 트리거를 사용해 SDA와 SCL을 함께 관찰했습니다.
+            </p>
+
+            <div class="debug-flow" aria-label="디버깅 순서">
+              <div>
+                <span>STEP 1</span>
+                <strong>오류 재현</strong>
+                <small>센서 분리 후 I²C 명령 전송</small>
+              </div>
+              <b>→</b>
+              <div>
+                <span>STEP 2</span>
+                <strong>포트 측정</strong>
+                <small>SDA·SCL을 트리거로 포착</small>
+              </div>
+              <b>→</b>
+              <div>
+                <span>STEP 3</span>
+                <strong>신호 추적</strong>
+                <small>가짜 ACK의 구동 위치 확인</small>
+              </div>
+              <b>→</b>
+              <div>
+                <span>STEP 4</span>
+                <strong>RTL 확인</strong>
+                <small>포트별 SDA 결합 로직 검사</small>
+              </div>
+            </div>
+
+            <p>
+              측정 결과 센서가 없는데도 ACK가 나와야 하는 타이밍에서 SDA가 High에서 Low로
+              내려갔습니다. 실제 슬레이브의 응답이 아니라 FPGA 내부 로직이 SDA를 Low로
+              만들고 그 값이 FX10으로 전달되는 것으로 판단했습니다.
+            </p>
+
+            <figure class="doc-figure troubleshooting-figure figure-i2c-waveform">
+              <img
+                src="../../assets/fx10-fpga-i2c-waveform.png"
+                alt="오실로스코프로 함께 측정한 FPGA I2C SDA와 SCL 파형"
+              />
+              <figcaption>
+                Device port에서 두 I²C 라인을 함께 측정한 화면입니다. 센서 미연결 조건에서도
+                SDA가 Low로 내려가는 구간을 확인한 뒤 FPGA 내부 신호를 추적했습니다.
+              </figcaption>
+            </figure>
+          </section>
+
+          <section class="doc-section searchable-section" id="root-cause" data-search-title="원인 분석">
+            <h3>4. 원인: 미사용 포트까지 AND 연산에 포함</h3>
+            <p>
+              기존 RTL은 네 카메라 포트의 SDA를 모두 AND 연산해 FX10으로 전달할 최종 SDA를
+              만들었습니다. I²C의 open-drain 신호를 결합할 때 Low가 우선되는 구조 자체는
+              필요하지만, 실제로 활성화되지 않은 내부 포트까지 결합한 것이 문제였습니다.
+            </p>
+
+            <pre class="log-block"><code>assign __i2c_o.sda =
+    cam_selected
+        ? (cam_i2c_bus_temp_arr[0].sda &amp;
+           cam_i2c_bus_temp_arr[1].sda &amp;
+           cam_i2c_bus_temp_arr[2].sda &amp;
+           cam_i2c_bus_temp_arr[3].sda)
+        : sda;</code></pre>
+
+            <div class="diagnostic-table-wrap">
+              <table class="diagnostic-table">
+                <thead>
+                  <tr>
+                    <th>포트</th>
+                    <th>실제 연결</th>
+                    <th>내부 SDA 상태</th>
+                    <th>기존 로직에 미친 영향</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Device port 0</td>
+                    <td><span class="status-chip">사용</span></td>
+                    <td>실제 센서 신호</td>
+                    <td>정상적으로 반영</td>
+                  </tr>
+                  <tr>
+                    <td>Device port 1~3</td>
+                    <td><span class="status-chip focus">미사용</span></td>
+                    <td>별도 구동 없이 기본 Low</td>
+                    <td>AND 결과를 항상 Low로 만듦</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="root-cause-card">
+              <span>Root cause</span>
+              <h4>없는 센서가 응답한 것이 아니라, 미사용 FPGA 포트가 ACK를 만들었습니다.</h4>
+              <p>
+                포트 1~3 중 하나라도 Low이면 AND 결과는 Low입니다. 그래서 실제 센서가 없는
+                상황에서도 FX10이 보는 SDA가 Low가 되었고, 이를 정상 ACK로 오인했습니다.
+              </p>
+            </div>
+          </section>
+
+          <section class="doc-section searchable-section" id="solution" data-search-title="해결 방법">
+            <h3>5. 해결: CAMERA_NUM만큼의 유효 포트만 선택</h3>
+            <p>
+              실제 사용하는 카메라 수에 맞춰 SDA 결합 범위를 바꾸도록 Verilog를 수정했습니다.
+              카메라가 한 대면 0번 포트만 사용하고, 두 대 이상일 때만 해당 개수만큼의 포트를
+              AND 연산에 포함했습니다. SDA 출력 enable도 같은 기준으로 처리했습니다.
+            </p>
+
+            <pre class="log-block"><code>generate
+    if (CAMERA_NUM == 1) begin
+        assign __i2c_o.sda = cam_selected
+            ? cam_i2c_bus_temp_arr[0].sda : sda;
+        assign __i2c_o.sda_en = cam_selected
+            ? !cam_i2c_bus_temp_arr[0].sda : !sda;
+    end else if (CAMERA_NUM == 2) begin
+        assign __i2c_o.sda = cam_selected
+            ? (cam_i2c_bus_temp_arr[0].sda &amp;
+               cam_i2c_bus_temp_arr[1].sda) : sda;
+        assign __i2c_o.sda_en = cam_selected
+            ? !(cam_i2c_bus_temp_arr[0].sda &amp;
+                cam_i2c_bus_temp_arr[1].sda) : !sda;
+    end else if (CAMERA_NUM == 3) begin
+        assign __i2c_o.sda = cam_selected
+            ? (cam_i2c_bus_temp_arr[0].sda &amp;
+               cam_i2c_bus_temp_arr[1].sda &amp;
+               cam_i2c_bus_temp_arr[2].sda) : sda;
+        assign __i2c_o.sda_en = cam_selected
+            ? !(cam_i2c_bus_temp_arr[0].sda &amp;
+                cam_i2c_bus_temp_arr[1].sda &amp;
+                cam_i2c_bus_temp_arr[2].sda) : !sda;
+    end else if (CAMERA_NUM == 4) begin
+        assign __i2c_o.sda = cam_selected
+            ? (cam_i2c_bus_temp_arr[0].sda &amp;
+               cam_i2c_bus_temp_arr[1].sda &amp;
+               cam_i2c_bus_temp_arr[2].sda &amp;
+               cam_i2c_bus_temp_arr[3].sda) : sda;
+        assign __i2c_o.sda_en = cam_selected
+            ? !(cam_i2c_bus_temp_arr[0].sda &amp;
+                cam_i2c_bus_temp_arr[1].sda &amp;
+                cam_i2c_bus_temp_arr[2].sda &amp;
+                cam_i2c_bus_temp_arr[3].sda) : !sda;
+    end
+endgenerate</code></pre>
+
+            <ol class="solution-steps">
+              <li>현재 하드웨어에서 실제 연결하는 카메라 수를 <code>CAMERA_NUM</code>으로 정의했습니다.</li>
+              <li>유효한 Device port의 SDA만 최종 SDA 결합에 포함했습니다.</li>
+              <li>같은 포트 범위를 사용해 SDA 출력 enable 신호도 함께 수정했습니다.</li>
+              <li>미사용 포트의 기본값이 FX10 쪽 I²C 응답에 영향을 주지 않는지 다시 측정했습니다.</li>
+            </ol>
+          </section>
+
+          <section class="doc-section searchable-section" id="verification" data-search-title="검증 결과">
+            <h3>6. 수정 결과</h3>
+            <p>
+              수정 후에는 미연결 포트의 영향이 제거됐습니다. 센서가 연결되지 않은 상태에서는
+              ACK 구간의 SDA가 Low로 내려가지 않아 정상적으로 NACK가 되었고, 실제 사용하는
+              포트의 신호만 FX10으로 전달되는 것을 확인했습니다.
+            </p>
+            <ul class="takeaway-list">
+              <li>센서 미연결: 응답할 장치가 없으므로 NACK</li>
+              <li>센서 연결: 해당 포트의 실제 SDA 응답만 반영</li>
+              <li>미사용 포트: 최종 SDA와 SDA enable 계산에서 제외</li>
+              <li>카메라 수 변경: <code>CAMERA_NUM</code>에 맞춰 유효 포트 범위 변경</li>
+            </ul>
+          </section>
+
+          <section class="doc-section searchable-section" id="lessons" data-search-title="배운 점">
+            <h3>7. 이 작업을 하면서 배운 점</h3>
+            <p>
+              이번 문제는 한 줄의 Verilog만 고치는 작업으로 끝나지 않았습니다. 센서의 제어
+              신호가 FPGA와 FX10을 거쳐 host 프로그램까지 어떻게 전달되는지 전체 카메라
+              시스템을 다시 따라가며, 어느 구간에서 실제 신호와 프로그램의 판단이 달라지는지
+              확인해야 했습니다.
+            </p>
+
+            <figure class="doc-figure troubleshooting-figure figure-camera-system">
+              <img
+                src="../../assets/fx10-camera-data-system.png"
+                alt="Dynamic Vision Sensor에서 FPGA, FX10, USB를 거쳐 Host PC로 이어지는 카메라 데이터 처리 구조"
+              />
+              <figcaption>
+                센서의 영상 데이터는 MIPI 수신과 FPGA의 AXI DMA, FX10의 GPIF III·DMA·USB
+                endpoint를 거쳐 Host PC로 전달됩니다. I²C는 이 데이터 경로를 동작시키기 위한
+                센서 제어 경로입니다.
+              </figcaption>
+            </figure>
+
+            <p>
+              센서에서 시작된 이미지 데이터가 FPGA의 MIPI D-PHY와 Rx subsystem, AXI DMA를
+              지나 FX10의 GPIF III, DMA buffer, USB endpoint를 거쳐 PC 프로그램으로 전달되는
+              구조도 함께 이해하게 됐습니다. I²C 제어 경로와 고속 이미지 데이터 경로를
+              구분하고, 두 경로가 시스템 안에서 어떻게 연결되는지도 확인할 수 있었습니다.
+            </p>
+            <p>
+              또한 오실로스코프 파형, Verilog RTL, FX10 firmware, host 프로그램을 서로
+              연결해서 보는 방법을 익혔습니다. 이후에는 한 프로그램의 오류 메시지만 보는
+              것이 아니라 하드웨어 신호부터 데이터 전달 경로 전체를 훑어가며 문제 지점을
+              좁히고, 필요한 Verilog와 여러 프로그램의 코드를 읽어 직접 원인을 찾고 수정할
+              수 있게 됐습니다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section reference-section" id="references" data-search-title="참고 자료">
+            <h3>8. 참고 자료</h3>
+            <ul>
+              <li>
+                NXP Semiconductors,
+                <a href="https://www.nxp.com/docs/en/user-guide/UM10204.pdf" target="_blank" rel="noopener noreferrer">
+                  I²C-bus specification and user manual (UM10204)
+                </a>
+              </li>
+              <li>
+                Mayayu,
+                <a href="https://commons.wikimedia.org/wiki/File:I2C_Architecture.svg" target="_blank" rel="noopener noreferrer">
+                  I2C Architecture.svg
+                </a>, CC BY-SA 3.0
+              </li>
+            </ul>
+          </section>
+
+          <div class="bottom-author">by jy</div>
+
+          <nav class="chapter-switcher bottom-switcher" aria-label="NRV FPGA 트러블슈팅 글 목록">
+            <span class="chapter-switcher-label">트러블슈팅 글 목록</span>
+            <div>
+              <a href="01-fx10-external-spi-flash.html">
+                1. FX10 외부 QSPI 플래시 쓰기 실패
+              </a>
+              <a class="current" href="02-fpga-i2c-false-ack.html" aria-current="page">
+                2. FPGA I²C 가짜 ACK
+              </a>
+            </div>
+          </nav>
+
+          <nav class="article-pager" aria-label="이전 글과 다음 글">
+            <a href="01-fx10-external-spi-flash.html">← 이전: 외부 QSPI 플래시 쓰기 실패</a>
+            <span class="disabled">다음 글 없음</span>
+          </nav>
+
+          <div class="repository-note">
+            <strong>기록 범위</strong>
+            <p>
+              NRV 카메라 시스템 개발 중 직접 측정하고 분석해 수정한 내용을 개인 기술 노트로
+              정리했습니다. 카메라 수와 포트 구성에 따라 RTL의 유효 입력 범위를 함께
+              확인해야 합니다.
+            </p>
+          </div>
+
+          <footer class="page-footer">
+            <span>Jay Tech Notes</span>
+            <a href="#top">맨 위로 ↑</a>
+          </footer>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>
