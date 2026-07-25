@@ -1969,6 +1969,30 @@ body.home-page .sitemap-number {
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
 }
 
+#planned-work .plan-card-link {
+  cursor: pointer;
+}
+
+#planned-work .plan-card-link:hover,
+#planned-work .plan-card-link:focus-visible {
+  border-color: var(--accent, #0f766e);
+  transform: translateY(-3px);
+  box-shadow: 0 24px 52px rgba(15, 23, 42, 0.1);
+}
+
+#planned-work .plan-card-link:focus-visible {
+  outline: 3px solid rgb(15 118 110 / 24%);
+  outline-offset: 3px;
+}
+
+#planned-work .plan-open-label {
+  display: inline-flex;
+  margin: 18px 30px 0;
+  color: var(--accent, #0f766e);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
 #planned-work .plan-thumb-image {
   object-fit: contain;
   background: #fff;
@@ -2023,6 +2047,68 @@ body.home-page .sitemap-number {
   #planned-work .planned-work-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Graduation thesis / capstone plan page. */
+body.planned-detail-page {
+  --accent: #0f766e;
+  --accent-soft: #ecfdf5;
+}
+
+body.planned-detail-page .document-kicker,
+body.planned-detail-page .chapter-switcher-label {
+  color: var(--accent);
+}
+
+body.planned-detail-page .draft-label {
+  border-color: #99f6e4;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+body.planned-detail-page h2::before,
+body.planned-detail-page h3::before {
+  background: var(--accent);
+}
+
+body.planned-detail-page .home-link:hover,
+body.planned-detail-page .page-footer a,
+body.planned-detail-page .chapter-switcher a:hover,
+body.planned-detail-page .chapter-switcher a.current {
+  color: var(--accent);
+}
+
+body.planned-detail-page .chapter-switcher a.current {
+  border-left-color: var(--accent);
+}
+
+body.planned-detail-page .scope-note {
+  border-left-color: var(--accent);
+}
+
+body.planned-detail-page .planned-hero {
+  width: min(100%, 940px);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+body.planned-detail-page .planned-hero img {
+  max-height: 680px;
+  object-fit: contain;
+}
+
+body.planned-detail-page .lab-timeline article {
+  border-top-color: var(--accent);
+}
+
+body.planned-detail-page .lab-timeline span {
+  border-color: rgb(15 118 110 / 22%);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+body.planned-detail-page .wiki-panel {
+  border-left-color: var(--accent);
 }
 
 .project-card-compact {

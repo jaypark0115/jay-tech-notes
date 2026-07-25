@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="LED 모션캡처 기반 드론 비행경로 제어 시스템의 졸업논문 주제, 구성, 검증 방법과 개발 일정."
+    />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>LED 모션캡처 기반 드론 비행경로 제어 시스템 — Jay Tech Notes</title>
+    <link rel="stylesheet" href="../../styles.css" />
+    <script src="../../script.js" defer></script>
+  </head>
+  <body class="planned-detail-page">
+    <div class="site-shell">
+      <main class="content-wrap" id="top">
+        <article class="content">
+          <div class="document-kicker">
+            <span>진행 중인 연구·개발</span>
+            <div class="kicker-actions">
+              <span class="draft-label">졸업논문 · 종합설계 진행 중</span>
+            </div>
+          </div>
+
+          <a class="home-link" href="../../index.html#planned-work">
+            ← 진행 중인 연구·개발로 돌아가기
+          </a>
+
+          <nav class="chapter-switcher" aria-label="진행 중인 연구·개발 상세 페이지">
+            <span class="chapter-switcher-label">상세 계획 페이지</span>
+            <div>
+              <a class="current" href="01-led-motion-capture-drone.html" aria-current="page">
+                1. LED 모션캡처 기반 드론 비행경로 제어 시스템
+              </a>
+              <span class="disabled">나머지 계획은 상세 페이지 준비 중</span>
+            </div>
+          </nav>
+
+          <h1>LED 모션캡처 기반 드론 비행경로 제어 시스템</h1>
+          <p class="lead">
+            실내의 여러 적외선 카메라로 드론에 부착한 LED 마커를 추적해 3차원 위치와
+            자세를 실시간으로 계산하고, 사용자가 입력한 목표 경로를 드론이 따라가도록
+            제어하는 시스템을 구현하고 있습니다. 스마트폰에서는 목표 경로를 입력하고
+            실제 비행 경로와 결과를 확인할 수 있도록 구성할 예정입니다.
+          </p>
+
+          <div class="scope-note" role="note">
+            <strong>현재 목표</strong>
+            <span>
+              2026년 10월 10일까지 졸업논문과 학술대회 제출용 결과를 정리하고,
+              종합설계 일정에 따라 11월 최종 제작·발표·보고서 제출까지 이어갑니다.
+            </span>
+          </div>
+
+          <div class="scope-note" role="note">
+            <strong>참여 인원</strong>
+            <span>박재연 외 2명(조원 1, 조원 2)이 함께 진행하는 프로젝트입니다.</span>
+          </div>
+
+          <figure class="doc-figure planned-hero">
+            <img
+              src="../../assets/drone-motion-capture-system.png"
+              alt="네 대의 적외선 카메라가 LED 마커가 부착된 드론을 추적하고 Jetson과 스마트폰 앱이 비행경로를 제어하는 시스템"
+            />
+            <figcaption>
+              네 대의 카메라, 드론의 IR LED 마커, Jetson 연산 장치와 스마트폰 경로 입력으로
+              구성한 실내 드론 모션캡처·궤적 추종 제어 시스템 개념도입니다.
+            </figcaption>
+          </figure>
+
+          <section class="doc-section searchable-section" id="topic" data-search-title="연구 주제">
+            <h3>1. 연구 주제와 목표</h3>
+            <p>
+              종합설계 제안서의 주제는 ‘모션캡처 시스템을 활용한 드론의 궤적 추종 제어
+              시스템’입니다. 상용 모션캡처 장비보다 접근하기 쉬운 비전 센서와 임베디드
+              연산 장치를 조합해 실내 정밀 측위 및 제어 환경을 직접 구축하는 것이 핵심입니다.
+            </p>
+            <p>
+              안전망이 설치된 실내 공간에서 영상 입력, 3차원 위치·자세 추정, 궤적 오차
+              계산, 제어 명령 전달을 하나의 폐루프 시스템으로 연결하는 것을 최종 목표로
+              합니다. 중앙대학교 전자전기공학부 제어 및 로봇 SLAM 연구실을 운영하는
+              심덕선 교수님의 지도 아래 진행하고 있습니다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="system" data-search-title="시스템 구성">
+            <h3>2. 시스템 구성</h3>
+            <div class="lab-timeline" aria-label="드론 모션캡처 시스템 구성 요소">
+              <article>
+                <span>Vision</span>
+                <h4>적외선 카메라 4대</h4>
+                <p>실내 공간의 여러 방향에서 드론의 IR LED 마커를 촬영합니다.</p>
+              </article>
+              <article>
+                <span>Marker</span>
+                <h4>드론 IR LED</h4>
+                <p>카메라 영상에서 구분 가능한 기준점으로 사용해 위치와 자세를 추정합니다.</p>
+              </article>
+              <article>
+                <span>Compute</span>
+                <h4>Jetson Orin Nano</h4>
+                <p>다채널 영상을 처리하고 3차원 위치·자세와 궤적 오차를 실시간 계산합니다.</p>
+              </article>
+              <article>
+                <span>Interface</span>
+                <h4>스마트폰 웹 앱</h4>
+                <p>목표 비행 경로를 입력하고 실제 이동 경로와 결과를 확인하는 UI를 제공합니다.</p>
+              </article>
+            </div>
+            <div class="wiki-panel">
+              <h4>보유 장비</h4>
+              <p>
+                시스템 구축에 사용할 Jetson Orin Nano와 카메라 어레이는 박재연이
+                소유하고 있으며, 이를 기반으로 영상 수집과 실시간 경로 추정 환경을
+                구성할 예정입니다.
+              </p>
+            </div>
+          </section>
+
+          <section class="doc-section searchable-section" id="role" data-search-title="담당 역할">
+            <h3>3. 담당 역할과 검증 방법</h3>
+            <p>
+              프로젝트에서 IR LED와 카메라 모듈을 이용해 드론의 이동 경로를 추정하는
+              프로그램 제작을 담당하고 있습니다. 여러 카메라의 관측값으로 위치를 계산하고,
+              제어 시스템이 사용할 수 있는 경로 데이터로 전달하는 부분을 구현합니다.
+            </p>
+            <div class="wiki-panel">
+              <h4>Ground Truth 검증</h4>
+              <p>
+                드론 또는 IR LED 표적을 산업용 로봇팔이나 리니어 모터에 고정하고, 장비에
+                입력한 정밀 기준 경로와 모션캡처가 추정한 3차원 경로를 비교합니다. 이 과정으로
+                정적·동적 위치 정확도와 반복 정밀도를 평가한 뒤 실제 드론의 폐루프 궤적 추종
+                비행으로 확장합니다.
+              </p>
+            </div>
+          </section>
+
+          <section class="doc-section searchable-section" id="schedule" data-search-title="개발 일정">
+            <h3>4. 개발 일정</h3>
+            <p>종합설계 제안서의 7~11월 일정표를 공개용 진행 단계로 간단히 정리했습니다.</p>
+            <div class="lab-timeline" aria-label="2026년 졸업논문 및 종합설계 개발 일정">
+              <article>
+                <span>7월</span>
+                <h4>요구사항 분석·시스템 설계</h4>
+                <p>필요 기능, 블록 구성, 시스템 사양과 실험 환경을 확정합니다.</p>
+              </article>
+              <article>
+                <span>7~8월</span>
+                <h4>경로 추정·드론 기체 제작</h4>
+                <p>IR LED·카메라 기반 경로 추정 프로그램과 실험용 드론 기체를 제작합니다.</p>
+              </article>
+              <article>
+                <span>8~9월</span>
+                <h4>원격 제어·앱 연동</h4>
+                <p>드론 원격 제어와 스마트폰 경로 입력 앱을 연결하고 시스템을 통합합니다.</p>
+              </article>
+              <article>
+                <span>9~10월</span>
+                <h4>Ground Truth 실험·보완</h4>
+                <p>정확도와 반복 정밀도를 측정하고 궤적 추정 및 제어 기능을 보완합니다.</p>
+              </article>
+              <article>
+                <span>10~11월</span>
+                <h4>최종 제작·발표</h4>
+                <p>전체 시스템을 완성하고 최종보고서, 시연과 발표 결과를 정리합니다.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="doc-section searchable-section" id="result" data-search-title="완성 목표">
+            <h3>5. 완성 목표</h3>
+            <p>
+              사용자가 스마트폰으로 입력한 목표 경로와 실제 드론 경로의 차이를 정량적으로
+              확인하고, 실내 안전 환경에서 안정적인 궤적 추종 비행을 재현하는 것이 목표입니다.
+              졸업논문과 학술대회 제출 결과를 먼저 정리한 뒤 종합설계 최종 제작과 제품·연구
+              확장 가능성까지 검토할 예정입니다.
+            </p>
+          </section>
+
+          <p class="bottom-author">by jy</p>
+
+          <nav class="article-pager" aria-label="진행 중인 연구·개발 이동">
+            <a class="pager-link pager-prev" href="../../index.html#planned-work">
+              ← 진행 중인 연구·개발 목록
+            </a>
+            <span class="pager-link pager-disabled">다음 상세 계획 준비 중</span>
+          </nav>
+
+          <p class="repository-note">
+            이 페이지는 종합설계 제안서를 바탕으로 공개 가능한 연구 주제와 일정만
+            요약했습니다. 공개한 참여 인원 표기 외의 개인정보, 예산과 내부 자료는
+            포함하지 않습니다.
+          </p>
+
+          <footer class="page-footer">
+            <span>졸업논문 · 종합설계 진행 기록</span>
+            <a href="#top">맨 위로 ↑</a>
+          </footer>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>
