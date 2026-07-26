@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="진행 중인 연구·개발 계획과 SNN 연구 기록, NRV DVS 캘리브레이션, SoC/FPGA bus 학습 노트 모음." />
+    <meta name="description" content="연구·개발 계획, SNN 연구, NRV DVS 캘리브레이션, SoC/FPGA 학습 노트와 경진대회 기술 케이스 스터디 모음." />
     <title>Jay Tech Notes</title>
-    <link rel="stylesheet" href="styles.css?v=20260725-capstone" />
+    <link rel="stylesheet" href="styles.css?v=20260726-competitions" />
     <script src="script.js" defer></script>
   </head>
   <body class="home-page">
@@ -26,8 +26,8 @@
             진행 중인 연구·개발 카드 중 상세 페이지가 준비된 항목은 클릭할 수 있고,
             아직 정리 중인 일부 카드는 클릭되지 않습니다. 그 외 공개 노트와 프로젝트
             카드는 모두 클릭해 각 글과 자료를 확인할 수 있습니다.
-            지금은 NRV DVS 캘리브레이션 글을 먼저 공개했고,
-            앞으로는 제가 작성한 논문, 프로젝트 기록, 실험 노트도 함께 올릴 예정입니다.
+            SNN 연구, NRV DVS 캘리브레이션, FPGA 트러블슈팅, SoC/FPGA 학습과
+            두 경진대회의 설계·구현·검증 기록을 함께 공개하고 있습니다.
           </p>
 
           <div class="home-panels" aria-label="페이지 소개">
@@ -79,6 +79,14 @@
                 AXI-to-APB Bridge 구현·검증 흐름을 나누어 정리했습니다.
               </p>
             </section>
+            <section class="home-panel home-panel-wide">
+              <span>기술 케이스 스터디</span>
+              <h2>경진대회 프로젝트</h2>
+              <p>
+                AI 반도체 SNN 제어와 YOLO FPGA 가속기를 문제 정의, 설계 판단,
+                실제 RTL, 검증과 결과의 흐름으로 나누어 정리했습니다.
+              </p>
+            </section>
           </div>
 
           <nav class="chapter-switcher" aria-label="기술 노트와 진행 계획">
@@ -90,6 +98,7 @@
               <a href="#nrv-fpga-troubleshooting">NRV FPGA 트러블슈팅 노트</a>
               <a href="#github-projects">GitHub 프로젝트 링크</a>
               <a href="#hardware-notes">SoC/FPGA 학습 노트</a>
+              <a href="#competition-case-studies">경진대회 기술 케이스 스터디</a>
             </div>
           </nav>
 
@@ -413,6 +422,80 @@
                 <h2>AXI-to-APB Bridge</h2>
                 <p>최종 프로젝트의 AXI-to-APB protocol conversion, Verilog FSM, testbench, PASS 로그를 정리합니다.</p>
               </a>
+            </div>
+          </section>
+
+          <section class="doc-section visible" id="competition-case-studies">
+            <h2>경진대회 기술 케이스 스터디</h2>
+            <p>
+              수상 결과만 나열하지 않고 문제 정의, 제약 해석, 설계 선택, 실제 구현,
+              검증과 결과가 연결되도록 두 경진대회를 각각 세 편의 글로 나누었습니다.
+              공개한 수치와 코드는 최종 발표자료, RTL, 보드 검증 결과에서 직접 확인한
+              범위로 한정합니다.
+            </p>
+
+            <div class="competition-collection">
+              <section class="competition-group competition-group-ai" aria-labelledby="ai-semi-group-title">
+                <header class="competition-group-header">
+                  <div>
+                    <span>2025 · SNN CONTROL</span>
+                    <h3 id="ai-semi-group-title">전국 대학생 AI 반도체 회로 설계 경진대회</h3>
+                    <p>
+                      1차 SNN/LIF 조사에서 2차 BallControl 문제로 이어진 과정과
+                      output-layer 제어 RTL, 실험·합성 결과를 설명합니다.
+                    </p>
+                  </div>
+                  <strong>1등 · 팀 반짝반짝</strong>
+                </header>
+                <div class="sitemap-grid competition-card-grid">
+                  <a class="sitemap-card" href="pages/competitions/ai-semi-01-problem-and-design.html">
+                    <span class="sitemap-number">AI-01</span>
+                    <h2>문제 정의와 설계 선택</h2>
+                    <p>30×30cm 보드, 1~30g 공과 중앙 1cm 목표를 위치·속도 입력과 네 방향 제어 출력으로 바꾼 과정을 설명합니다.</p>
+                  </a>
+                  <a class="sitemap-card" href="pages/competitions/ai-semi-02-snn-control-rtl.html">
+                    <span class="sitemap-number">AI-02</span>
+                    <h2>SNN 제어 RTL</h2>
+                    <p>실제 error encoder, LIF neuron, controller top 코드를 따라 signed 오차가 모터 spike로 변하는 과정을 설명합니다.</p>
+                  </a>
+                  <a class="sitemap-card" href="pages/competitions/ai-semi-03-verification-results.html">
+                    <span class="sitemap-number">AI-03</span>
+                    <h2>실험·합성 결과와 역할</h2>
+                    <p>one-shot에서 무게 반영 rate encoding으로 확장한 실험, FPGA 도구 추정 결과와 팀장 역할을 구분해 정리합니다.</p>
+                  </a>
+                </div>
+              </section>
+
+              <section class="competition-group competition-group-aix" aria-labelledby="aix-group-title">
+                <header class="competition-group-header">
+                  <div>
+                    <span>2026 · YOLO FPGA ACCELERATOR</span>
+                    <h3 id="aix-group-title">AIX 2026 Deep Learning Hardware 설계경진대회</h3>
+                    <p>
+                      mAP를 기준으로 잡은 양자화에서 22-stage full graph RTL,
+                      229장 실제 보드 검증까지 이어진 과정을 설명합니다.
+                    </p>
+                  </div>
+                  <strong>장려상 · 팀 경이원지</strong>
+                </header>
+                <div class="sitemap-grid competition-card-grid">
+                  <a class="sitemap-card" href="pages/competitions/aix-01-quantization.html">
+                    <span class="sitemap-number">AIX-01</span>
+                    <h2>mAP에서 시작한 양자화</h2>
+                    <p>대표 이미지 calibration, mAP 기반 후보 선택과 INT8 저장·INT32 누산·requantization의 연결을 설명합니다.</p>
+                  </a>
+                  <a class="sitemap-card" href="pages/competitions/aix-02-fpga-architecture.html">
+                    <span class="sitemap-number">AIX-02</span>
+                    <h2>Full-graph FPGA 구조</h2>
+                    <p>DDR, JTAG-to-AXI, descriptor, 144-lane MAC, Route/Upsample과 두 detection head를 연결한 구조를 설명합니다.</p>
+                  </a>
+                  <a class="sitemap-card" href="pages/competitions/aix-03-board-verification.html">
+                    <span class="sitemap-number">AIX-03</span>
+                    <h2>보드 검증과 최종 결과</h2>
+                    <p>test_one에서 229장 test_all로 확장해 11.420687 FPS와 two-head detector mAP 78.60%를 확인한 과정을 정리합니다.</p>
+                  </a>
+                </div>
+              </section>
             </div>
           </section>
 </article>
