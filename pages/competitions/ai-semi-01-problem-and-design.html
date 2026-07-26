@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="SNN과 LIF 뉴런 조사에서 BallControl용 네 방향 출력 제어 회로로 이어진 과정을 처음 보는 독자에게 설명한 글." />
     <title>AI 반도체 경진대회 1 - BallControl 문제 이해하기</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260726-evidence" />
+    <link rel="stylesheet" href="../../styles.css?v=20260726-summaries" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="competition-page">
@@ -37,7 +37,7 @@
           </p>
 
           <section class="doc-section searchable-section" id="contest" data-search-title="경진대회는 무엇을 하는가">
-            <h2>무엇을 만드는 경진대회였나?</h2>
+            <h2>SNN 조사에서 BallControl 회로 설계까지</h2>
             <p>
               경진대회는 조사와 설계를 연결하는 두 단계 과제로 진행됐습니다. 1차에서는
               뇌의 뉴런처럼 시간에 따라 상태를 쌓고 스파이크를 만드는 SNN 하드웨어를
@@ -53,7 +53,7 @@
           </section>
 
           <section class="doc-section searchable-section" id="constraints" data-search-title="BallControl 조건">
-            <h2>BallControl은 어떤 문제인가?</h2>
+            <h2>30×30cm 보드의 BallControl 요구사항</h2>
             <p>
               30×30cm 보드 위에는 1g에서 30g 사이의 공이 임의의 위치에 놓입니다.
               목표는 공을 보드 중앙의 반경 1cm 영역으로 이동시키는 것입니다.
@@ -87,7 +87,7 @@
           </section>
 
           <section class="doc-section searchable-section" id="system" data-search-title="제어 회로 전체 흐름">
-            <h2>회로는 무엇을 받아 무엇을 내보내나?</h2>
+            <h2>위치·속도 입력에서 네 방향 모터 출력까지</h2>
             <div class="architecture-flow" aria-label="BallControl 출력 제어 회로의 데이터 흐름">
               <span>현재 X·Y 위치<br />속도 크기</span>
               <b>→</b>
@@ -126,7 +126,7 @@
           </section>
 
           <section class="doc-section searchable-section" id="design" data-search-title="설계 방법">
-            <h2>왜 네 개의 작은 뉴런으로 구성했나?</h2>
+            <h2>네 방향을 독립적으로 처리하는 4채널 LIF 구조</h2>
             <p>
               한 뉴런이 X와 Y의 부호, 방향 선택과 모터 출력을 모두 맡으면 내부 조건이
               복잡해집니다. 대신 네 방향에 같은 LIF 구조를 하나씩 두면 각 뉴런은
@@ -149,7 +149,7 @@
           </section>
 
           <section class="doc-section searchable-section" id="reading-order" data-search-title="글 읽는 순서">
-            <h2>다음 글에서는 무엇을 보나?</h2>
+            <h2>다음 글: 실제 RTL 신호 흐름</h2>
             <p>
               다음 글은 <code>error_encoder → 4채널 LIF neuron → motor direction</code>
               흐름을 실제 Verilog와 함께 따라갑니다. 마지막 글에서는 위치만 한 번

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="BallControl의 위치 오차가 error encoder와 네 개의 LIF 뉴런을 거쳐 모터 방향 스파이크가 되는 RTL 흐름을 설명한 글." />
     <title>AI 반도체 경진대회 2 - 위치 오차가 스파이크가 되는 과정</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260726-evidence" />
+    <link rel="stylesheet" href="../../styles.css?v=20260726-summaries" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="competition-page">
@@ -77,7 +77,7 @@
           </section>
 
           <section class="doc-section searchable-section" id="encoder" data-search-title="error encoder">
-            <h2><code>error_encoder</code>는 무엇을 계산하나?</h2>
+            <h2><code>error_encoder</code>: signed 오차를 네 방향 크기로 변환</h2>
             <p>
               LIF 뉴런에는 한 방향의 자극 크기만 전달하는 편이 이해하기 쉽습니다.
               그래서 X와 Y를 그대로 넣지 않고, 값의 부호에 따라 해당하는 방향만
@@ -104,7 +104,7 @@ assign X_y_push = (ey &lt; 0) ? (ALPHA * (-ey)) : 0;</code></pre>
           </section>
 
           <section class="doc-section searchable-section" id="lif" data-search-title="LIF neuron">
-            <h2>LIF 뉴런 안에서는 어떤 일이 일어나나?</h2>
+            <h2><code>lif_neuron</code>: 누적·누설·임계값 발화</h2>
             <p>
               LIF(Leaky Integrate-and-Fire) 뉴런은 막전위라는 상태를 기억합니다.
               입력이 들어오면 막전위가 올라가고, 입력이 약해지면 누설 항만큼
@@ -146,7 +146,7 @@ end</code></pre>
           </section>
 
           <section class="doc-section searchable-section" id="controller-top" data-search-title="controller top">
-            <h2><code>controller_top</code>은 네 방향을 어떻게 연결하나?</h2>
+            <h2><code>controller_top</code>: 동일한 LIF 모듈을 네 방향에 연결</h2>
             <p>
               top 모듈은 encoder가 만든 네 값을 같은 LIF 모듈 네 개에 연결합니다.
               generate 구문을 사용해 뉴런 구조와 파라미터는 공유하고, 각 인스턴스가

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="YOLOv2를 FPGA용 정수 연산으로 바꾸기 위해 대표 이미지, mAP, INT8 저장, INT32 누산과 requantization을 연결한 과정을 설명한 글." />
     <title>AIX 경진대회 1 - YOLOv2를 정수 연산으로 바꾸기</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260726-evidence" />
+    <link rel="stylesheet" href="../../styles.css?v=20260726-summaries" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="competition-page">
@@ -58,7 +58,7 @@
           </dl>
 
           <section class="doc-section searchable-section" id="why" data-search-title="양자화가 필요한 이유">
-            <h2>왜 양자화부터 시작했나?</h2>
+            <h2>FPGA 구현의 출발점이 된 INT8 양자화</h2>
             <p>
               YOLOv2의 feature map과 weight는 layer마다 값의 범위가 다릅니다.
               이 값을 모두 8-bit 정수로 저장하면 DDR에서 옮겨야 하는 데이터가
@@ -78,7 +78,7 @@
           </section>
 
           <section class="doc-section searchable-section" id="calibration" data-search-title="대표 이미지와 mAP">
-            <h2>정수 배율은 어떻게 정했나?</h2>
+            <h2>대표 이미지와 detector mAP를 이용한 배율 탐색</h2>
             <p>
               calibration에는 가까운 물체와 먼 물체처럼 서로 다른 크기의 대상이
               함께 나타나는 대표 이미지를 사용했습니다. 각 layer의 activation
@@ -109,7 +109,7 @@
           </section>
 
           <section class="doc-section searchable-section" id="datapath" data-search-title="INT8 INT32 requantization">
-            <h2>INT8, INT32와 requantization은 어떻게 이어지나?</h2>
+            <h2>INT8 저장·INT32 누산·requantization 데이터 경로</h2>
             <div class="definition-grid">
               <article>
                 <h3>INT8 저장</h3>

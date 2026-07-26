@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="YOLOv2 FPGA 가속기를 한 장에서 229장으로 확장 검증하고 속도, mAP, timing, 자원과 전력 추정 결과를 확인한 과정." />
     <title>AIX 경진대회 3 - 한 장에서 229장 검증까지</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260726-evidence" />
+    <link rel="stylesheet" href="../../styles.css?v=20260726-summaries" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="competition-page">
@@ -59,7 +59,7 @@
           </dl>
 
           <section class="doc-section searchable-section" id="one-image" data-search-title="한 장 테스트">
-            <h2>한 장 테스트에서는 무엇을 확인했나?</h2>
+            <h2><code>test_one</code>: program부터 detector 후처리까지 점검</h2>
             <p>
               <code>test_one</code>은 단순한 데모 스크립트가 아니라 실행 경로의
               각 단계를 확인하기 위한 테스트입니다. 문제가 생기면 어느 단계부터
@@ -83,7 +83,7 @@
           </section>
 
           <section class="doc-section searchable-section" id="all-images" data-search-title="229장 테스트">
-            <h2>왜 229장을 같은 hardware session에서 실행했나?</h2>
+            <h2><code>test_all</code>: 한 번의 program·weight preload로 229장 연속 실행</h2>
             <p>
               이미지마다 bitstream과 weights를 다시 올리면 FPGA 계산 시간과 준비
               시간이 섞입니다. <code>test_all</code>에서는 bitstream program과
@@ -120,7 +120,7 @@
           </section>
 
           <section class="doc-section searchable-section" id="accuracy" data-search-title="mAP 결과">
-            <h2>78.60% mAP는 무엇을 확인한 값인가?</h2>
+            <h2>두 detection head를 함께 평가한 78.60% detector mAP</h2>
             <p>
               mAP는 각 이미지에서 물체를 하나 찾았는지만 세는 값이 아닙니다.
               예측한 상자와 정답 상자의 겹침, 물체 종류와 confidence를 함께 반영해
@@ -136,7 +136,7 @@
           </section>
 
           <section class="doc-section searchable-section" id="hardware" data-search-title="timing 자원 전력">
-            <h2>timing과 자원 보고서는 어떻게 읽나?</h2>
+            <h2>100MHz timing closure와 FPGA 자원 사용 결과</h2>
             <div class="signal-table-wrap">
               <table class="signal-table">
                 <thead><tr><th>항목</th><th>최종 값</th><th>의미</th></tr></thead>
@@ -185,7 +185,7 @@
           </section>
 
           <section class="doc-section searchable-section" id="debugging" data-search-title="문제 해결 과정">
-            <h2>결과가 다를 때 어디서부터 확인했나?</h2>
+            <h2>최초 mismatch layer를 기준으로 한 오류 추적</h2>
             <ul class="check-list">
               <li>소프트웨어와 FPGA tensor가 처음 달라지는 layer를 찾아 주소와 정수 도메인을 확인했습니다.</li>
               <li>Route와 Upsample은 feature map 배치와 DDR offset을 descriptor와 readback 결과로 비교했습니다.</li>

@@ -3,52 +3,41 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="SNN BallControl 회로와 YOLOv2 FPGA 가속기가 무엇을 입력받고 어떤 결과를 만드는지 비교해 설명한 경진대회 글 안내." />
-    <title>경진대회 케이스 스터디 - 먼저 읽기</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260726-evidence" />
+    <meta
+      name="description"
+      content="SNN BallControl 출력 제어 회로와 YOLOv2 FPGA 가속기의 목표, 구현 범위, 핵심 기술과 결과를 한눈에 정리한 경진대회 프로젝트 안내."
+    />
+    <title>경진대회 프로젝트 한눈에 보기</title>
+    <link rel="stylesheet" href="../../styles.css?v=20260726-summaries" />
     <script src="../../script.js" defer></script>
   </head>
-  <body class="competition-page">
+  <body class="competition-page competition-overview-page">
     <div class="site-shell">
       <main class="content-wrap" id="top">
         <article class="content">
           <div class="document-kicker">
             <span>Competition Case Studies</span>
-            <div class="kicker-actions"><span class="draft-label">먼저 읽기</span></div>
+            <div class="kicker-actions"><span class="draft-label">프로젝트 요약</span></div>
           </div>
           <a class="home-link" href="../../index.html#competition-case-studies">← 경진대회 글묶음으로 돌아가기</a>
 
-          <h1>두 경진대회에서 무엇을 만들었나</h1>
+          <h1>경진대회 프로젝트 한눈에 보기</h1>
           <p class="lead">
-            한 프로젝트에서는 보드 위 공의 위치를 읽어 네 방향 제어 신호를 만드는
-            SNN 회로를 다뤘고, 다른 프로젝트에서는 YOLOv2 객체검출 모델 전체를
-            FPGA에서 실행하는 가속기를 다뤘습니다. 사용하는 알고리즘은 다르지만,
-            두 작업 모두 소프트웨어의 계산 방법을 실제 하드웨어가 처리할 수 있는
-            데이터 흐름으로 바꾸는 과정이 중심입니다.
+            두 프로젝트에서 다룬 문제와 실제 수행 범위, 사용한 기술, 확인한 결과를
+            먼저 정리했습니다. 설계와 검증 과정은 프로젝트별 세 편의 글에서 이어집니다.
           </p>
 
-          <section class="doc-section searchable-section" id="ai-semi" data-search-title="AI 반도체 경진대회 소개">
-            <h2>공을 중앙으로 움직이는 SNN 제어 회로</h2>
+          <section class="doc-section searchable-section overview-project" id="ai-semi" data-search-title="SNN BallControl 프로젝트 요약">
+            <div class="overview-project-heading">
+              <span>2025 · 팀 반짝반짝</span>
+              <h2>SNN BallControl 출력 제어 회로</h2>
+            </div>
             <p>
-              2025 전국 대학생 AI 반도체 회로 설계 경진대회는 두 단계로 진행됐습니다.
-              첫 단계에서는 스파이킹 뉴럴 네트워크(SNN)와 LIF 뉴런의 동작을 조사했고,
-              다음 단계에서는 그 개념을 BallControl 문제에 적용했습니다. BallControl은
-              30×30cm 보드 위에 놓인 공의 위치와 움직임을 바탕으로, 공이 중앙으로
-              향하도록 모터 방향을 정하는 과제입니다.
+              30×30cm 보드 위 공의 위치와 속도를 읽어 중앙으로 이동시키는 과제를
+              SNN 출력 제어 회로로 구현했습니다. signed X/Y 오차를 네 방향 크기로
+              바꾸고, 각 방향의 LIF 뉴런이 모터 제어 스파이크를 생성합니다.
             </p>
-            <figure class="doc-figure">
-              <div class="figure-label">원본 발표자료에서 발췌한 BallControl 제어 개념</div>
-              <img
-                src="../../assets/ai-semi-ballcontrol-system.png"
-                alt="공의 압력과 위치를 입력 뉴런과 신경망에 전달해 X와 Y축 네 방향 모터 뉴런을 구동하는 BallControl 구조"
-              />
-              <figcaption>
-                공의 상태를 입력 뉴런이 받아 SNN 제어 신호로 바꾸고, 네 방향 모터
-                뉴런으로 전달하는 과제의 전체 개념입니다. 슬라이드의 제목과 장식은
-                제외하고 시스템 부분만 잘라 사용했습니다.
-              </figcaption>
-            </figure>
-            <div class="architecture-flow" aria-label="BallControl SNN 제어 회로의 입력과 출력">
+            <div class="architecture-flow" aria-label="BallControl 출력 제어 회로 흐름">
               <span>공의 X·Y 위치<br />속도 크기</span>
               <b>→</b>
               <span>방향별 오차<br />encoder</span>
@@ -57,143 +46,86 @@
               <b>→</b>
               <span>X/Y 모터<br />네 방향 신호</span>
             </div>
-            <p>
-              이 글묶음에서 설명하는 실제 구현 범위는 센서와 기구부를 모두 포함한
-              완성형 폐루프 장치가 아니라, 위치·속도 값을 받아 네 방향 스파이크를
-              만드는 출력 제어 회로입니다. 첫 글은 문제를 회로 사양으로 바꾸는 과정을,
-              둘째 글은 RTL 데이터 흐름을, 셋째 글은 입력 방식의 변화와 구현 결과를
-              설명합니다.
-            </p>
-            <div class="work-concept-grid">
-              <section>
-                <h3>이 프로젝트에서 한 일</h3>
-                <ul>
-                  <li>SNN과 LIF 뉴런의 디지털 하드웨어 구현 사례를 조사했습니다.</li>
-                  <li>공의 위치·속도·무게 조건을 회로 입력과 네 방향 출력으로 해석했습니다.</li>
-                  <li>오차 encoder, 4채널 LIF와 top-level을 잇는 출력 계층 RTL 구조를 정리했습니다.</li>
-                  <li>위치 기반 입력과 무게 반영 rate encoding을 비교하고 결과 자료를 팀장으로 통합했습니다.</li>
-                </ul>
-              </section>
-              <section>
-                <h3>사용한 기술 개념</h3>
-                <ul>
-                  <li><strong>LIF neuron:</strong> 입력을 막전위에 누적하고 임계값에서 스파이크를 만드는 상태 기반 뉴런</li>
-                  <li><strong>Rate encoding:</strong> 물리량의 크기를 일정 시간 동안 발생하는 스파이크 빈도로 표현하는 방법</li>
-                  <li><strong>Signed error encoding:</strong> X·Y 오차의 부호와 크기를 네 방향의 양수 채널로 바꾸는 방법</li>
-                  <li><strong>RTL hierarchy:</strong> encoder, neuron, top 모듈의 역할과 클록 단위 상태 변화를 명시하는 설계</li>
-                </ul>
-              </section>
-            </div>
-            <div class="chapter-switcher" aria-label="AI 반도체 경진대회 글">
-              <span class="chapter-switcher-label">AI 반도체 경진대회 · 팀 반짝반짝</span>
+            <dl class="concept-list overview-facts">
               <div>
-                <a href="ai-semi-01-problem-and-design.html">1. BallControl 문제 이해하기</a>
-                <a href="ai-semi-02-snn-control-rtl.html">2. 위치 오차가 스파이크가 되는 과정</a>
-                <a href="ai-semi-03-verification-results.html">3. 입력 실험과 구현 결과 읽기</a>
+                <dt>수행 내용</dt>
+                <dd>SNN/LIF 조사, 요구사항 해석, output-layer RTL 구조, 입력 방식 실험, 팀 일정과 발표자료 정리</dd>
+              </div>
+              <div>
+                <dt>핵심 기술</dt>
+                <dd>Signed error encoding, LIF neuron, rate encoding, Verilog RTL hierarchy</dd>
+              </div>
+              <div>
+                <dt>구현 범위</dt>
+                <dd>공의 상태 입력을 네 방향 모터 스파이크로 변환하는 출력 제어 파이프라인</dd>
+              </div>
+              <div>
+                <dt>확인 결과</dt>
+                <dd>입력 방식 비교, RTL 동작, 합성 자원과 I/O 사용량, Vivado 전력 추정</dd>
+              </div>
+            </dl>
+            <div class="chapter-switcher" aria-label="SNN BallControl 세부 글">
+              <span class="chapter-switcher-label">3편의 기술 글</span>
+              <div>
+                <a href="ai-semi-01-problem-and-design.html">1. BallControl 문제와 회로 구조</a>
+                <a href="ai-semi-02-snn-control-rtl.html">2. Encoder와 LIF RTL 신호 흐름</a>
+                <a href="ai-semi-03-verification-results.html">3. 입력 실험과 구현 결과</a>
               </div>
             </div>
           </section>
 
-          <section class="doc-section searchable-section" id="aix" data-search-title="AIX 경진대회 소개">
-            <h2>YOLOv2 객체검출 모델을 실행하는 FPGA 가속기</h2>
+          <section class="doc-section searchable-section overview-project" id="aix" data-search-title="YOLOv2 FPGA 프로젝트 요약">
+            <div class="overview-project-heading">
+              <span>2026 · 팀 경이원지</span>
+              <h2>YOLOv2 Full-Graph FPGA 가속기</h2>
+            </div>
             <p>
-              AIX 2026 Deep Learning Hardware 설계경진대회에서는 학습된 YOLOv2
-              모델을 FPGA 보드에서 동작시키는 가속기를 만들었습니다. YOLOv2는
-              이미지에서 물체의 위치와 종류를 찾는 신경망입니다. 부동소수점 모델을
-              그대로 옮기는 대신 정수 양자화를 적용하고, convolution뿐 아니라
-              pooling, route, upsample과 두 개의 detection head까지 전체 계산 흐름을
-              하드웨어에서 이어야 했습니다.
+              학습된 YOLOv2를 INT8 중심의 정수 연산으로 바꾸고, Conv·Pool·Route·Upsample과
+              두 detection head를 포함한 전체 그래프를 FPGA에서 실행했습니다.
+              대표 이미지 양자화 실험부터 229장 보드 검증까지 하나의 흐름으로 연결했습니다.
             </p>
-            <figure class="doc-figure">
-              <div class="figure-label">원본 발표자료에서 발췌한 Host–FPGA 실행 구조</div>
-              <img
-                src="../../assets/aix-host-fpga-block-crop.png"
-                alt="PC host, JTAG-to-AXI, DDR workspace, YOLO engine scheduler와 연산 경로가 연결된 블록도"
-              />
-              <figcaption>
-                Host는 입력과 weights의 전송·결과 회수를 맡고, FPGA의 scheduler와
-                dispatcher가 Conv, Pool, Route, Upsample과 두 detection head를
-                순서대로 실행합니다.
-              </figcaption>
-            </figure>
-            <div class="architecture-flow architecture-flow-long" aria-label="YOLOv2 FPGA 가속기의 입력과 출력">
+            <div class="architecture-flow architecture-flow-long" aria-label="YOLOv2 FPGA 가속기 흐름">
               <span>입력 이미지<br />학습 weights</span>
               <b>→</b>
-              <span>INT8<br />양자화</span>
+              <span>INT8 저장<br />INT32 누산</span>
               <b>→</b>
               <span>22단계<br />FPGA 연산</span>
               <b>→</b>
               <span>두 detection<br />head</span>
               <b>→</b>
-              <span>물체 위치와<br />종류</span>
+              <span>객체 위치와<br />종류</span>
             </div>
-            <p>
-              첫 글은 모델 값을 하드웨어용 정수로 바꾸면서 정확도를 확인한 방법을,
-              둘째 글은 모델 전체가 FPGA와 DDR 안에서 실행되는 구조를, 셋째 글은
-              한 장 테스트를 229장 평가로 확장해 속도와 검출 정확도를 확인한 과정을
-              설명합니다.
-            </p>
-            <div class="work-concept-grid">
-              <section>
-                <h3>이 프로젝트에서 한 일</h3>
-                <ul>
-                  <li>대표 이미지와 detector mAP를 이용해 layer별 양자화 조건을 탐색했습니다.</li>
-                  <li>정수 소프트웨어 모델의 배율·반올림 규칙을 RTL 데이터 경로와 연결했습니다.</li>
-                  <li>22단계 full graph의 RTL 통합과 DDR·연산 병목 개선에 참여했습니다.</li>
-                  <li>FPGA 보드에서 한 장 테스트를 229장 평가로 확장하고 최종 결과를 정리했습니다.</li>
-                </ul>
-              </section>
-              <section>
-                <h3>사용한 기술 개념</h3>
-                <ul>
-                  <li><strong>Post-training quantization:</strong> 학습된 모델을 대표 입력으로 보정해 정수 연산으로 바꾸는 방법</li>
-                  <li><strong>INT8 MAC·INT32 accumulation:</strong> 저장과 곱셈은 작게, 여러 곱의 합은 넓게 유지하는 데이터 경로</li>
-                  <li><strong>Graph-aware scheduling:</strong> Conv 외의 Route와 Upsample까지 descriptor로 실행하는 제어 구조</li>
-                  <li><strong>Memory hierarchy:</strong> DDR, cache와 buffer 사이의 데이터 이동을 연산 속도와 함께 설계하는 방법</li>
-                  <li><strong>Two-head validation:</strong> 서로 다른 해상도의 두 검출 출력을 함께 후처리해 detector mAP를 확인하는 검증</li>
-                </ul>
-              </section>
-            </div>
-            <div class="chapter-switcher" aria-label="AIX 경진대회 글">
-              <span class="chapter-switcher-label">AIX 2026 · 팀 경이원지</span>
+            <dl class="concept-list overview-facts">
               <div>
-                <a href="aix-01-quantization.html">1. YOLOv2를 정수 연산으로 바꾸기</a>
-                <a href="aix-02-fpga-architecture.html">2. 모델 전체를 FPGA에서 실행하기</a>
-                <a href="aix-03-board-verification.html">3. 한 장에서 229장 검증까지</a>
+                <dt>수행 내용</dt>
+                <dd>양자화 조건 탐색, 정수 모델–RTL 연결, full-graph 통합과 병목 개선, FPGA 보드 검증</dd>
               </div>
-            </div>
-          </section>
-
-          <section class="doc-section searchable-section" id="comparison" data-search-title="두 프로젝트 비교">
-            <h2>두 프로젝트를 한눈에 비교하면</h2>
-            <div class="signal-table-wrap">
-              <table class="signal-table">
-                <thead>
-                  <tr><th>프로젝트</th><th>입력</th><th>하드웨어 안의 처리</th><th>출력</th><th>핵심 질문</th></tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>SNN BallControl</td>
-                    <td>공의 위치와 속도 크기</td>
-                    <td>오차 인코딩과 LIF 상태 갱신</td>
-                    <td>네 방향 모터 스파이크</td>
-                    <td>물리 조건을 작은 이벤트 기반 제어 회로로 어떻게 표현할까?</td>
-                  </tr>
-                  <tr>
-                    <td>YOLOv2 FPGA</td>
-                    <td>이미지와 정수 weights</td>
-                    <td>22단계 신경망 그래프 연산</td>
-                    <td>물체의 위치와 종류</td>
-                    <td>정확도를 유지하면서 전체 모델을 FPGA 자원과 timing 안에 어떻게 넣을까?</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div>
+                <dt>핵심 기술</dt>
+                <dd>INT8/INT32 data path, requantization, descriptor scheduling, DDR workspace, 144-lane MAC</dd>
+              </div>
+              <div>
+                <dt>구현 범위</dt>
+                <dd>22개 처리 단계와 두 detection head를 포함한 YOLOv2 전체 그래프의 FPGA 실행</dd>
+              </div>
+              <div>
+                <dt>최종 검증</dt>
+                <dd>229/229 PASS, 11.420687 compute-only FPS, 78.60% detector mAP</dd>
+              </div>
+            </dl>
+            <div class="chapter-switcher" aria-label="YOLOv2 FPGA 세부 글">
+              <span class="chapter-switcher-label">3편의 기술 글</span>
+              <div>
+                <a href="aix-01-quantization.html">1. INT8 양자화와 requantization</a>
+                <a href="aix-02-fpga-architecture.html">2. Full-graph FPGA 아키텍처</a>
+                <a href="aix-03-board-verification.html">3. 229장 보드 검증과 결과</a>
+              </div>
             </div>
           </section>
 
           <footer class="page-footer">
             <a href="../../index.html#competition-case-studies">← 경진대회 글묶음</a>
-            <a href="ai-semi-01-problem-and-design.html">첫 글 읽기 →</a>
+            <a href="ai-semi-01-problem-and-design.html">첫 번째 기술 글 →</a>
           </footer>
         </article>
       </main>

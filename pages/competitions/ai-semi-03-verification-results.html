@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="BallControl SNN 회로의 one-shot 입력과 무게 반영 rate encoding 실험, 합성·전력 추정 결과와 프로젝트 기여를 설명한 글." />
     <title>AI 반도체 경진대회 3 - 입력 실험과 구현 결과 읽기</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260726-evidence" />
+    <link rel="stylesheet" href="../../styles.css?v=20260726-summaries" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="competition-page">
@@ -55,7 +55,7 @@
           </dl>
 
           <section class="doc-section searchable-section" id="experiments" data-search-title="두 입력 실험">
-            <h2>왜 입력 방식을 두 번 실험했나?</h2>
+            <h2>위치 one-shot에서 무게 반영 rate encoding으로 확장</h2>
             <p>
               첫 실험은 위치 오차가 올바른 방향의 뉴런으로 전달되는지 확인하는
               기능 검증에 가깝습니다. 두 번째 실험은 같은 위치에 있더라도 공의
@@ -93,7 +93,7 @@
           </section>
 
           <section class="doc-section searchable-section" id="resources" data-search-title="합성 자원 결과">
-            <h2>합성 결과는 무엇을 보여 주나?</h2>
+            <h2>작은 내부 로직과 높은 top-level I/O 사용률</h2>
             <p>
               아래 값은 발표자료에 기록된 FPGA 합성 결과입니다. LUT, 레지스터,
               DSP와 BRAM은 제어 로직의 크기를 보여 주지만, I/O는 외부로 노출한
@@ -128,7 +128,7 @@
           </section>
 
           <section class="doc-section searchable-section" id="power" data-search-title="전력 추정 결과">
-            <h2>2.302W라는 전력 값은 어떻게 읽어야 하나?</h2>
+            <h2>I/O switching이 큰 비중을 차지한 2.302W 전력 추정</h2>
             <div class="metric-grid metric-grid-featured" aria-label="AI 반도체 SNN 출력 회로의 전력 추정">
               <article><strong>2.302W</strong><span>도구가 계산한 총 전력</span></article>
               <article><strong>2.165W</strong><span>dynamic power</span></article>

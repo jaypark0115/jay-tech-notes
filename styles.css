@@ -3025,13 +3025,6 @@ body.home-page .home-panel-wide p {
   line-height: 1.7;
 }
 
-.competition-group-header .competition-role {
-  margin-top: 0.8rem;
-  color: #0f766e;
-  font-size: 0.88rem;
-  font-weight: 700;
-}
-
 .competition-group-header > strong {
   flex: 0 0 auto;
   padding: 0.55rem 0.75rem;
@@ -3039,6 +3032,63 @@ body.home-page .home-panel-wide p {
   background: #f0fdfa;
   color: #0f766e;
   font-size: 0.82rem;
+}
+
+.competition-project-summary {
+  margin: 24px 24px 0;
+  padding: 22px 24px;
+  border: 1px solid #d9e4e8;
+  border-left: 4px solid #0f766e;
+  background: #f8fafc;
+}
+
+.competition-project-summary > span {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: #0f766e;
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+}
+
+.competition-project-summary h4 {
+  margin: 0 0 0.55rem;
+  color: var(--ink);
+  font-size: 1.12rem;
+  line-height: 1.45;
+}
+
+.competition-project-summary > p {
+  max-width: 900px;
+  margin: 0;
+  color: #475569;
+  line-height: 1.75;
+}
+
+.competition-summary-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin: 1.25rem 0 0;
+}
+
+.competition-summary-facts div {
+  padding-top: 0.8rem;
+  border-top: 1px solid #cbd5e1;
+}
+
+.competition-summary-facts dt {
+  margin-bottom: 0.3rem;
+  color: #115e59;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.competition-summary-facts dd {
+  margin: 0;
+  color: #475569;
+  font-size: 0.84rem;
+  line-height: 1.65;
 }
 
 #competition-case-studies .competition-card-grid {
@@ -3260,6 +3310,31 @@ body.competition-page .doc-figure img {
   margin-left: auto;
 }
 
+.competition-overview-page .lead {
+  max-width: 820px;
+}
+
+.competition-overview-page .overview-project {
+  padding: 1.8rem 0 0;
+}
+
+.overview-project-heading > span {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: var(--competition-accent-dark);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+
+.overview-project-heading h2 {
+  margin-top: 0;
+}
+
+.overview-facts {
+  margin-bottom: 1.5rem;
+}
+
 @media (max-width: 1100px) {
   body.home-page .home-panel-wide {
     grid-column: auto;
@@ -3276,6 +3351,11 @@ body.competition-page .doc-figure img {
 
   #competition-case-studies .competition-card-grid {
     grid-template-columns: 1fr;
+  }
+
+  .competition-summary-facts {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 
   .architecture-flow {
@@ -3307,8 +3387,13 @@ body.competition-page .doc-figure img {
 
 @media (max-width: 560px) {
   .competition-group-header,
-  #competition-case-studies .competition-card-grid {
+  #competition-case-studies .competition-card-grid,
+  .competition-project-summary {
     padding: 20px;
+  }
+
+  .competition-project-summary {
+    margin: 20px 20px 0;
   }
 
   .metric-grid {

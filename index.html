@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="연구·개발 계획, SNN 연구, NRV DVS 캘리브레이션, SoC/FPGA 학습 노트와 경진대회 기술 케이스 스터디 모음." />
     <title>Jay Tech Notes</title>
-    <link rel="stylesheet" href="styles.css?v=20260726-evidence" />
+    <link rel="stylesheet" href="styles.css?v=20260726-summaries" />
     <script src="script.js" defer></script>
   </head>
   <body class="home-page">
@@ -439,10 +439,10 @@
                 <span class="sitemap-number">START</span>
                 <div>
                   <small>처음 방문했다면 여기부터</small>
-                  <h3>두 경진대회에서 무엇을 만들었나</h3>
+                  <h3>경진대회 프로젝트 한눈에 보기</h3>
                   <p>
-                    BallControl용 SNN 제어 회로와 YOLOv2 FPGA 가속기의 입력,
-                    처리 과정, 출력을 한 화면에서 비교합니다.
+                    두 프로젝트의 목표, 구현 범위, 핵심 기술과 결과를
+                    짧게 정리했습니다.
                   </p>
                 </div>
                 <strong>먼저 읽기 →</strong>
@@ -452,18 +452,36 @@
                 <header class="competition-group-header">
                   <div>
                     <span>2025 · 팀 반짝반짝</span>
-                    <h3 id="ai-semi-group-title">공의 위치를 네 방향 제어 신호로 바꾸는 SNN 회로</h3>
+                    <h3 id="ai-semi-group-title">SNN BallControl 출력 제어 회로</h3>
                     <p>
-                      전국 대학생 AI 반도체 회로 설계 경진대회의 두 단계 과제를
-                      따라, LIF 뉴런 조사부터 BallControl 출력 회로까지 설명합니다.
-                    </p>
-                    <p class="competition-role">
-                      수행 범위 · SNN/LIF 조사, 요구사항 해석, 출력 계층 RTL 구조,
-                      입력 실험, 팀 일정·발표자료 정리
+                      전국 대학생 AI 반도체 회로 설계 경진대회
                     </p>
                   </div>
                   <strong>3편</strong>
                 </header>
+                <article class="competition-project-summary">
+                  <span>PROJECT SUMMARY</span>
+                  <h4>공의 위치·속도를 네 방향 모터 스파이크로 변환</h4>
+                  <p>
+                    30×30cm 보드 중앙으로 공을 이동시키는 BallControl 과제를
+                    SNN 출력 제어 회로로 해석했습니다. signed X/Y 오차를 네 방향
+                    크기로 나누고, 4개의 LIF 뉴런이 모터 제어 스파이크를 만듭니다.
+                  </p>
+                  <dl class="competition-summary-facts">
+                    <div>
+                      <dt>수행 내용</dt>
+                      <dd>SNN/LIF 조사 · 요구사항 해석 · 출력 계층 RTL 구조 · 입력 실험</dd>
+                    </div>
+                    <div>
+                      <dt>핵심 기술</dt>
+                      <dd>Signed error · LIF neuron · Rate encoding · Verilog RTL</dd>
+                    </div>
+                    <div>
+                      <dt>확인 결과</dt>
+                      <dd>4방향 출력 파이프라인 · 합성 결과 · 전력 추정 · 실험 로그</dd>
+                    </div>
+                  </dl>
+                </article>
                 <div class="sitemap-grid competition-card-grid">
                   <a class="sitemap-card" href="pages/competitions/ai-semi-01-problem-and-design.html">
                     <span class="sitemap-number">AI-01</span>
@@ -487,18 +505,36 @@
                 <header class="competition-group-header">
                   <div>
                     <span>2026 · 팀 경이원지</span>
-                    <h3 id="aix-group-title">YOLOv2 전체 그래프를 실행하는 FPGA 가속기</h3>
+                    <h3 id="aix-group-title">YOLOv2 Full-Graph FPGA 가속기</h3>
                     <p>
-                      AIX Deep Learning Hardware 설계경진대회에서 객체검출 모델을
-                      정수 연산으로 바꾸고 FPGA 보드에서 검증한 과정을 설명합니다.
-                    </p>
-                    <p class="competition-role">
-                      수행 범위 · 양자화 실험, 정수 모델–RTL 연결, 가속기 통합·병목
-                      개선, 229장 보드 검증
+                      AIX 2026 Deep Learning Hardware 설계경진대회
                     </p>
                   </div>
                   <strong>3편</strong>
                 </header>
+                <article class="competition-project-summary">
+                  <span>PROJECT SUMMARY</span>
+                  <h4>양자화된 YOLOv2 전체 그래프를 FPGA에서 실행</h4>
+                  <p>
+                    대표 이미지와 detector mAP로 INT8 조건을 정하고, 22개
+                    Conv·Pool·Route·Upsample 단계를 descriptor와 DDR 작업 공간으로
+                    연결했습니다. 두 detection head를 포함한 전체 모델을 보드에서 검증했습니다.
+                  </p>
+                  <dl class="competition-summary-facts">
+                    <div>
+                      <dt>수행 내용</dt>
+                      <dd>양자화 탐색 · 정수 모델–RTL 연결 · 통합·병목 개선 · 보드 검증</dd>
+                    </div>
+                    <div>
+                      <dt>핵심 기술</dt>
+                      <dd>INT8/INT32 · Requantization · Descriptor scheduling · DDR buffering</dd>
+                    </div>
+                    <div>
+                      <dt>확인 결과</dt>
+                      <dd>229/229 PASS · 11.420687 compute-only FPS · 78.60% mAP</dd>
+                    </div>
+                  </dl>
+                </article>
                 <div class="sitemap-grid competition-card-grid">
                   <a class="sitemap-card" href="pages/competitions/aix-01-quantization.html">
                     <span class="sitemap-number">AIX-01</span>
