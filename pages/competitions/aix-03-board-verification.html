@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="YOLOv2 FPGA 가속기를 한 장에서 229장으로 확장 검증하고 속도, mAP, timing, 자원과 전력 추정 결과를 확인한 과정." />
     <title>AIX 경진대회 3 - 한 장에서 229장 검증까지</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260726-reader-first" />
+    <link rel="stylesheet" href="../../styles.css?v=20260726-evidence" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="competition-page">
@@ -35,6 +35,28 @@
             마지막에는 처리 속도뿐 아니라 두 detection head의 mAP와 하드웨어
             timing 보고서도 함께 확인했습니다.
           </p>
+          <dl class="concept-list">
+            <div>
+              <dt>Smoke test</dt>
+              <dd>한 장으로 program, preload, compute, readback과 후처리 경로가 끊기지 않는지 빠르게 확인하는 테스트입니다.</dd>
+            </div>
+            <div>
+              <dt>Layer mismatch</dt>
+              <dd>소프트웨어와 FPGA tensor가 처음 달라지는 layer를 찾아 주소, signed 처리와 양자화 도메인 문제를 좁히는 방법입니다.</dd>
+            </div>
+            <div>
+              <dt>Compute-only FPS</dt>
+              <dd>FPGA cycle counter가 잰 순수 연산 속도로, JTAG 전송과 Python 후처리 시간을 포함하지 않습니다.</dd>
+            </div>
+            <div>
+              <dt>Detector-level mAP</dt>
+              <dd>두 head의 출력을 실제 box와 class로 해석해 229장 전체에서 검출 정확도를 평가합니다.</dd>
+            </div>
+            <div>
+              <dt>Timing closure</dt>
+              <dd>모든 데이터 경로가 목표 100MHz의 setup·hold 시간을 만족해 실제 bitstream을 만들 수 있는 상태입니다.</dd>
+            </div>
+          </dl>
 
           <section class="doc-section searchable-section" id="one-image" data-search-title="한 장 테스트">
             <h2>한 장 테스트에서는 무엇을 확인했나?</h2>
@@ -83,6 +105,18 @@
                 않습니다.
               </span>
             </div>
+            <figure class="doc-figure compact-figure">
+              <div class="figure-label">229장 detector-level 정확도 평가표</div>
+              <img
+                src="../../assets/aix-validation-table-crop.png"
+                alt="229장 모두 통과, SW reference mAP 83.60%, FPGA detector mAP 78.60%, precision, recall과 F1을 보여 주는 표"
+              />
+              <figcaption>
+                FPGA 출력이 software tensor와 모든 byte에서 같다는 주장 대신, 두
+                detection head를 같은 후처리에 연결해 실제 detector 정확도를
+                평가했습니다.
+              </figcaption>
+            </figure>
           </section>
 
           <section class="doc-section searchable-section" id="accuracy" data-search-title="mAP 결과">
@@ -124,6 +158,30 @@
               전력계로 잰 값이 아니라 Vivado가 계산한 추정치이며, 보고서의
               confidence도 Low입니다.
             </p>
+            <div class="evidence-grid">
+              <figure class="doc-figure">
+                <div class="figure-label">자원 사용률과 각 자원의 역할</div>
+                <img
+                  src="../../assets/aix-resource-utilization-crop.png"
+                  alt="LUT 71.63%, FF 36.28%, BRAM 84.81%, DSP 85.42%의 자원 사용률과 역할 표"
+                />
+                <figcaption>
+                  BRAM은 cache와 buffer에, DSP는 packed INT8 MAC 병렬화에 주로
+                  사용됐습니다.
+                </figcaption>
+              </figure>
+              <figure class="doc-figure">
+                <div class="figure-label">최종 성능과 전력 추정의 측정 범위</div>
+                <img
+                  src="../../assets/aix-performance-power-crop.png"
+                  alt="11.420687 compute-only FPS, 229장 통과, 78.60% mAP와 Vivado 1.842W Low confidence를 보여 주는 표"
+                />
+                <figcaption>
+                  속도는 FPGA compute-only, 전력은 실제 측정이 아닌 Vivado
+                  추정값이라는 경계를 같은 표에서 확인할 수 있습니다.
+                </figcaption>
+              </figure>
+            </div>
           </section>
 
           <section class="doc-section searchable-section" id="debugging" data-search-title="문제 해결 과정">

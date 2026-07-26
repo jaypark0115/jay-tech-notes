@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="BallControl SNN 회로의 one-shot 입력과 무게 반영 rate encoding 실험, 합성·전력 추정 결과와 프로젝트 기여를 설명한 글." />
     <title>AI 반도체 경진대회 3 - 입력 실험과 구현 결과 읽기</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260726-reader-first" />
+    <link rel="stylesheet" href="../../styles.css?v=20260726-evidence" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="competition-page">
@@ -35,6 +35,24 @@
             합성 보고서에서는 회로 규모와 I/O, 전력 추정값을 각각 어떤 의미로
             읽어야 하는지 확인했습니다.
           </p>
+          <dl class="concept-list">
+            <div>
+              <dt>One-shot encoding</dt>
+              <dd>좌표 한 세트를 한 번 전달해 방향 연결과 기본 동작을 확인하는 입력 방식입니다.</dd>
+            </div>
+            <div>
+              <dt>Rate encoding</dt>
+              <dd>일정 시간 동안의 스파이크 수나 간격에 물리량의 크기를 담는 방식으로, 두 번째 실험에서 무게 차이를 표현했습니다.</dd>
+            </div>
+            <div>
+              <dt>Logic utilization</dt>
+              <dd>LUT·레지스터처럼 내부 회로 규모를 나타내는 값이며, 외부 핀 수를 뜻하는 I/O 사용률과 의미가 다릅니다.</dd>
+            </div>
+            <div>
+              <dt>Power estimate</dt>
+              <dd>설계 도구가 신호 활동률을 가정해 계산한 값입니다. 실제 보드에서 전력계로 측정한 값과 구분해야 합니다.</dd>
+            </div>
+          </dl>
 
           <section class="doc-section searchable-section" id="experiments" data-search-title="두 입력 실험">
             <h2>왜 입력 방식을 두 번 실험했나?</h2>
@@ -60,6 +78,18 @@
               검토했다는 데 의미가 있습니다. 실제 기구부의 안정성까지 판단하려면
               공의 관성, 모터 응답과 센서 지연을 포함한 폐루프 실험이 더 필요합니다.
             </p>
+            <figure class="doc-figure">
+              <div class="figure-label">15g·30g 입력 실험의 결과 표와 실행 로그</div>
+              <img
+                src="../../assets/ai-semi-weight-experiment-results.png"
+                alt="15g과 30g 공의 초기 위치, digital weight, 네 방향 motor spike, 최종 위치와 오차를 비교한 표와 시뮬레이션 로그"
+              />
+              <figcaption>
+                발표자료에서 장식과 제목을 제외하고 결과 표와 실행 로그만 발췌했습니다.
+                무게에 따라 digital weight와 방향별 spike 수가 달라지고, 최종 위치와
+                오차를 함께 기록한 실험입니다.
+              </figcaption>
+            </figure>
           </section>
 
           <section class="doc-section searchable-section" id="resources" data-search-title="합성 자원 결과">
@@ -84,6 +114,17 @@
                 노출한 신호 구성이 크게 반영된 값입니다.
               </span>
             </div>
+            <figure class="doc-figure">
+              <div class="figure-label">발표자료의 FPGA 합성 자원 표</div>
+              <img
+                src="../../assets/ai-semi-utilization-crop.png"
+                alt="LUT 10개, 레지스터 41개, BRAM과 DSP 0개, I/O 핀 83개를 보여 주는 FPGA 자원 표"
+              />
+              <figcaption>
+                내부 제어 로직은 LUT 10개와 레지스터 41개로 작지만, top-level에
+                노출한 신호 때문에 I/O 핀은 83개로 기록됐습니다.
+              </figcaption>
+            </figure>
           </section>
 
           <section class="doc-section searchable-section" id="power" data-search-title="전력 추정 결과">
@@ -101,6 +142,17 @@
               실제 소비전력을 말하려면 최종 핀 구성과 동작률을 적용한 뒤 보드에서
               별도로 측정해야 합니다.
             </p>
+            <figure class="doc-figure compact-figure">
+              <div class="figure-label">발표자료의 on-chip power 분포</div>
+              <img
+                src="../../assets/ai-semi-power-crop.png"
+                alt="Dynamic 2.165W, signals 0.163W, logic 0.033W, I/O 1.968W와 device static 0.137W를 보여 주는 전력 분포 차트"
+              />
+              <figcaption>
+                총 2.302W 가운데 dynamic 2.165W, static 0.137W로 계산됐고,
+                dynamic 항에서는 I/O가 1.968W로 가장 큽니다. 모두 도구 추정값입니다.
+              </figcaption>
+            </figure>
           </section>
 
           <section class="doc-section searchable-section" id="contribution" data-search-title="프로젝트에서 맡은 일">

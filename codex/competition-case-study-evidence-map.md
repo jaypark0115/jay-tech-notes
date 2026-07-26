@@ -14,6 +14,8 @@
 | one-shot 입력에서 무게 반영 rate encoding으로 확장 | `실험 1.zip`, `실험 2.zip`, `EXPERIMENT1_2_CODE_VERIFICATION.txt` |
 | LUT 10, FF 41, DSP/BRAM 0, I/O 83 | 최종 발표자료 39쪽 |
 | 2.302W, dynamic 2.165W, static 0.137W | 최종 발표자료 40쪽 |
+| BallControl 전체 개념, RTL 합성 계층, LIF 데이터패스, 무게별 실험 표·로그 | 최종 발표자료 4·7·18·37쪽에서 핵심 영역만 crop |
+| 자원·전력 이미지 | 최종 발표자료 39·40쪽에서 표와 차트 영역만 crop |
 
 작성 제한:
 
@@ -34,6 +36,8 @@
 | 229/229 PASS, 11.420687 FPS, 78.60% mAP | `host/outputs/test_all/FINAL_RESULT.txt` |
 | WNS +0.111ns, LUT/FF/BRAM/DSP 사용량 | `reports/build_summary_final.txt`, timing/utilization reports |
 | 1.842W, confidence Low | Vivado routed power report |
+| 양자화 과정, Host–FPGA 구조, DDR/two-head 배치 | 최종 발표자료 5·18·19쪽에서 핵심 영역만 crop |
+| detector 정확도, 자원, 성능·전력 표 | 최종 발표자료 23·24·26쪽에서 표 영역만 crop |
 
 작성 제한:
 

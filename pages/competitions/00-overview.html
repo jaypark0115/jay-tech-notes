@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="SNN BallControl 회로와 YOLOv2 FPGA 가속기가 무엇을 입력받고 어떤 결과를 만드는지 비교해 설명한 경진대회 글 안내." />
     <title>경진대회 케이스 스터디 - 먼저 읽기</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260726-reader-first" />
+    <link rel="stylesheet" href="../../styles.css?v=20260726-evidence" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="competition-page">
@@ -36,6 +36,18 @@
               30×30cm 보드 위에 놓인 공의 위치와 움직임을 바탕으로, 공이 중앙으로
               향하도록 모터 방향을 정하는 과제입니다.
             </p>
+            <figure class="doc-figure">
+              <div class="figure-label">원본 발표자료에서 발췌한 BallControl 제어 개념</div>
+              <img
+                src="../../assets/ai-semi-ballcontrol-system.png"
+                alt="공의 압력과 위치를 입력 뉴런과 신경망에 전달해 X와 Y축 네 방향 모터 뉴런을 구동하는 BallControl 구조"
+              />
+              <figcaption>
+                공의 상태를 입력 뉴런이 받아 SNN 제어 신호로 바꾸고, 네 방향 모터
+                뉴런으로 전달하는 과제의 전체 개념입니다. 슬라이드의 제목과 장식은
+                제외하고 시스템 부분만 잘라 사용했습니다.
+              </figcaption>
+            </figure>
             <div class="architecture-flow" aria-label="BallControl SNN 제어 회로의 입력과 출력">
               <span>공의 X·Y 위치<br />속도 크기</span>
               <b>→</b>
@@ -52,6 +64,26 @@
               둘째 글은 RTL 데이터 흐름을, 셋째 글은 입력 방식의 변화와 구현 결과를
               설명합니다.
             </p>
+            <div class="work-concept-grid">
+              <section>
+                <h3>이 프로젝트에서 한 일</h3>
+                <ul>
+                  <li>SNN과 LIF 뉴런의 디지털 하드웨어 구현 사례를 조사했습니다.</li>
+                  <li>공의 위치·속도·무게 조건을 회로 입력과 네 방향 출력으로 해석했습니다.</li>
+                  <li>오차 encoder, 4채널 LIF와 top-level을 잇는 출력 계층 RTL 구조를 정리했습니다.</li>
+                  <li>위치 기반 입력과 무게 반영 rate encoding을 비교하고 결과 자료를 팀장으로 통합했습니다.</li>
+                </ul>
+              </section>
+              <section>
+                <h3>사용한 기술 개념</h3>
+                <ul>
+                  <li><strong>LIF neuron:</strong> 입력을 막전위에 누적하고 임계값에서 스파이크를 만드는 상태 기반 뉴런</li>
+                  <li><strong>Rate encoding:</strong> 물리량의 크기를 일정 시간 동안 발생하는 스파이크 빈도로 표현하는 방법</li>
+                  <li><strong>Signed error encoding:</strong> X·Y 오차의 부호와 크기를 네 방향의 양수 채널로 바꾸는 방법</li>
+                  <li><strong>RTL hierarchy:</strong> encoder, neuron, top 모듈의 역할과 클록 단위 상태 변화를 명시하는 설계</li>
+                </ul>
+              </section>
+            </div>
             <div class="chapter-switcher" aria-label="AI 반도체 경진대회 글">
               <span class="chapter-switcher-label">AI 반도체 경진대회 · 팀 반짝반짝</span>
               <div>
@@ -72,6 +104,18 @@
               pooling, route, upsample과 두 개의 detection head까지 전체 계산 흐름을
               하드웨어에서 이어야 했습니다.
             </p>
+            <figure class="doc-figure">
+              <div class="figure-label">원본 발표자료에서 발췌한 Host–FPGA 실행 구조</div>
+              <img
+                src="../../assets/aix-host-fpga-block-crop.png"
+                alt="PC host, JTAG-to-AXI, DDR workspace, YOLO engine scheduler와 연산 경로가 연결된 블록도"
+              />
+              <figcaption>
+                Host는 입력과 weights의 전송·결과 회수를 맡고, FPGA의 scheduler와
+                dispatcher가 Conv, Pool, Route, Upsample과 두 detection head를
+                순서대로 실행합니다.
+              </figcaption>
+            </figure>
             <div class="architecture-flow architecture-flow-long" aria-label="YOLOv2 FPGA 가속기의 입력과 출력">
               <span>입력 이미지<br />학습 weights</span>
               <b>→</b>
@@ -89,6 +133,27 @@
               한 장 테스트를 229장 평가로 확장해 속도와 검출 정확도를 확인한 과정을
               설명합니다.
             </p>
+            <div class="work-concept-grid">
+              <section>
+                <h3>이 프로젝트에서 한 일</h3>
+                <ul>
+                  <li>대표 이미지와 detector mAP를 이용해 layer별 양자화 조건을 탐색했습니다.</li>
+                  <li>정수 소프트웨어 모델의 배율·반올림 규칙을 RTL 데이터 경로와 연결했습니다.</li>
+                  <li>22단계 full graph의 RTL 통합과 DDR·연산 병목 개선에 참여했습니다.</li>
+                  <li>FPGA 보드에서 한 장 테스트를 229장 평가로 확장하고 최종 결과를 정리했습니다.</li>
+                </ul>
+              </section>
+              <section>
+                <h3>사용한 기술 개념</h3>
+                <ul>
+                  <li><strong>Post-training quantization:</strong> 학습된 모델을 대표 입력으로 보정해 정수 연산으로 바꾸는 방법</li>
+                  <li><strong>INT8 MAC·INT32 accumulation:</strong> 저장과 곱셈은 작게, 여러 곱의 합은 넓게 유지하는 데이터 경로</li>
+                  <li><strong>Graph-aware scheduling:</strong> Conv 외의 Route와 Upsample까지 descriptor로 실행하는 제어 구조</li>
+                  <li><strong>Memory hierarchy:</strong> DDR, cache와 buffer 사이의 데이터 이동을 연산 속도와 함께 설계하는 방법</li>
+                  <li><strong>Two-head validation:</strong> 서로 다른 해상도의 두 검출 출력을 함께 후처리해 detector mAP를 확인하는 검증</li>
+                </ul>
+              </section>
+            </div>
             <div class="chapter-switcher" aria-label="AIX 경진대회 글">
               <span class="chapter-switcher-label">AIX 2026 · 팀 경이원지</span>
               <div>

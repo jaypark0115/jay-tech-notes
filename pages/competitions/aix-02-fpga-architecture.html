@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="YOLOv2의 22개 처리 단계를 DDR, descriptor, 144-lane MAC, Route, Upsample과 두 detection head로 실행하는 FPGA 구조를 설명한 글." />
     <title>AIX 경진대회 2 - 모델 전체를 FPGA에서 실행하기</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260726-reader-first" />
+    <link rel="stylesheet" href="../../styles.css?v=20260726-evidence" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="competition-page">
@@ -35,6 +35,28 @@
             있습니다. 이 글에서는 22개 처리 단계가 FPGA와 DDR 안에서 끊기지 않고
             실행되는 구조를 설명합니다.
           </p>
+          <dl class="concept-list">
+            <div>
+              <dt>Full-graph execution</dt>
+              <dd>Convolution만 가속하는 것이 아니라 Pool, Route, Upsample과 두 detection head까지 모델 전체를 FPGA에서 계산합니다.</dd>
+            </div>
+            <div>
+              <dt>Descriptor scheduling</dt>
+              <dd>각 단계의 연산 종류, tensor 크기와 DDR 주소를 ROM에 기록하고 scheduler가 순서대로 읽어 실행합니다.</dd>
+            </div>
+            <div>
+              <dt>DDR workspace</dt>
+              <dd>입력, weights, 중간 feature map과 두 head 출력을 충돌하지 않는 주소 영역에 배치한 공용 작업 공간입니다.</dd>
+            </div>
+            <div>
+              <dt>Data reuse·prefetch</dt>
+              <dd>같은 feature와 weight를 다시 쓰고 다음 데이터를 미리 가져와 MAC이 DDR 응답을 기다리는 시간을 줄입니다.</dd>
+            </div>
+            <div>
+              <dt>Backpressure</dt>
+              <dd>다음 단계가 데이터를 받을 수 없을 때 valid/ready 흐름으로 앞단 연산을 안전하게 멈추는 제어입니다.</dd>
+            </div>
+          </dl>
 
           <section class="doc-section searchable-section" id="roles" data-search-title="Host와 FPGA의 역할">
             <h2>Host와 FPGA는 각각 무엇을 하나?</h2>
@@ -81,6 +103,18 @@
               <b>→</b>
               <span>16×16<br />CONV20 head</span>
             </div>
+            <figure class="doc-figure">
+              <div class="figure-label">DDR memory map과 두 detection head 출력 배치</div>
+              <img
+                src="../../assets/aix-ddr-two-head-layout-crop.png"
+                alt="입력, weights, full workspace, CONV14와 CONV20 출력의 DDR 주소와 HWC packing 및 두 head readback 흐름"
+              />
+              <figcaption>
+                중간 feature map은 DDR workspace 안에서 재사용하고, CONV14와
+                CONV20 출력은 각각의 주소에 남겨 host가 함께 읽습니다. 한 AXI word에
+                여러 channel을 packing해 전송 단위를 맞췄습니다.
+              </figcaption>
+            </figure>
           </section>
 
           <section class="doc-section searchable-section" id="descriptor" data-search-title="22단계 descriptor">
@@ -168,6 +202,14 @@ localparam integer SUM_W = 23;</code></pre>
               서로 다른 크기의 물체를 담당하므로, 최종 정확도는 두 출력을 모두
               저장하고 함께 후처리한 build에서 평가해야 합니다. 다음 글의 최종
               수치도 이 full-graph 조건에서 얻은 결과만 사용합니다.
+            </p>
+            <h3>이 단계에서 한 일</h3>
+            <p>
+              정수 layer가 개별적으로 맞는 상태에서 끝내지 않고, descriptor와 DDR
+              offset을 기준으로 22단계 실행 경로를 연결했습니다. 통합 과정에서는
+              layer별 readback으로 최초 mismatch 지점을 찾고, weight cache,
+              feature 재사용, burst 전송과 write backpressure를 조정했습니다.
+              최종 detector가 두 head를 모두 남기도록 실행·저장 경로를 확인했습니다.
             </p>
           </section>
 

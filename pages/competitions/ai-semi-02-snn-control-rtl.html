@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="BallControl의 위치 오차가 error encoder와 네 개의 LIF 뉴런을 거쳐 모터 방향 스파이크가 되는 RTL 흐름을 설명한 글." />
     <title>AI 반도체 경진대회 2 - 위치 오차가 스파이크가 되는 과정</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260726-reader-first" />
+    <link rel="stylesheet" href="../../styles.css?v=20260726-evidence" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="competition-page">
@@ -56,6 +56,24 @@
                 </tbody>
               </table>
             </div>
+            <dl class="concept-list">
+              <div>
+                <dt>조합 논리 encoder</dt>
+                <dd>현재 X·Y 값의 부호와 크기만으로 네 방향 자극을 바로 계산하며 별도의 상태를 갖지 않습니다.</dd>
+              </div>
+              <div>
+                <dt>순차 논리 LIF</dt>
+                <dd>클록마다 막전위 레지스터를 갱신하므로 같은 입력도 시간에 따라 누적 결과가 달라집니다.</dd>
+              </div>
+              <div>
+                <dt>Threshold firing</dt>
+                <dd>막전위가 임계값을 넘는 순간 1-bit spike를 발생시켜 아날로그적인 상태를 디지털 이벤트로 바꿉니다.</dd>
+              </div>
+              <div>
+                <dt>Generate hierarchy</dt>
+                <dd>같은 LIF 모듈을 네 번 재사용해 방향별 구조와 파라미터 규칙을 동일하게 유지합니다.</dd>
+              </div>
+            </dl>
           </section>
 
           <section class="doc-section searchable-section" id="encoder" data-search-title="error encoder">
@@ -113,6 +131,18 @@ end</code></pre>
               반응을 누르는 형태입니다. 상태 갱신 코드는
               <a href="../../code/competitions/ai-semi/lif_neuron.v">lif_neuron.v</a>에 있습니다.
             </p>
+            <figure class="doc-figure">
+              <div class="figure-label">발표자료의 LIF 뉴런 데이터패스</div>
+              <img
+                src="../../assets/ai-semi-lif-neuron-datapath.png"
+                alt="입력 스파이크의 가중합, 누설, 막전위 적분기, 막전위 레지스터와 출력 스파이크가 연결된 LIF 뉴런 데이터패스"
+              />
+              <figcaption>
+                입력 가중합과 누설값이 막전위 적분기로 들어가고, 레지스터에 저장된
+                상태가 다음 클록 계산에 다시 사용됩니다. 이 상태 피드백이 일반적인
+                조합 논리와 LIF 뉴런 RTL의 가장 큰 차이입니다.
+              </figcaption>
+            </figure>
           </section>
 
           <section class="doc-section searchable-section" id="controller-top" data-search-title="controller top">
@@ -154,6 +184,14 @@ assign motor_Y_PUSH = spikes[3];</code></pre>
               동시 활성화를 막는 보호 로직과 기구부의 지연을 추가로 다뤄야 합니다.
               따라서 이 코드는 전체 BallControl 장치가 아니라 출력 제어 파이프라인의
               구현 근거로 읽는 것이 정확합니다.
+            </p>
+            <h3>이 단계에서 한 일</h3>
+            <p>
+              encoder, LIF와 top-level 사이의 데이터 폭과 방향 순서를 맞추고, 네
+              채널을 같은 모듈로 연결해 출력 계층을 구성했습니다. 또한 실제 Verilog와
+              발표자료의 블록도가 같은 신호 흐름을 설명하도록 정리했습니다. 팀
+              프로젝트 산출물이므로 공개한 각 파일 전체를 개인 단독 작성물로
+              표현하지 않습니다.
             </p>
           </section>
 

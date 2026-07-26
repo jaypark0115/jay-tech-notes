@@ -84,11 +84,11 @@ https://jaypark0115.github.io/jay-tech-notes/
 
 ### 6. 경진대회 기술 케이스 스터디
 
-두 경진대회가 어떤 문제를 다뤘고 무엇을 만들었는지 설명한 뒤, 각 프로젝트의
-설계·구현·검증 과정을 세 편씩 이어서 정리했습니다.
+두 경진대회가 어떤 문제를 다뤘고 무엇을 만들었는지 설명한 뒤, 각 프로젝트에서
+수행한 일과 사용한 기술 개념, 설계·구현·검증 과정을 세 편씩 이어서 정리했습니다.
 
 1. [먼저 읽기: 두 경진대회에서 무엇을 만들었나](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/00-overview.html)
-   - BallControl용 SNN 제어 회로와 YOLOv2 FPGA 가속기의 입력, 처리 과정, 출력을 비교합니다.
+   - BallControl용 SNN 제어 회로와 YOLOv2 FPGA 가속기의 입력·처리·출력, 수행 범위와 핵심 기술 개념을 비교합니다.
 
 #### 2025 전국 대학생 AI 반도체 회로 설계 경진대회 · 팀 반짝반짝
 

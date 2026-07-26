@@ -3025,6 +3025,13 @@ body.home-page .home-panel-wide p {
   line-height: 1.7;
 }
 
+.competition-group-header .competition-role {
+  margin-top: 0.8rem;
+  color: #0f766e;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
 .competition-group-header > strong {
   flex: 0 0 auto;
   padding: 0.55rem 0.75rem;
@@ -3184,6 +3191,75 @@ body.competition-page .doc-figure img {
   object-fit: contain;
 }
 
+.work-concept-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
+  margin: 2rem 0 2.5rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.work-concept-grid h3 {
+  margin: 0 0 0.8rem;
+  color: var(--ink);
+  font-size: 1.08rem;
+}
+
+.work-concept-grid h3::before {
+  display: none;
+}
+
+.work-concept-grid ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.work-concept-grid li + li {
+  margin-top: 0.55rem;
+}
+
+.concept-list {
+  display: grid;
+  gap: 0.65rem;
+  margin: 1.35rem 0 2rem;
+}
+
+.concept-list div {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.concept-list dt {
+  color: var(--competition-accent-dark);
+  font-weight: 850;
+}
+
+.concept-list dd {
+  margin: 0;
+}
+
+.evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+  margin: 2rem 0 2.75rem;
+}
+
+.evidence-grid .doc-figure {
+  margin: 0;
+}
+
+.compact-figure {
+  max-width: 760px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
 @media (max-width: 1100px) {
   body.home-page .home-panel-wide {
     grid-column: auto;
@@ -3214,6 +3290,18 @@ body.competition-page .doc-figure img {
 
   .metric-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .work-concept-grid,
+  .evidence-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .concept-list div {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
   }
 }
 
