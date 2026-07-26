@@ -2567,6 +2567,7 @@ body.planned-detail-page .thesis-schedule-table tbody tr:last-child td {
   background: #fff;
 }
 
+.definition-grid h3,
 .definition-grid h4 {
   margin-bottom: 0.45rem;
   color: var(--ink);
@@ -2929,6 +2930,55 @@ body.home-page .home-panel-wide p {
   margin: 42px 0 66px;
 }
 
+.competition-overview-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 22px;
+  padding: 26px 28px;
+  border: 1px solid #99d5cf;
+  border-left: 5px solid #0f766e;
+  background: linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%);
+  color: inherit;
+  text-decoration: none;
+  box-shadow: 0 14px 34px rgb(15 118 110 / 8%);
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.competition-overview-card:hover {
+  border-color: #0f766e;
+  transform: translateY(-2px);
+  box-shadow: 0 18px 38px rgb(15 118 110 / 13%);
+}
+
+.competition-overview-card small {
+  color: #0f766e;
+  font-weight: 800;
+}
+
+.competition-overview-card h3 {
+  margin: 0.15rem 0 0.3rem;
+  color: var(--ink);
+  font-size: 1.35rem;
+}
+
+.competition-overview-card h3::before {
+  display: none;
+}
+
+.competition-overview-card p {
+  margin: 0;
+  color: #475569;
+}
+
+.competition-overview-card > strong {
+  color: #0f766e;
+  white-space: nowrap;
+}
+
 .competition-group {
   overflow: hidden;
   border: 1px solid var(--line);
@@ -2984,16 +3034,6 @@ body.home-page .home-panel-wide p {
   font-size: 0.82rem;
 }
 
-.competition-group-aix .competition-group-header span {
-  color: #b45309;
-}
-
-.competition-group-aix .competition-group-header > strong {
-  border-color: #fed7aa;
-  background: #fff7ed;
-  color: #9a3412;
-}
-
 #competition-case-studies .competition-card-grid {
   margin: 0;
   padding: 24px;
@@ -3004,14 +3044,6 @@ body.home-page .home-panel-wide p {
   min-height: 240px;
 }
 
-#competition-case-studies .competition-group-aix .sitemap-card {
-  border-top-color: #d97706;
-}
-
-#competition-case-studies .competition-group-aix .sitemap-card:hover {
-  border-color: #d97706;
-}
-
 #competition-case-studies .sitemap-number {
   width: auto;
   min-width: 58px;
@@ -3020,24 +3052,12 @@ body.home-page .home-panel-wide p {
   font-size: 0.72rem;
 }
 
-#competition-case-studies .competition-group-aix .sitemap-number {
-  border-color: #fed7aa;
-  background: #fff7ed;
-  color: #9a3412;
-}
-
 body.competition-page {
-  --competition-accent: #7c3aed;
-  --competition-accent-dark: #5b21b6;
-  --competition-accent-soft: #f5f3ff;
+  --competition-accent: #0f766e;
+  --competition-accent-dark: #115e59;
+  --competition-accent-soft: #f0fdfa;
   --nrv-red: var(--competition-accent);
   --nrv-red-dark: var(--competition-accent-dark);
-}
-
-body.competition-page.aix-page {
-  --competition-accent: #d97706;
-  --competition-accent-dark: #9a3412;
-  --competition-accent-soft: #fff7ed;
 }
 
 body.competition-page .draft-label {
@@ -3069,11 +3089,7 @@ body.competition-page .chapter-switcher a.current {
 }
 
 body.competition-page .rtl-card > span {
-  color: #ddd6fe;
-}
-
-body.competition-page.aix-page .rtl-card > span {
-  color: #fed7aa;
+  color: #99f6e4;
 }
 
 body.competition-page .sequence-list li::before {
@@ -3175,6 +3191,11 @@ body.competition-page .doc-figure img {
 
   .competition-group-header {
     flex-direction: column;
+  }
+
+  .competition-overview-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   #competition-case-studies .competition-card-grid {

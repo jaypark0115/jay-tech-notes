@@ -7,7 +7,7 @@
 
 | 공개 내용 | 근거 |
 |---|---|
-| 대회명, 팀명 반짝반짝, 1등 | `AI_SEMI_MASTER_DOSSIER_V2_팀장중심.txt`, 사용자 확인 |
+| 대회명, 팀명 반짝반짝 | `AI_SEMI_MASTER_DOSSIER_V2_팀장중심.txt`, 사용자 확인 |
 | 30×30cm 보드, 공 1~30g, 무작위 초기 위치, 중앙 1cm 목표 | 2차 과제 Q&A 정리 및 최종 발표자료 |
 | 1차 SNN/LIF 조사에서 2차 BallControl로 이어진 흐름 | `AI_SEMI_MASTER_DOSSIER_SINGLE_FILE.txt`, 중간·최종 발표자료 |
 | `error_encoder → 4×LIF → motor direction` | `controller_top.v`, `error_encoder.v`, `lif_neuron.v` |
@@ -25,7 +25,7 @@
 
 | 공개 내용 | 근거 |
 |---|---|
-| 공식 대회명과 장려상 | 경진대회 포스터, 사용자 확인 |
+| 공식 대회명, 팀명 경이원지 | 경진대회 자료, 사용자 확인 |
 | representative calibration과 mAP 기준 multiplier 선택 | 프로젝트 작업 기록과 발표 대본 |
 | INT8 저장, INT32 누산, requantization | 최종 README와 `fastv2_postproc_requant_pipe.v` |
 | 22-layer Conv/Pool/Route/Upsample graph | `fastv2_network_desc_rom.v` |
@@ -37,6 +37,8 @@
 
 작성 제한:
 
+- 공개 페이지는 프로젝트의 기술 내용과 검증 과정에 집중한다.
+- 발표 슬라이드 화면을 그대로 캡처한 이미지는 사용하지 않는다.
 - 중간 속도 실험값을 최종 성과처럼 사용하지 않는다.
 - compute-only FPS와 JTAG 기반 전체 실행 시간을 구분한다.
 - power는 실제 보드 측정값이 아닌 Vivado 추정값으로 표시한다.
