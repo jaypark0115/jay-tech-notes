@@ -3,80 +3,71 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="BallControl output-layer의 error encoder, LIF neuron, 4방향 모터 출력 RTL을 실제 Verilog로 설명한 글." />
-    <title>AI 반도체 경진대회 2 - SNN 제어 RTL</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260726-competitions" />
+    <meta name="description" content="BallControl의 위치 오차가 error encoder와 네 개의 LIF 뉴런을 거쳐 모터 방향 스파이크가 되는 RTL 흐름을 설명한 글." />
+    <title>AI 반도체 경진대회 2 - 위치 오차가 스파이크가 되는 과정</title>
+    <link rel="stylesheet" href="../../styles.css?v=20260726-reader-first" />
     <script src="../../script.js" defer></script>
   </head>
-  <body class="competition-page ai-semi-page">
+  <body class="competition-page">
     <div class="site-shell">
       <main class="content-wrap" id="top">
         <article class="content">
           <div class="document-kicker">
-            <span>Competition Case Study · AI Semiconductor</span>
-            <div class="kicker-actions"><span class="draft-label">Actual RTL</span></div>
+            <span>AI Semiconductor Circuit Design · 팀 반짝반짝</span>
+            <div class="kicker-actions"><span class="draft-label">2 / 3</span></div>
           </div>
           <a class="home-link" href="../../index.html#competition-case-studies">← 경진대회 글묶음으로 돌아가기</a>
           <nav class="chapter-switcher" aria-label="AI 반도체 경진대회 글 이동">
-            <span class="chapter-switcher-label">2025 AI 반도체 회로 설계 경진대회</span>
+            <span class="chapter-switcher-label">2025 전국 대학생 AI 반도체 회로 설계 경진대회</span>
             <div>
-              <a href="ai-semi-01-problem-and-design.html">1. 문제 정의와 설계 선택</a>
-              <a class="current" href="ai-semi-02-snn-control-rtl.html">2. SNN 제어 RTL</a>
-              <a href="ai-semi-03-verification-results.html">3. 실험·합성 결과와 역할</a>
+              <a href="00-overview.html">먼저 읽기</a>
+              <a href="ai-semi-01-problem-and-design.html">1. BallControl 문제 이해하기</a>
+              <a class="current" href="ai-semi-02-snn-control-rtl.html">2. 위치 오차가 스파이크가 되는 과정</a>
+              <a href="ai-semi-03-verification-results.html">3. 입력 실험과 구현 결과 읽기</a>
             </div>
           </nav>
 
-          <h1>2. 위치 오차를 네 방향 스파이크로 바꾸는 RTL</h1>
+          <h1>2. 위치 오차가 네 방향 스파이크가 되는 과정</h1>
           <p class="lead">
-            output-layer는 세 모듈로 구성된다. <code>error_encoder</code>가 signed
-            x/y 오차를 네 개의 양수 방향 자극으로 분리하고, 네 개의
-            <code>lif_neuron</code>이 막전위를 갱신한다. <code>controller_top</code>은
-            이 네 spike를 X/Y pull·push 모터 출력으로 연결한다.
+            이 회로에는 현재 공의 X·Y 위치와 속도 크기가 들어옵니다. 먼저 중앙과의
+            오차를 네 방향의 양수 값으로 바꾸고, 방향마다 하나씩 배치한 LIF 뉴런이
+            그 값을 시간에 따라 누적합니다. 스파이크가 발생한 채널은 어떤 방향의
+            모터가 반응해야 하는지를 나타냅니다.
           </p>
-          <div class="scope-note">
-            <strong>원문 코드</strong>
-            <span>
-              <a href="../../code/competitions/ai-semi/controller_top.v">controller_top.v</a> ·
-              <a href="../../code/competitions/ai-semi/error_encoder.v">error_encoder.v</a> ·
-              <a href="../../code/competitions/ai-semi/lif_neuron.v">lif_neuron.v</a>
-            </span>
-          </div>
 
-          <section class="doc-section searchable-section" id="contract" data-search-title="모듈 계약">
-            <h3>2.1 먼저 모듈 사이의 계약을 단순하게 만들었다</h3>
-            <div class="architecture-flow" aria-label="RTL 모듈 연결 순서">
-              <span>signed position</span>
+          <section class="doc-section searchable-section" id="overview" data-search-title="전체 신호 흐름">
+            <h2>전체 신호 흐름부터 보기</h2>
+            <div class="architecture-flow" aria-label="SNN 제어 RTL의 모듈 연결">
+              <span>signed<br />X·Y 위치</span>
               <b>→</b>
-              <span>direction magnitude</span>
+              <span>error_encoder<br />네 방향 크기</span>
               <b>→</b>
-              <span>membrane update</span>
+              <span>lif_neuron × 4<br />막전위 갱신</span>
               <b>→</b>
-              <span>motor spike</span>
+              <span>motor<br />X/Y pull·push</span>
             </div>
             <div class="signal-table-wrap">
               <table class="signal-table">
-                <thead>
-                  <tr><th>모듈</th><th>입력</th><th>출력</th><th>책임</th></tr>
-                </thead>
+                <thead><tr><th>모듈</th><th>받는 값</th><th>내보내는 값</th><th>역할</th></tr></thead>
                 <tbody>
-                  <tr><td>error_encoder</td><td>signed x, y</td><td>4방향 magnitude</td><td>오차의 부호와 크기 분리</td></tr>
-                  <tr><td>lif_neuron</td><td>방향 자극, 속도 크기</td><td>spike</td><td>누적·누설·임계값·리셋</td></tr>
-                  <tr><td>controller_top</td><td>위치, 속도 크기</td><td>모터 4방향</td><td>동일 뉴런 4개 생성과 배선</td></tr>
+                  <tr><td>error_encoder</td><td>부호가 있는 X·Y 위치</td><td>네 방향 오차 크기</td><td>방향 선택과 크기 계산</td></tr>
+                  <tr><td>lif_neuron</td><td>방향 오차와 속도 크기</td><td>1-bit spike</td><td>누적, 누설, 임계값 판정</td></tr>
+                  <tr><td>controller_top</td><td>위치와 속도 크기</td><td>네 방향 모터 신호</td><td>encoder와 뉴런 네 개 연결</td></tr>
                 </tbody>
               </table>
             </div>
           </section>
 
-          <section class="doc-section searchable-section" id="encoder" data-search-title="오차 인코더">
-            <h3>2.2 signed 오차를 네 개의 단방향 신호로 분리했다</h3>
+          <section class="doc-section searchable-section" id="encoder" data-search-title="error encoder">
+            <h2><code>error_encoder</code>는 무엇을 계산하나?</h2>
             <p>
-              중심을 0으로 보면 현재 위치의 반대 방향이 복귀 방향이므로
-              <code>ex=-x</code>, <code>ey=-y</code>로 오차를 만든다. 각 축에서
-              양수와 음수는 동시에 활성화되지 않는다. 결과적으로 뒤의 LIF 뉴런은
-              signed 방향 판단을 다시 하지 않고 0 이상의 자극 크기만 처리할 수 있다.
+              LIF 뉴런에는 한 방향의 자극 크기만 전달하는 편이 이해하기 쉽습니다.
+              그래서 X와 Y를 그대로 넣지 않고, 값의 부호에 따라 해당하는 방향만
+              활성화합니다. 예를 들어 X가 양수라면 X축의 한쪽 채널에는 그 절댓값이
+              들어가고 반대쪽 채널은 0이 됩니다.
             </p>
             <div class="rtl-card">
-              <span>error_encoder.v - 방향별 오차 분리</span>
+              <span>error_encoder.v · 방향과 크기를 만드는 핵심 부분</span>
               <pre><code>wire signed [W_IN-1:0] ex = -x;
 wire signed [W_IN-1:0] ey = -y;
 
@@ -86,23 +77,24 @@ assign X_y_pull = (ey &gt; 0) ? (ALPHA * ey) : 0;
 assign X_y_push = (ey &lt; 0) ? (ALPHA * (-ey)) : 0;</code></pre>
             </div>
             <p>
-              이 분리는 단순하지만 중요한 설계 선택이다. 한 축의 반대 방향 actuator가
-              동시에 켜지는 상태를 encoder 단계에서 제거하고, 네 출력 채널의 의미를
-              고정하기 때문이다.
+              이 변환 뒤에는 모든 채널이 0 이상의 크기를 갖습니다. 각 뉴런이 부호
+              판정까지 반복하지 않아도 되고, X축과 Y축의 네 방향을 같은 방식으로
+              처리할 수 있습니다. 전체 연결은
+              <a href="../../code/competitions/ai-semi/error_encoder.v">error_encoder.v</a>에서
+              확인할 수 있습니다.
             </p>
           </section>
 
-          <section class="doc-section searchable-section" id="lif" data-search-title="LIF 뉴런">
-            <h3>2.3 막전위는 누적되고, 누설되며, 임계값에서 spike를 낸다</h3>
+          <section class="doc-section searchable-section" id="lif" data-search-title="LIF neuron">
+            <h2>LIF 뉴런 안에서는 어떤 일이 일어나나?</h2>
             <p>
-              <code>U</code>는 뉴런의 막전위 상태다. 매 clock마다 이전 전위에서
-              <code>LEAK</code>를 빼고, 방향 자극 <code>X_in</code>을 더한다. 속도
-              크기 <code>v_abs</code>는 <code>K_V</code>와 곱해 감쇠 항으로 들어간다.
-              임계값을 넘은 상태에서는 spike를 내고 <code>U_THR</code>만큼 빼는
-              subtractive reset을 사용한다.
+              LIF(Leaky Integrate-and-Fire) 뉴런은 막전위라는 상태를 기억합니다.
+              입력이 들어오면 막전위가 올라가고, 입력이 약해지면 누설 항만큼
+              내려갑니다. 값이 임계값을 넘으면 스파이크를 만들고, 다음 상태를
+              계산할 때 임계값만큼을 빼 줍니다.
             </p>
             <div class="rtl-card">
-              <span>lif_neuron.v - 상태 갱신과 발화</span>
+              <span>lif_neuron.v · 누적, 임계값 판정과 리셋</span>
               <pre><code>spike &lt;= (U &gt; U_THR);
 
 if (U &lt; LEAK) begin
@@ -114,27 +106,27 @@ end else begin
        - (K_V * v_abs);
 end</code></pre>
             </div>
-            <div class="definition-grid">
-              <article><h4>LEAK</h4><p>입력이 사라졌을 때 상태가 계속 남지 않도록 매 cycle 감소시키는 항이다.</p></article>
-              <article><h4>U_THR</h4><p>막전위가 이 값을 넘으면 방향 제어용 spike가 발생한다.</p></article>
-              <article><h4>W_GAIN</h4><p>위치 오차가 막전위에 얼마나 크게 반영되는지 정한다.</p></article>
-              <article><h4>K_V</h4><p>속도 크기가 클 때 추가 발화를 억제하는 감쇠 항이다.</p></article>
-            </div>
+            <p>
+              방향 오차 <code>X_in</code>은 막전위를 올리고, 속도 크기
+              <code>v_abs</code>는 계수 <code>K_V</code>와 함께 막전위를 낮추는 항에
+              들어갑니다. 위치 오차가 클수록 발화를 밀어 올리고, 속도가 큰 동안에는
+              반응을 누르는 형태입니다. 상태 갱신 코드는
+              <a href="../../code/competitions/ai-semi/lif_neuron.v">lif_neuron.v</a>에 있습니다.
+            </p>
           </section>
 
-          <section class="doc-section searchable-section" id="top-integration" data-search-title="Top 통합">
-            <h3>2.4 generate로 네 방향 뉴런을 같은 구조로 통합했다</h3>
+          <section class="doc-section searchable-section" id="controller-top" data-search-title="controller top">
+            <h2><code>controller_top</code>은 네 방향을 어떻게 연결하나?</h2>
             <p>
-              top에서는 encoder 출력과 속도 입력을 같은 index 규칙으로 묶는다.
-              0/1은 X축 pull/push, 2/3은 Y축 pull/push다. generate loop로 네 개의
-              LIF 인스턴스를 만들기 때문에 방향마다 코드가 달라지는 문제를 줄이고,
-              같은 파라미터를 일관되게 적용할 수 있다.
+              top 모듈은 encoder가 만든 네 값을 같은 LIF 모듈 네 개에 연결합니다.
+              generate 구문을 사용해 뉴런 구조와 파라미터는 공유하고, 각 인스턴스가
+              담당하는 방향만 달라집니다. 이렇게 만든 네 스파이크가 X pull, X push,
+              Y pull, Y push 출력이 됩니다.
             </p>
             <div class="rtl-card">
-              <span>controller_top.v - 4채널 LIF 생성과 모터 출력</span>
+              <span>controller_top.v · 같은 뉴런 구조를 네 방향에 연결</span>
               <pre><code>for (i = 0; i &lt; 4; i = i + 1) begin : SNN_CHANNEL
-  lif_neuron #(.WU(W_POS), .WX(W_POS)) u_lif (
-    .clk(clk), .rstn(rstn),
+  lif_neuron u_lif (
     .X_in(X_in[i]),
     .v_abs(v_abs[i]),
     .spike(spikes[i])
@@ -146,21 +138,28 @@ assign motor_X_PUSH = spikes[1];
 assign motor_Y_PULL = spikes[2];
 assign motor_Y_PUSH = spikes[3];</code></pre>
             </div>
+            <p>
+              top-level의 포트와 실제 배선은
+              <a href="../../code/competitions/ai-semi/controller_top.v">controller_top.v</a>에서
+              이어서 볼 수 있습니다.
+            </p>
           </section>
 
-          <section class="doc-section searchable-section" id="review" data-search-title="코드에서 확인되는 한계">
-            <h3>2.5 코드에서 확인되는 한계도 함께 남긴다</h3>
-            <ul class="check-list">
-              <li>현재 파라미터는 방향별로 동일하며 공의 동역학에 맞춘 자동 학습 과정은 포함하지 않는다.</li>
-              <li><code>W_POS</code> 폭 안에서 곱셈과 상태 갱신이 이뤄지므로 overflow·saturation 정책을 더 명확히 할 수 있다.</li>
-              <li>spike가 곧바로 모터 출력에 연결되므로 실제 actuator를 위한 pulse width, dead-zone, 상호 배타 제어가 별도로 필요하다.</li>
-              <li>따라서 이 코드는 전체 기계 제어기가 아니라 SNN 기반 방향 출력 계층의 RTL 근거로 해석해야 한다.</li>
-            </ul>
+          <section class="doc-section searchable-section" id="scope" data-search-title="코드 범위와 한계">
+            <h2>현재 코드가 설명하는 범위</h2>
+            <p>
+              이 RTL은 위치·속도 숫자가 이미 준비됐다고 가정하고, 네 방향 제어
+              스파이크를 만드는 부분을 설명합니다. 실제 장치에 연결하려면 센서 값을
+              좌표로 바꾸는 전처리, 모터 드라이버가 요구하는 pulse width, 반대 방향
+              동시 활성화를 막는 보호 로직과 기구부의 지연을 추가로 다뤄야 합니다.
+              따라서 이 코드는 전체 BallControl 장치가 아니라 출력 제어 파이프라인의
+              구현 근거로 읽는 것이 정확합니다.
+            </p>
           </section>
 
           <footer class="page-footer">
-            <a href="ai-semi-01-problem-and-design.html">← 이전: 문제 정의</a>
-            <a href="ai-semi-03-verification-results.html">다음: 실험·결과 →</a>
+            <a href="ai-semi-01-problem-and-design.html">← 이전: BallControl 문제 이해하기</a>
+            <a href="ai-semi-03-verification-results.html">다음: 입력 실험과 구현 결과 읽기 →</a>
           </footer>
         </article>
       </main>

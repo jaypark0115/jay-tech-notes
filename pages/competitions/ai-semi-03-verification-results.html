@@ -3,143 +3,135 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="BallControl의 one-shot과 weight rate encoding 실험, FPGA 합성·전력 추정 결과, 팀장 역할과 한계를 정리한 글." />
-    <title>AI 반도체 경진대회 3 - 실험·합성 결과와 역할</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260726-competitions" />
+    <meta name="description" content="BallControl SNN 회로의 one-shot 입력과 무게 반영 rate encoding 실험, 합성·전력 추정 결과와 프로젝트 기여를 설명한 글." />
+    <title>AI 반도체 경진대회 3 - 입력 실험과 구현 결과 읽기</title>
+    <link rel="stylesheet" href="../../styles.css?v=20260726-reader-first" />
     <script src="../../script.js" defer></script>
   </head>
-  <body class="competition-page ai-semi-page">
+  <body class="competition-page">
     <div class="site-shell">
       <main class="content-wrap" id="top">
         <article class="content">
           <div class="document-kicker">
-            <span>Competition Case Study · AI Semiconductor</span>
-            <div class="kicker-actions"><span class="draft-label">Verification &amp; Results</span></div>
+            <span>AI Semiconductor Circuit Design · 팀 반짝반짝</span>
+            <div class="kicker-actions"><span class="draft-label">3 / 3</span></div>
           </div>
           <a class="home-link" href="../../index.html#competition-case-studies">← 경진대회 글묶음으로 돌아가기</a>
           <nav class="chapter-switcher" aria-label="AI 반도체 경진대회 글 이동">
-            <span class="chapter-switcher-label">2025 AI 반도체 회로 설계 경진대회</span>
+            <span class="chapter-switcher-label">2025 전국 대학생 AI 반도체 회로 설계 경진대회</span>
             <div>
-              <a href="ai-semi-01-problem-and-design.html">1. 문제 정의와 설계 선택</a>
-              <a href="ai-semi-02-snn-control-rtl.html">2. SNN 제어 RTL</a>
-              <a class="current" href="ai-semi-03-verification-results.html">3. 실험·합성 결과와 역할</a>
+              <a href="00-overview.html">먼저 읽기</a>
+              <a href="ai-semi-01-problem-and-design.html">1. BallControl 문제 이해하기</a>
+              <a href="ai-semi-02-snn-control-rtl.html">2. 위치 오차가 스파이크가 되는 과정</a>
+              <a class="current" href="ai-semi-03-verification-results.html">3. 입력 실험과 구현 결과 읽기</a>
             </div>
           </nav>
 
-          <h1>3. 위치만 보던 입력에서 무게까지 반영하기</h1>
+          <h1>3. 입력 방식을 바꾸며 제어 반응 확인하기</h1>
           <p class="lead">
-            검증은 한 번에 완성된 네트워크를 주장하는 방식이 아니라, 입력 인코딩을
-            두 단계로 나눠 비교했다. 실험 1은 위치에 따른 one-shot 입력을 사용했고,
-            실험 2는 공 무게를 rate encoding에 포함해 같은 좌표라도 입력 spike
-            밀도가 달라지도록 확장했다.
+            위치 오차가 네 방향 출력으로 이어지는 기본 경로를 만든 뒤에는, 공의
+            무게가 달라질 때 입력을 어떻게 표현할지 살펴봤습니다. 위치 값을 한 번
+            전달하는 실험과 무게에 따라 입력 스파이크의 빈도를 바꾸는 실험을 비교했고,
+            합성 보고서에서는 회로 규모와 I/O, 전력 추정값을 각각 어떤 의미로
+            읽어야 하는지 확인했습니다.
           </p>
-          <div class="scope-note">
-            <strong>수치 해석</strong>
-            <span>
-              아래 자원과 전력은 최종 발표자료에 기록된 FPGA 도구 분석값이다.
-              실제 보드에서 측정한 전력이나 전체 기구 시스템의 성능 수치가 아니다.
-            </span>
-          </div>
 
-          <section class="doc-section searchable-section" id="experiment-progression" data-search-title="실험 개선">
-            <h3>3.1 Experiment 1 → 2: 입력 표현을 확장했다</h3>
+          <section class="doc-section searchable-section" id="experiments" data-search-title="두 입력 실험">
+            <h2>왜 입력 방식을 두 번 실험했나?</h2>
+            <p>
+              첫 실험은 위치 오차가 올바른 방향의 뉴런으로 전달되는지 확인하는
+              기능 검증에 가깝습니다. 두 번째 실험은 같은 위치에 있더라도 공의
+              무게가 다르면 제어 반응도 달라져야 한다는 조건을 입력 스파이크의
+              빈도로 표현했습니다. 한 번의 큰 입력만 보는 대신, 시간축에서
+              반복되는 스파이크의 간격으로 자극의 차이를 나타낸 것입니다.
+            </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
-                <thead>
-                  <tr><th>구분</th><th>입력 인코딩</th><th>파라미터</th><th>확인 목적</th></tr>
-                </thead>
+                <thead><tr><th>실험</th><th>입력 표현</th><th>확인하려는 내용</th><th>주요 파라미터</th></tr></thead>
                 <tbody>
-                  <tr><td>실험 1</td><td>위치 기반 one-shot</td><td>THRESHOLD 40, LEAK_SHIFT 4</td><td>좌표와 방향 출력의 기본 연결 확인</td></tr>
-                  <tr><td>실험 2</td><td>무게 반영 rate encoding</td><td>THRESHOLD 300, LEAK_SHIFT 6</td><td>무게가 입력 spike 밀도와 제어 반응에 미치는 영향 확인</td></tr>
+                  <tr><td>실험 1</td><td>위치 기반 one-shot</td><td>좌표의 부호와 네 방향 출력이 맞게 연결되는가</td><td>THRESHOLD 40, LEAK_SHIFT 4</td></tr>
+                  <tr><td>실험 2</td><td>무게 반영 rate encoding</td><td>무게 변화가 스파이크 밀도와 제어 반응에 반영되는가</td><td>THRESHOLD 300, LEAK_SHIFT 6</td></tr>
                 </tbody>
               </table>
             </div>
-            <figure class="doc-figure wide-figure">
-              <div class="figure-label">무게 변수를 포함한 입력 실험</div>
-              <img src="../../assets/ai-semi-weight-rate-experiment.png" alt="15g과 30g 공을 서로 다른 좌표에 놓고 rate encoding 입력을 비교한 실험 슬라이드" />
-              <figcaption>같은 위치 정보만 사용하는 대신 공의 무게를 디지털 값으로 매핑해 입력 rate에 반영했다.</figcaption>
-            </figure>
             <p>
-              이 비교에서 중요한 것은 “무게를 넣었다”는 기능 추가보다, 새로운 물리
-              조건이 들어왔을 때 입력 표현과 임계값·누설 파라미터를 함께 다시 조정해야
-              한다는 점이다. 즉 센서 값 하나를 port에 추가하는 것으로 끝나지 않고
-              뉴런의 시간 응답 전체가 바뀐다.
+              이 비교에서 중요한 점은 두 파라미터 숫자 자체가 아닙니다. 첫 실험으로
+              방향 연결을 확인한 뒤, 두 번째 실험에서 시간에 따른 입력 패턴까지
+              검토했다는 데 의미가 있습니다. 실제 기구부의 안정성까지 판단하려면
+              공의 관성, 모터 응답과 센서 지연을 포함한 폐루프 실험이 더 필요합니다.
             </p>
           </section>
 
-          <section class="doc-section searchable-section" id="resources" data-search-title="FPGA 자원">
-            <h3>3.2 로직 자원과 I/O를 분리해서 읽었다</h3>
+          <section class="doc-section searchable-section" id="resources" data-search-title="합성 자원 결과">
+            <h2>합성 결과는 무엇을 보여 주나?</h2>
             <p>
-              최종 발표자료의 Artix-7 AC701 합성 요약은 LUT 10, FF/Register 41,
-              BRAM 0, DSP 0을 제시한다. 반면 I/O pin은 83개로 표의 I/O 사용률이
-              99.85%다. 따라서 발표자료의 “약 20.78% 자원”이라는 한 숫자만 사용하면
-              작은 로직 코어와 top-level I/O 제약이 섞여 보일 수 있다. 이 글에서는
-              로직과 I/O를 분리해 공개한다.
+              아래 값은 발표자료에 기록된 FPGA 합성 결과입니다. LUT, 레지스터,
+              DSP와 BRAM은 제어 로직의 크기를 보여 주지만, I/O는 외부로 노출한
+              신호 수를 보여 줍니다. I/O 비율이 높다고 해서 내부 계산 회로가 큰
+              것은 아니므로 같은 의미로 합치지 않고 읽어야 합니다.
             </p>
-            <div class="metric-grid" aria-label="발표자료 기준 FPGA 자원">
+            <div class="metric-grid" aria-label="AI 반도체 SNN 출력 회로의 합성 자원">
               <article><strong>10</strong><span>LUT · 0.05%</span></article>
               <article><strong>41</strong><span>FF/Reg · 0.10%</span></article>
               <article><strong>0 / 0</strong><span>DSP / BRAM</span></article>
               <article><strong>83</strong><span>I/O pins · 99.85%</span></article>
             </div>
-            <figure class="doc-figure wide-figure">
-              <div class="figure-label">최종 발표자료의 resource utilization</div>
-              <img src="../../assets/ai-semi-resource-utilization.png" alt="Artix-7 AC701 합성 결과의 LUT, FF, BRAM, DSP와 I/O pin 사용량 표" />
-            </figure>
-          </section>
-
-          <section class="doc-section searchable-section" id="power" data-search-title="전력 추정">
-            <h3>3.3 전력의 대부분은 I/O switching 추정치였다</h3>
-            <p>
-              발표자료 기준 total on-chip power 추정치는 2.302W이며, dynamic
-              2.165W(94%), device static 0.137W(6%)로 정리돼 있다. dynamic 항
-              중 I/O가 1.968W(90%)를 차지한다. 이를 뉴런 계산 자체의 소비전력으로
-              해석하기보다, 병렬 top-level I/O가 계속 toggle되는 합성 조건의 영향을
-              크게 받은 결과로 보는 것이 안전하다.
-            </p>
-            <figure class="doc-figure wide-figure">
-              <div class="figure-label">최종 발표자료의 on-chip power estimate</div>
-              <img src="../../assets/ai-semi-power-estimate.png" alt="total on-chip power 2.302W와 dynamic, static, I/O 전력 비중을 나타낸 발표 슬라이드" />
-              <figcaption>실측 전력이 아니라 발표자료에 기록된 FPGA 도구 추정 결과다.</figcaption>
-            </figure>
-          </section>
-
-          <section class="doc-section searchable-section" id="contribution" data-search-title="기여 범위">
-            <h3>3.4 내가 맡은 범위</h3>
-            <div class="signal-table-wrap">
-              <table class="signal-table">
-                <thead><tr><th>영역</th><th>수행 내용</th></tr></thead>
-                <tbody>
-                  <tr><td>프로젝트 운영</td><td>팀장으로 1·2차 일정, 마일스톤, 문서와 최종 제출 패키지를 관리했다.</td></tr>
-                  <tr><td>기술 조사</td><td>SNN/LIF, ODIN, QuantiSenc 자료를 조사하고 팀 발표자료의 기술 흐름으로 통합했다.</td></tr>
-                  <tr><td>요구사항 해석</td><td>Q&amp;A의 물리 조건을 위치·속도·무게 입력과 네 방향 제어 출력으로 분해했다.</td></tr>
-                  <tr><td>구현 정리</td><td>output-layer의 encoder, LIF, top-level RTL 구조를 정리하고 구현 결과에 반영했다.</td></tr>
-                  <tr><td>결과 전달</td><td>발표자료, 실험 zip, 코드와 결과 문서를 한 번에 확인할 수 있도록 패키징했다.</td></tr>
-                </tbody>
-              </table>
+            <div class="scope-note">
+              <strong>수치의 성격</strong>
+              <span>
+                실제 장치에서 측정한 처리 성능이 아니라 발표자료에 기록된 도구
+                결과입니다. 특히 83개 I/O는 테스트와 관찰을 위해 top-level에
+                노출한 신호 구성이 크게 반영된 값입니다.
+              </span>
             </div>
           </section>
 
-          <section class="doc-section searchable-section" id="lessons" data-search-title="한계와 개선">
-            <h3>3.5 수상 결과와 다음 개선점</h3>
+          <section class="doc-section searchable-section" id="power" data-search-title="전력 추정 결과">
+            <h2>2.302W라는 전력 값은 어떻게 읽어야 하나?</h2>
+            <div class="metric-grid metric-grid-featured" aria-label="AI 반도체 SNN 출력 회로의 전력 추정">
+              <article><strong>2.302W</strong><span>도구가 계산한 총 전력</span></article>
+              <article><strong>2.165W</strong><span>dynamic power</span></article>
+              <article><strong>0.137W</strong><span>static power</span></article>
+              <article><strong>I/O 중심</strong><span>dynamic power 구성</span></article>
+            </div>
             <p>
-              프로젝트는 2025 전국 대학생 AI 반도체 회로 설계 경진대회에서
-              1등을 수상했다. 다만 포트폴리오에서는 수상보다 설계 범위를 분명히
-              남기는 것이 중요하다. 현재 코드가 증명하는 것은 output-layer 제어
-              경로이며, 다음 단계에서는 실제 plant model, sensor noise, actuator
-              dead-zone까지 포함한 closed-loop 검증이 필요하다.
+              이 값은 전력계로 보드에서 측정한 결과가 아니라 발표자료에 포함된
+              설계 도구 추정치입니다. 내부 연산 로직이 매우 작은데도 dynamic power가
+              크게 나타난 것은 많은 I/O의 switching 가정이 포함됐기 때문입니다.
+              실제 소비전력을 말하려면 최종 핀 구성과 동작률을 적용한 뒤 보드에서
+              별도로 측정해야 합니다.
             </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="contribution" data-search-title="프로젝트에서 맡은 일">
+            <h2>프로젝트에서 맡은 일</h2>
+            <p>
+              팀장으로서 1차 SNN 조사와 2차 회로 설계의 일정과 발표 흐름을 관리했습니다.
+              SNN/LIF 및 관련 하드웨어 사례를 조사하고, BallControl의 물리 조건을
+              위치·속도·무게 입력과 네 방향 출력으로 옮기는 작업에 참여했습니다.
+              output-layer의 encoder, LIF, top-level 구조를 정리했으며, 실험 코드와
+              발표자료가 같은 설계를 설명하도록 최종 자료를 구성했습니다.
+            </p>
+            <p>
+              팀 프로젝트이므로 이 글은 모든 기계·전자 시스템이나 코드 전체를
+              개인이 단독으로 완성했다는 뜻이 아닙니다. 여기서 확인할 수 있는 기여는
+              요구사항 해석, SNN 출력 제어 구조, RTL 통합과 실험·문서 정리입니다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="next" data-search-title="한계와 다음 개선">
+            <h2>다음 단계에서 확인할 것</h2>
             <ul class="check-list">
-              <li>Python 또는 HDL reference model로 막전위와 spike sequence를 cycle 단위로 자동 비교한다.</li>
-              <li>고정 폭 곱셈의 overflow와 saturation 정책을 명세한다.</li>
-              <li>네 방향 출력의 상호 배타성과 motor pulse shaping을 top-level에서 보장한다.</li>
-              <li>실제 기구부를 연결할 때 위치 오차뿐 아니라 지연과 관성까지 포함해 파라미터를 다시 조정한다.</li>
+              <li>Python 또는 HDL 기준 모델과 막전위·스파이크를 클록 단위로 비교합니다.</li>
+              <li>고정 폭 곱셈에서 overflow와 saturation이 생길 때의 규칙을 명시합니다.</li>
+              <li>반대 방향 출력이 동시에 켜지지 않도록 보호 로직과 motor pulse shaping을 추가합니다.</li>
+              <li>실제 센서·모터·기구부의 지연과 관성을 포함해 LIF 파라미터를 다시 조정합니다.</li>
             </ul>
           </section>
 
           <footer class="page-footer">
-            <a href="ai-semi-02-snn-control-rtl.html">← 이전: SNN 제어 RTL</a>
-            <a href="aix-01-quantization.html">다음 대회: AIX 양자화 →</a>
+            <a href="ai-semi-02-snn-control-rtl.html">← 이전: 위치 오차가 스파이크가 되는 과정</a>
+            <a href="aix-01-quantization.html">다음 프로젝트: YOLOv2 정수 양자화 →</a>
           </footer>
         </article>
       </main>
