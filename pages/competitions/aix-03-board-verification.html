@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="AIX 2026 YOLO FPGA 가속기의 test_one, 229장 test_all, detector mAP, timing·resource 결과와 프로젝트 기여를 정리한 글." />
+    <title>AIX 2026 경진대회 3 - 보드 검증과 최종 결과</title>
+    <link rel="stylesheet" href="../../styles.css?v=20260726-competitions" />
+    <script src="../../script.js" defer></script>
+  </head>
+  <body class="competition-page aix-page">
+    <div class="site-shell">
+      <main class="content-wrap" id="top">
+        <article class="content">
+          <div class="document-kicker">
+            <span>Competition Case Study · AIX 2026</span>
+            <div class="kicker-actions"><span class="draft-label">229/229 PASS</span></div>
+          </div>
+          <a class="home-link" href="../../index.html#competition-case-studies">← 경진대회 글묶음으로 돌아가기</a>
+          <nav class="chapter-switcher" aria-label="AIX 2026 경진대회 글 이동">
+            <span class="chapter-switcher-label">AIX 2026 Deep Learning Hardware 설계경진대회</span>
+            <div>
+              <a href="aix-01-quantization.html">1. mAP에서 시작한 양자화</a>
+              <a href="aix-02-fpga-architecture.html">2. Full-graph FPGA 구조</a>
+              <a class="current" href="aix-03-board-verification.html">3. 보드 검증과 최종 결과</a>
+            </div>
+          </nav>
+
+          <h1>3. 한 장의 시연에서 229장 detector 검증까지</h1>
+          <p class="lead">
+            최종 검증은 simulation PASS나 한 장의 검출 이미지로 끝내지 않았다.
+            <code>test_one</code>으로 program, preload, compute, readback과 후처리
+            경로를 먼저 확인한 뒤, 한 번의 Vivado hardware session에서 229장을
+            순차 실행하는 <code>test_all</code>로 확장했다. 마지막 acceptance
+            criterion은 두 detection head를 사용한 detector-level mAP였다.
+          </p>
+          <div class="scope-note">
+            <strong>시간 기준</strong>
+            <span>
+              11.420687 FPS는 100MHz cycle counter로 계산한 FPGA compute-only
+              수치다. bitstream program, JTAG 전송과 host 후처리가 포함된 전체 실행
+              시간과 구분한다.
+            </span>
+          </div>
+
+          <section class="doc-section searchable-section" id="test-one" data-search-title="test one">
+            <h3>3.1 test_one으로 전체 실행 경로를 한 단계씩 확인했다</h3>
+            <ol class="sequence-list">
+              <li><strong>Program:</strong> Vivado batch/Tcl로 최종 bitstream을 FPGA에 올린다.</li>
+              <li><strong>Preload:</strong> JTAG-to-AXI로 weights와 입력 tensor를 DDR에 기록한다.</li>
+              <li><strong>Compute:</strong> control register를 통해 full graph 실행을 시작하고 done/cycle을 읽는다.</li>
+              <li><strong>Readback:</strong> DDR에서 8×8 CONV14와 16×16 CONV20 결과를 모두 읽는다.</li>
+              <li><strong>Postprocess:</strong> 두 head를 decode하고 NMS를 적용해 bounding box와 비교 이미지를 만든다.</li>
+              <li><strong>Cooldown:</strong> 실행 후 blank bitstream을 올려 장시간 테스트 사이의 보드 상태를 관리한다.</li>
+            </ol>
+            <figure class="doc-figure wide-figure">
+              <div class="figure-label">같은 입력에 대한 software와 FPGA two-head 검출 비교</div>
+              <img src="../../assets/aix-sw-vs-fpga-twohead.png" alt="동일한 상품 이미지에서 software 검출 결과와 FPGA의 CONV14 및 CONV20 두 head 검출 결과를 나란히 비교한 이미지" />
+              <figcaption>왼쪽은 software detection, 오른쪽은 FPGA 두 detection head를 후처리한 결과다.</figcaption>
+            </figure>
+          </section>
+
+          <section class="doc-section searchable-section" id="test-all" data-search-title="229장 test all">
+            <h3>3.2 test_all은 229장을 같은 hardware session에서 실행했다</h3>
+            <p>
+              매 이미지마다 bitstream과 weights를 다시 올리면 순수 계산 성능과 JTAG
+              준비 시간이 섞인다. 최종 runner는 bitstream program과 weight preload를
+              한 번 수행하고, 229개 입력을 순차 교체하며 compute cycle과 두 head
+              출력을 저장했다. 모든 이미지가 끝난 뒤 저장된 FPGA 출력을 같은 detector
+              evaluator로 평가했다.
+            </p>
+            <div class="rtl-card">
+              <span>FINAL_RESULT.txt - 최종 보드 검증</span>
+              <pre><code>status: PASS
+images_done: 229 / 229
+compute_avg_s: 0.087560404
+compute_avg_fps: 11.420687
+
+mAP_11point: 0.786049
+precision_at_score_0.24: 0.697471
+recall_at_score_0.24: 0.754985
+f1_at_score_0.24: 0.725089</code></pre>
+            </div>
+            <div class="metric-grid metric-grid-featured" aria-label="AIX 2026 최종 결과">
+              <article><strong>229 / 229</strong><span>FPGA test PASS</span></article>
+              <article><strong>11.420687</strong><span>compute-only FPS</span></article>
+              <article><strong>78.60%</strong><span>two-head detector mAP</span></article>
+              <article><strong>0.087560404s</strong><span>compute / image</span></article>
+            </div>
+          </section>
+
+          <section class="doc-section searchable-section" id="hardware-report" data-search-title="하드웨어 리포트">
+            <h3>3.3 최종 bitstream은 timing을 만족했다</h3>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>지표</th><th>최종 값</th><th>해석</th></tr></thead>
+                <tbody>
+                  <tr><td>Clock / WNS</td><td>100MHz / +0.111ns</td><td>setup timing closed</td></tr>
+                  <tr><td>WHS</td><td>+0.017ns</td><td>hold timing closed</td></tr>
+                  <tr><td>LUT</td><td>45,414 / 63,400 · 71.63%</td><td>control, address와 reduction logic 포함</td></tr>
+                  <tr><td>FF</td><td>46,000 / 126,800 · 36.28%</td><td>pipeline과 state register</td></tr>
+                  <tr><td>BRAM</td><td>114.5 / 135 · 84.81%</td><td>feature/weight buffering의 높은 비중</td></tr>
+                  <tr><td>DSP</td><td>205 / 240 · 85.42%</td><td>INT8 MAC과 requantization</td></tr>
+                  <tr><td>Power</td><td>1.842W</td><td>Vivado routed estimate, confidence Low</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="doc-section searchable-section" id="troubleshooting" data-search-title="트러블슈팅">
+            <h3>3.4 성능 개선 과정에서 acceptance criterion을 잃지 않았다</h3>
+            <p>
+              개발 중 가장 위험한 경우는 빠른 bitstream이 정상처럼 보이지만 detector
+              전체를 계산하지 않는 상황이었다. CONV20-only smoke build는 속도 확인에는
+              유용했지만 작은 물체를 담당하는 CONV14가 빠져 최종 mAP 기준으로 사용할
+              수 없었다. 그래서 최종 결과는 두 head의 존재, 229장 completion,
+              detector mAP, timing closure를 동시에 만족할 때만 채택했다.
+            </p>
+            <ul class="check-list">
+              <li>tensor mismatch는 최초 오차 layer와 fixed-point domain을 찾는 진단 도구로 사용했다.</li>
+              <li>Route/Upsample의 layout과 DDR offset을 descriptor와 readback 결과로 교차 확인했다.</li>
+              <li>MAC 병렬도 증가 뒤에는 DSP 수뿐 아니라 routing과 requant timing을 다시 확인했다.</li>
+              <li>중간 성능 숫자는 버리고 최종 full-detector bitstream의 결과만 보고했다.</li>
+            </ul>
+          </section>
+
+          <section class="doc-section searchable-section" id="contribution" data-search-title="기여와 재현성">
+            <h3>3.5 프로젝트에서 수행한 범위와 남긴 결과</h3>
+            <p>
+              이 프로젝트에서 수행한 작업은 소프트웨어 양자화 조건 탐색, 정수 도메인과
+              RTL datapath의 연결, full-graph scheduler와 accelerator 통합·최적화,
+              실제 FPGA 보드 검증, 최종 실행 패키지 정리로 요약할 수 있다. 팀 프로젝트
+              결과이므로 특정 RTL 파일 전체를 단독 작성했다고 표현하지 않는다.
+            </p>
+            <p>
+              최종 패키지는 다른 위치에 복사해도 스크립트 기준 상대 경로로
+              <code>test_one</code>과 <code>test_all</code>을 실행하도록 정리했다.
+              bitstream, XSA, host runner, prepared dataset, RTL snapshot과 reports를
+              함께 남겨 단순 발표 영상이 아니라 다시 실행 가능한 보드 검증 근거를
+              만들었다. 프로젝트는 AIX 2026 Deep Learning Hardware 설계경진대회에서
+              장려상을 수상했다.
+            </p>
+          </section>
+
+          <footer class="page-footer">
+            <a href="aix-02-fpga-architecture.html">← 이전: Full-graph FPGA 구조</a>
+            <a href="../../index.html#competition-case-studies">경진대회 글묶음으로 ↑</a>
+          </footer>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>

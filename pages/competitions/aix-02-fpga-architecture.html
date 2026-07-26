@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="AIX 2026 YOLOv2 FPGA 가속기의 JTAG-to-AXI, DDR workspace, 22-layer scheduler, 144-lane MAC과 두 detection head 구조를 설명한 글." />
+    <title>AIX 2026 경진대회 2 - Full-graph FPGA 구조</title>
+    <link rel="stylesheet" href="../../styles.css?v=20260726-competitions" />
+    <script src="../../script.js" defer></script>
+  </head>
+  <body class="competition-page aix-page">
+    <div class="site-shell">
+      <main class="content-wrap" id="top">
+        <article class="content">
+          <div class="document-kicker">
+            <span>Competition Case Study · AIX 2026</span>
+            <div class="kicker-actions"><span class="draft-label">Full Graph RTL</span></div>
+          </div>
+          <a class="home-link" href="../../index.html#competition-case-studies">← 경진대회 글묶음으로 돌아가기</a>
+          <nav class="chapter-switcher" aria-label="AIX 2026 경진대회 글 이동">
+            <span class="chapter-switcher-label">AIX 2026 Deep Learning Hardware 설계경진대회</span>
+            <div>
+              <a href="aix-01-quantization.html">1. mAP에서 시작한 양자화</a>
+              <a class="current" href="aix-02-fpga-architecture.html">2. Full-graph FPGA 구조</a>
+              <a href="aix-03-board-verification.html">3. 보드 검증과 최종 결과</a>
+            </div>
+          </nav>
+
+          <h1>2. MAC 모듈이 아니라 YOLO graph 전체를 실행하는 구조</h1>
+          <p class="lead">
+            YOLOv2는 convolution만 반복하는 직선형 네트워크가 아니다. Pooling,
+            route, upsample과 두 detection head가 서로 다른 feature map을 참조한다.
+            최종 구조는 host가 layer마다 명령하는 대신, FPGA 내부 descriptor와
+            dispatcher가 22개 stage의 shape, operation, DDR offset을 읽고 다음
+            layer를 실행하도록 구성했다.
+          </p>
+          <div class="scope-note">
+            <strong>시스템 경계</strong>
+            <span>
+              Host는 bitstream program, weights/input preload, 시작·완료 제어,
+              result readback과 detector 후처리를 담당한다. FPGA는 DDR의 정수 tensor를
+              읽어 CONV14와 CONV20 두 detection head까지 graph를 계산한다.
+            </span>
+          </div>
+
+          <section class="doc-section searchable-section" id="system-flow" data-search-title="시스템 실행 흐름">
+            <h3>2.1 Host에서 검출 결과까지</h3>
+            <div class="architecture-flow architecture-flow-long" aria-label="YOLO FPGA 시스템 실행 흐름">
+              <span>Python host</span>
+              <b>→</b>
+              <span>JTAG-to-AXI</span>
+              <b>→</b>
+              <span>DDR workspace</span>
+              <b>→</b>
+              <span>RTL scheduler</span>
+              <b>→</b>
+              <span>two heads</span>
+              <b>→</b>
+              <span>mAP</span>
+            </div>
+            <p>
+              UART 대신 JTAG-to-AXI를 사용한 이유는 tensor와 weight 전송량 때문이다.
+              FPGA compute-only 시간은 약 0.08756초인데 UART 115200bps에서는
+              입력과 출력 전송만 이미지당 수십 초가 필요하다. JTAG-to-AXI를 통해
+              DDR와 control register에 직접 접근해 계산 자체와 통신 병목을 구분했다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="descriptor" data-search-title="22-layer descriptor">
+            <h3>2.2 layer shape와 DDR 주소를 descriptor로 고정했다</h3>
+            <p>
+              <code>fastv2_network_desc_rom.v</code>에는 각 stage의 operation type,
+              입력·출력 크기, kernel/stride/pad와 IFM/OFM/weight/bias/scale offset이
+              들어 있다. scheduler는 layer index를 증가시키며 descriptor를 읽고,
+              op dispatcher가 Conv, Pool, Route, Upsample 또는 Detection 경로를
+              선택한다.
+            </p>
+            <div class="rtl-card">
+              <span>fastv2_network_desc_rom.v - graph descriptor 예시</span>
+              <pre><code>8'd14: begin
+  o_layer_type=1;             // CONV14
+  o_in_w=8;  o_in_h=8;  o_in_c=512;
+  o_out_w=8; o_out_h=8; o_out_c=195;
+  o_kernel=1; o_stride=1; o_pad=0;
+end
+
+8'd18: begin
+  o_layer_type=4;             // upsample x2
+  o_in_w=8;   o_in_h=8;   o_in_c=128;
+  o_out_w=16; o_out_h=16; o_out_c=128;
+end
+
+8'd19: begin
+  o_layer_type=3;             // route / concat
+  o_in_c=128; o_out_c=384;
+  o_ifm2_word_ofs=614400;
+end</code></pre>
+            </div>
+            <p>
+              실제 descriptor 전체는
+              <a href="../../code/competitions/aix/fastv2_network_desc_rom.v">fastv2_network_desc_rom.v</a>에서
+              확인할 수 있다. 이 표가 있어 host는 각 layer의 DDR 주소를 매번
+              계산해 명령하지 않아도 된다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="mac" data-search-title="144-lane MAC">
+            <h3>2.3 144개 INT8 lane을 연산 형태에 맞게 재사용했다</h3>
+            <p>
+              3×3 convolution에서는 144개 signed INT8 lane이 같은 weight를 공유하며
+              두 spatial dot product를 계산한다. 1×1에서는 같은 DSP array를 네 output
+              channel과 2×2 spatial tile에 맞게 다시 그룹화한다. MAC 수를 추가하지
+              않고 layer 형태에 따라 lane의 의미를 바꾼 것이다.
+            </p>
+            <div class="rtl-card">
+              <span>fastv2_mac_array_packed_pair.v - packed-pair 입력 구성</span>
+              <pre><code>parameter integer NUM_MACS = 144,
+parameter integer DATA_W   = 8,
+parameter integer ACC_W    = 32;
+
+assign pack_a[gi] =
+    {1'b0, ifm1_byte[gi][7:0], 16'd0}
+  | {17'd0, ifm0_u[gi]};
+assign pack_b[gi] =
+    {{10{wgt_byte[gi][7]}}, wgt_byte[gi]};
+assign product_w[gi] = pack_a[gi] * pack_b[gi];</code></pre>
+            </div>
+            <p>
+              144개 INT8 곱의 local reduction은 signed 23-bit 안에 들어가도록
+              분석하고, layer 간 누산과 post-processing은 32-bit로 유지했다. 실제
+              구현은
+              <a href="../../code/competitions/aix/fastv2_mac_array_packed_pair.v">fastv2_mac_array_packed_pair.v</a>에
+              공개했다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="bottlenecks" data-search-title="병목 개선">
+            <h3>2.4 연산기보다 데이터 이동과 layer 전환이 병목이었다</h3>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>병목</th><th>문제</th><th>적용한 방향</th></tr></thead>
+                <tbody>
+                  <tr><td>초기 feature map</td><td>같은 입력을 반복해서 DDR에서 읽음</td><td>Layer0 line/window reuse 경로</td></tr>
+                  <tr><td>weight 공급</td><td>MAC이 DDR 응답을 기다림</td><td>banked weight cache와 prefetch</td></tr>
+                  <tr><td>3×3 / 1×1</td><td>서로 다른 병렬화 형태가 필요함</td><td>같은 144-lane array의 packed-pair/quad4 재사용</td></tr>
+                  <tr><td>Route/Upsample</td><td>비연산 layer도 DDR traffic을 만듦</td><td>전용 copy path와 burst 처리</td></tr>
+                  <tr><td>Write pacing</td><td>계산보다 write backpressure가 길어짐</td><td>valid/ready 경로와 burst 경계 조정</td></tr>
+                  <tr><td>Timing</td><td>requant multiplier의 긴 조합 경로</td><td>partial product 분할과 pipeline register</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="doc-section searchable-section" id="two-heads" data-search-title="두 detection head">
+            <h3>2.5 빠른 smoke build와 유효한 detector를 구분했다</h3>
+            <p>
+              개발 중에는 16×16 CONV20 경로만 남겨 속도를 확인한 smoke build도
+              있었다. 그러나 YOLO 후처리는 8×8 CONV14와 16×16 CONV20 두 head가
+              모두 있어야 한다. 최종 RTL에서는 CONV14를 건너뛰는 경로를 비활성화하고,
+              두 결과를 DDR에 보존해 host가 함께 읽도록 했다.
+            </p>
+            <div class="rtl-card">
+              <span>yolo_engine.v - full detector에서 두 head 보존</span>
+              <pre><code>// CONV20-only smoke builds skipped layers 13/14 after layer12,
+// but detector postprocess needs both CONV14 and CONV20.
+wire fastv2_skip_l13_l14_head_active = 1'b0;</code></pre>
+            </div>
+            <p>
+              이 수정은 “더 높은 FPS”보다 “정확도 평가가 가능한 전체 모델”을 최종
+              기준으로 삼았다는 의미다. 최종 성능 수치는 두 head를 모두 계산한
+              bitstream에서만 보고한다.
+            </p>
+          </section>
+
+          <footer class="page-footer">
+            <a href="aix-01-quantization.html">← 이전: mAP 기반 양자화</a>
+            <a href="aix-03-board-verification.html">다음: 보드 검증과 결과 →</a>
+          </footer>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>

@@ -1,7 +1,7 @@
 # Jay Tech Notes
 
 제가 직접 작성하고 정리한 기술 글, 실험 기록, 논문 자료를 모아두는 개인 기술 노트입니다.
-현재 공개 페이지는 메인 화면에 보이는 순서와 동일하게 `진행 중인 연구·개발`, `SNN 연구 노트`, `NRV DVS 캘리브레이션 설명`, `NRV FPGA 트러블슈팅 노트`, `GitHub 프로젝트 링크`, `SoC/FPGA 학습 노트` 순서로 구성되어 있습니다.
+현재 공개 페이지는 메인 화면에 보이는 순서와 동일하게 `진행 중인 연구·개발`, `SNN 연구 노트`, `NRV DVS 캘리브레이션 설명`, `NRV FPGA 트러블슈팅 노트`, `GitHub 프로젝트 링크`, `SoC/FPGA 학습 노트`, `경진대회 기술 케이스 스터디` 순서로 구성되어 있습니다.
 
 이 저장소의 첫 화면은 개인적으로 정리한 글 목록이며, NRV 공식 문서가 아닙니다.
 NRV와 관련된 공식 정보는 NRV docs 웹페이지에서 확인해야 합니다.
@@ -81,3 +81,30 @@ https://jaypark0115.github.io/jay-tech-notes/
    - AXI 5개 channel과 VALID/READY handshake, Lab7 AXI slave register block의 channel 동작 조건을 설명합니다.
 4. [AXI-to-APB Bridge](https://jaypark0115.github.io/jay-tech-notes/pages/soc/07-axi-to-apb-bridge.html)
    - AXI-to-APB protocol conversion, write/read FSM, APB slave, testbench, PASS 로그를 기준으로 최종 프로젝트를 정리했습니다.
+
+### 6. 경진대회 기술 케이스 스터디
+
+수상 결과만 나열하지 않고 문제 정의, 제약 해석, 설계 판단, 실제 코드,
+검증과 결과가 이어지도록 두 경진대회를 각각 세 편으로 나눴습니다.
+
+#### 2025 전국 대학생 AI 반도체 회로 설계 경진대회 · 1등
+
+1. [문제 정의와 설계 선택](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-01-problem-and-design.html)
+   - 1차 SNN/LIF 조사에서 2차 BallControl로 이어진 과정과 물리 조건을 회로 입력·출력으로 바꾼 판단을 설명합니다.
+2. [SNN 제어 RTL](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-02-snn-control-rtl.html)
+   - 실제 `error_encoder`, `lif_neuron`, `controller_top` Verilog를 따라 위치 오차가 네 방향 spike로 변하는 과정을 설명합니다.
+3. [실험·합성 결과와 역할](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-03-verification-results.html)
+   - one-shot에서 무게 반영 rate encoding으로 확장한 실험, 발표자료 기반 FPGA 도구 추정 결과와 팀장 역할을 정리했습니다.
+
+#### AIX 2026 Deep Learning Hardware 설계경진대회 · 장려상
+
+1. [mAP에서 시작한 양자화](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-01-quantization.html)
+   - 대표 이미지 calibration, mAP 기반 후보 선택과 INT8 저장·INT32 누산·requantization의 연결을 설명합니다.
+2. [Full-graph FPGA 구조](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-02-fpga-architecture.html)
+   - DDR, JTAG-to-AXI, 22-stage descriptor, 144-lane MAC, Route/Upsample과 두 detection head 구조를 설명합니다.
+3. [보드 검증과 최종 결과](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-03-board-verification.html)
+   - `test_one`에서 229장 `test_all`로 확장해 11.420687 FPS와 two-head detector mAP 78.60%를 확인한 과정을 정리했습니다.
+
+공개 RTL 스냅샷은 [`code/competitions`](code/competitions/README.md)에 있습니다.
+팀 프로젝트의 구조를 설명하기 위한 파일이며, 독립적으로 합성 가능한 전체 제출
+패키지나 특정 개인의 단독 작성물을 의미하지 않습니다.
