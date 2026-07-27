@@ -2919,29 +2919,21 @@ body.troubleshooting-page .hardware-reference-figure {
 
 .competition-collection {
   display: grid;
-  gap: 34px;
+  gap: 72px;
   margin: 42px 0 66px;
 }
 
 .competition-group {
-  overflow: hidden;
-  border: 1px solid var(--line);
-  background: #fff;
-  box-shadow: 0 18px 44px rgb(15 23 42 / 7%);
+  min-width: 0;
 }
 
 .competition-group-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 28px;
-  padding: 26px 28px 24px;
+  padding: 0 0 20px;
   border-bottom: 1px solid var(--line);
-  background: #f8fafc;
 }
 
 .competition-group-header > div {
-  max-width: 780px;
+  max-width: 860px;
 }
 
 .competition-group-header span {
@@ -2969,19 +2961,10 @@ body.troubleshooting-page .hardware-reference-figure {
   line-height: 1.7;
 }
 
-.competition-group-header > strong {
-  flex: 0 0 auto;
-  padding: 0.55rem 0.75rem;
-  border: 1px solid #99f6e4;
-  background: #f0fdfa;
-  color: #0f766e;
-  font-size: 0.82rem;
-}
-
 #competition-case-studies .competition-card-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin: 0;
-  padding: 24px;
+  margin: 28px 0 0;
+  padding: 0;
   gap: 18px;
 }
 
@@ -2989,39 +2972,30 @@ body.troubleshooting-page .hardware-reference-figure {
   min-height: 240px;
 }
 
-#competition-case-studies .sitemap-number {
-  width: auto;
-  min-width: 58px;
-  padding: 0 10px;
-  border-radius: 999px;
-  font-size: 0.72rem;
-}
-
-#competition-case-studies .competition-summary-card {
-  background: #f8fafc;
-}
-
 body.home-page .content-wrap {
   width: 100%;
-  max-width: 1600px;
-  grid-template-columns: minmax(0, 1120px) 238px;
+  max-width: 1640px;
+  grid-template-columns: minmax(0, 1120px) 270px;
   align-items: start;
-  gap: 48px;
+  gap: 52px;
 }
 
 body.home-page .home-page-toc {
   top: 2rem;
   margin-top: 8.8rem;
-  padding: 1rem 0 1rem 1rem;
+  padding: 1.15rem 0 1.15rem 1.2rem;
   border-left-color: #cbd5e1;
 }
 
 body.home-page .home-page-toc strong {
   color: var(--accent);
+  font-size: 0.86rem;
 }
 
 body.home-page .home-page-toc a {
-  padding-block: 0.6rem;
+  padding: 0.68rem 0.72rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
 }
 
 body.home-page .home-page-toc a:hover,
@@ -3258,10 +3232,6 @@ body.competition-page .doc-figure img {
 }
 
 @media (max-width: 1100px) {
-  .competition-group-header {
-    flex-direction: column;
-  }
-
   #competition-case-studies .competition-card-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -3308,7 +3278,7 @@ body.competition-page .doc-figure img {
   }
 }
 
-@media (max-width: 1360px) {
+@media (max-width: 1400px) {
   body.home-page .content-wrap {
     max-width: none;
     grid-template-columns: minmax(0, 1120px);
