@@ -1,7 +1,7 @@
 # Jay Tech Notes
 
 제가 직접 작성하고 정리한 기술 글, 실험 기록, 논문 자료를 모아두는 개인 기술 노트입니다.
-현재 공개 페이지는 메인 화면에 보이는 순서와 동일하게 `진행 중인 연구·개발`, `SNN 연구 노트`, `NRV DVS 캘리브레이션 설명`, `NRV FPGA 트러블슈팅 노트`, `GitHub 프로젝트 링크`, `SoC/FPGA 학습 노트`, `경진대회 기술 케이스 스터디` 순서로 구성되어 있습니다.
+현재 공개 페이지는 메인 화면에 보이는 순서와 동일하게 `진행 중인 연구·개발`, `SNN 연구 노트`, `NRV DVS 캘리브레이션 설명`, `NRV FPGA 트러블슈팅 노트`, `GitHub 프로젝트 링크`, `SoC/FPGA 학습 노트`, `경진대회 기술 노트` 순서로 구성되어 있습니다.
 
 이 저장소의 첫 화면은 개인적으로 정리한 글 목록이며, NRV 공식 문서가 아닙니다.
 NRV와 관련된 공식 정보는 NRV docs 웹페이지에서 확인해야 합니다.
@@ -82,28 +82,29 @@ https://jaypark0115.github.io/jay-tech-notes/
 4. [AXI-to-APB Bridge](https://jaypark0115.github.io/jay-tech-notes/pages/soc/07-axi-to-apb-bridge.html)
    - AXI-to-APB protocol conversion, write/read FSM, APB slave, testbench, PASS 로그를 기준으로 최종 프로젝트를 정리했습니다.
 
-### 6. 경진대회 기술 케이스 스터디
+### 6. 경진대회 기술 노트
 
-두 경진대회가 어떤 문제를 다뤘고 무엇을 만들었는지 설명한 뒤, 각 프로젝트에서
-수행한 일과 사용한 기술 개념, 설계·구현·검증 과정을 세 편씩 이어서 정리했습니다.
-
-1. [먼저 읽기: 두 경진대회에서 무엇을 만들었나](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/00-overview.html)
-   - BallControl용 SNN 제어 회로와 YOLOv2 FPGA 가속기의 입력·처리·출력, 수행 범위와 핵심 기술 개념을 비교합니다.
+제가 참여한 두 경진대회에서 진행한 설계, 구현과 검증 내용을 대회별 요약과
+세 편의 기술 글로 나누어 기록했습니다.
 
 #### 2025 전국 대학생 AI 반도체 회로 설계 경진대회 · 팀 반짝반짝
 
-1. [BallControl 문제 이해하기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-01-problem-and-design.html)
+1. [경진대회 프로젝트 요약](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/00-overview.html#ai-semi)
+   - BallControl 과제의 목표, 수행 범위, 핵심 기술과 확인 결과를 정리했습니다.
+2. [BallControl 문제 이해하기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-01-problem-and-design.html)
    - 30×30cm 보드 위의 공을 중앙으로 옮기는 문제가 회로의 입력과 출력으로 어떻게 바뀌는지 설명합니다.
-2. [위치 오차가 스파이크가 되는 과정](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-02-snn-control-rtl.html)
+3. [위치 오차가 스파이크가 되는 과정](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-02-snn-control-rtl.html)
    - `error_encoder`, `lif_neuron`, `controller_top`을 따라 위치 오차가 네 방향 제어 신호가 되는 과정을 읽습니다.
-3. [입력 실험과 구현 결과 읽기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-03-verification-results.html)
+4. [입력 실험과 구현 결과 읽기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-03-verification-results.html)
    - 위치만 사용한 입력과 공의 무게까지 반영한 입력을 비교하고 합성·전력 결과의 의미를 정리했습니다.
 
 #### AIX 2026 Deep Learning Hardware 설계경진대회 · 팀 경이원지
 
-1. [YOLOv2를 정수 연산으로 바꾸기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-01-quantization.html)
+1. [경진대회 프로젝트 요약](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/00-overview.html#aix)
+   - YOLOv2 FPGA 가속기의 목표, 수행 범위, 전체 그래프 구현과 보드 검증 결과를 정리했습니다.
+2. [YOLOv2를 정수 연산으로 바꾸기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-01-quantization.html)
    - 대표 이미지로 값의 범위를 찾고 실제 검출 정확도를 확인하며 INT8 양자화 조건을 정한 과정을 설명합니다.
-2. [모델 전체를 FPGA에서 실행하기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-02-fpga-architecture.html)
+3. [모델 전체를 FPGA에서 실행하기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-02-fpga-architecture.html)
    - 22개 처리 단계, DDR 작업 공간, 144-lane MAC과 두 검출 출력을 하나의 실행 흐름으로 연결한 구조를 살펴봅니다.
-3. [한 장에서 229장 검증까지](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-03-board-verification.html)
+4. [한 장에서 229장 검증까지](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-03-board-verification.html)
    - 실행 경로를 한 장으로 확인한 뒤 229장으로 확장해 속도, 정확도와 하드웨어 보고서를 함께 검증합니다.

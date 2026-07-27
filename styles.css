@@ -2915,68 +2915,12 @@ body.troubleshooting-page .hardware-reference-figure {
   max-width: 720px;
 }
 
-/* Competition case studies: scoped additions for the home collection and six articles. */
-body.home-page .home-panel-wide {
-  grid-column: 1 / -1;
-}
-
-body.home-page .home-panel-wide p {
-  max-width: 860px;
-}
+/* Competition notes: scoped additions for the home collection and six articles. */
 
 .competition-collection {
   display: grid;
   gap: 34px;
   margin: 42px 0 66px;
-}
-
-.competition-overview-card {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 22px;
-  padding: 26px 28px;
-  border: 1px solid #99d5cf;
-  border-left: 5px solid #0f766e;
-  background: linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%);
-  color: inherit;
-  text-decoration: none;
-  box-shadow: 0 14px 34px rgb(15 118 110 / 8%);
-  transition:
-    border-color 160ms ease,
-    transform 160ms ease,
-    box-shadow 160ms ease;
-}
-
-.competition-overview-card:hover {
-  border-color: #0f766e;
-  transform: translateY(-2px);
-  box-shadow: 0 18px 38px rgb(15 118 110 / 13%);
-}
-
-.competition-overview-card small {
-  color: #0f766e;
-  font-weight: 800;
-}
-
-.competition-overview-card h3 {
-  margin: 0.15rem 0 0.3rem;
-  color: var(--ink);
-  font-size: 1.35rem;
-}
-
-.competition-overview-card h3::before {
-  display: none;
-}
-
-.competition-overview-card p {
-  margin: 0;
-  color: #475569;
-}
-
-.competition-overview-card > strong {
-  color: #0f766e;
-  white-space: nowrap;
 }
 
 .competition-group {
@@ -3034,64 +2978,8 @@ body.home-page .home-panel-wide p {
   font-size: 0.82rem;
 }
 
-.competition-project-summary {
-  margin: 24px 24px 0;
-  padding: 22px 24px;
-  border: 1px solid #d9e4e8;
-  border-left: 4px solid #0f766e;
-  background: #f8fafc;
-}
-
-.competition-project-summary > span {
-  display: block;
-  margin-bottom: 0.45rem;
-  color: #0f766e;
-  font-size: 0.68rem;
-  font-weight: 850;
-  letter-spacing: 0.1em;
-}
-
-.competition-project-summary h4 {
-  margin: 0 0 0.55rem;
-  color: var(--ink);
-  font-size: 1.12rem;
-  line-height: 1.45;
-}
-
-.competition-project-summary > p {
-  max-width: 900px;
-  margin: 0;
-  color: #475569;
-  line-height: 1.75;
-}
-
-.competition-summary-facts {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-  margin: 1.25rem 0 0;
-}
-
-.competition-summary-facts div {
-  padding-top: 0.8rem;
-  border-top: 1px solid #cbd5e1;
-}
-
-.competition-summary-facts dt {
-  margin-bottom: 0.3rem;
-  color: #115e59;
-  font-size: 0.78rem;
-  font-weight: 850;
-}
-
-.competition-summary-facts dd {
-  margin: 0;
-  color: #475569;
-  font-size: 0.84rem;
-  line-height: 1.65;
-}
-
 #competition-case-studies .competition-card-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: 0;
   padding: 24px;
   gap: 18px;
@@ -3107,6 +2995,40 @@ body.home-page .home-panel-wide p {
   padding: 0 10px;
   border-radius: 999px;
   font-size: 0.72rem;
+}
+
+#competition-case-studies .competition-summary-card {
+  background: #f8fafc;
+}
+
+body.home-page .content-wrap {
+  width: 100%;
+  max-width: 1600px;
+  grid-template-columns: minmax(0, 1120px) 238px;
+  align-items: start;
+  gap: 48px;
+}
+
+body.home-page .home-page-toc {
+  top: 2rem;
+  margin-top: 8.8rem;
+  padding: 1rem 0 1rem 1rem;
+  border-left-color: #cbd5e1;
+}
+
+body.home-page .home-page-toc strong {
+  color: var(--accent);
+}
+
+body.home-page .home-page-toc a {
+  padding-block: 0.6rem;
+}
+
+body.home-page .home-page-toc a:hover,
+body.home-page .home-page-toc a.current {
+  border-left-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 body.competition-page {
@@ -3336,26 +3258,12 @@ body.competition-page .doc-figure img {
 }
 
 @media (max-width: 1100px) {
-  body.home-page .home-panel-wide {
-    grid-column: auto;
-  }
-
   .competition-group-header {
     flex-direction: column;
   }
 
-  .competition-overview-card {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
   #competition-case-studies .competition-card-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .competition-summary-facts {
-    grid-template-columns: 1fr;
-    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .architecture-flow {
@@ -3387,17 +3295,28 @@ body.competition-page .doc-figure img {
 
 @media (max-width: 560px) {
   .competition-group-header,
-  #competition-case-studies .competition-card-grid,
-  .competition-project-summary {
+  #competition-case-studies .competition-card-grid {
     padding: 20px;
   }
 
-  .competition-project-summary {
-    margin: 20px 20px 0;
+  #competition-case-studies .competition-card-grid {
+    grid-template-columns: 1fr;
   }
 
   .metric-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1360px) {
+  body.home-page .content-wrap {
+    max-width: none;
+    grid-template-columns: minmax(0, 1120px);
+    gap: 0;
+  }
+
+  body.home-page .home-page-toc {
+    display: none;
   }
 }
 

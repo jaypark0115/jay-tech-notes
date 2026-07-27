@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="연구·개발 계획, SNN 연구, NRV DVS 캘리브레이션, SoC/FPGA 학습 노트와 경진대회 기술 케이스 스터디 모음." />
+    <meta name="description" content="연구·개발 계획, SNN 연구, NRV DVS 캘리브레이션, SoC/FPGA 학습 노트와 경진대회 기술 노트 모음." />
     <title>Jay Tech Notes</title>
-    <link rel="stylesheet" href="styles.css?v=20260726-summaries" />
+    <link rel="stylesheet" href="styles.css?v=20260727-competition-nav" />
     <script src="script.js" defer></script>
   </head>
   <body class="home-page">
@@ -79,29 +79,15 @@
                 AXI-to-APB Bridge 구현·검증 흐름을 나누어 정리했습니다.
               </p>
             </section>
-            <section class="home-panel home-panel-wide">
-              <span>기술 케이스 스터디</span>
-              <h2>경진대회 프로젝트</h2>
+            <section class="home-panel">
+              <span>경진대회 노트 묶음</span>
+              <h2>경진대회 기술 노트</h2>
               <p>
-                공의 위치를 네 방향 제어 신호로 바꾸는 SNN 회로와 YOLOv2 전체
-                그래프를 실행하는 FPGA 가속기를, 처음 보는 사람도 이해할 수 있는
-                순서로 설명합니다.
+                제가 참여한 두 경진대회에서 진행한 SNN 제어 회로와
+                YOLOv2 FPGA 가속기의 설계·구현·검증 내용을 정리했습니다.
               </p>
             </section>
           </div>
-
-          <nav class="chapter-switcher" aria-label="기술 노트와 진행 계획">
-            <span class="chapter-switcher-label">기술 노트와 진행 계획</span>
-            <div>
-              <a href="#planned-work">진행 중인 연구·개발</a>
-              <a href="#snn-research">SNN 연구 노트</a>
-              <a href="#nrv-dvs-calibration">NRV DVS 캘리브레이션 설명</a>
-              <a href="#nrv-fpga-troubleshooting">NRV FPGA 트러블슈팅 노트</a>
-              <a href="#github-projects">GitHub 프로젝트 링크</a>
-              <a href="#hardware-notes">SoC/FPGA 학습 노트</a>
-              <a href="#competition-case-studies">경진대회 기술 케이스 스터디</a>
-            </div>
-          </nav>
 
           <section class="doc-section visible" id="planned-work">
             <h2>0. 진행 중인 연구·개발</h2>
@@ -427,27 +413,13 @@
           </section>
 
           <section class="doc-section visible" id="competition-case-studies">
-            <h2>경진대회 기술 케이스 스터디</h2>
+            <h2>경진대회 기술 노트</h2>
             <p>
-              두 프로젝트가 무엇을 입력받아 어떤 결과를 만드는지부터 시작합니다.
-              전체 그림을 먼저 읽은 뒤, SNN 제어 회로와 YOLOv2 FPGA 가속기의
-              설계·구현·검증 과정을 세 편씩 따라갈 수 있습니다.
+              제가 참여한 두 경진대회에서 진행한 설계, 구현과 검증 내용을
+              대회별 요약과 세 편의 기술 글로 나누어 기록했습니다.
             </p>
 
             <div class="competition-collection">
-              <a class="competition-overview-card" href="pages/competitions/00-overview.html">
-                <span class="sitemap-number">START</span>
-                <div>
-                  <small>처음 방문했다면 여기부터</small>
-                  <h3>경진대회 프로젝트 한눈에 보기</h3>
-                  <p>
-                    두 프로젝트의 목표, 구현 범위, 핵심 기술과 결과를
-                    짧게 정리했습니다.
-                  </p>
-                </div>
-                <strong>먼저 읽기 →</strong>
-              </a>
-
               <section class="competition-group competition-group-ai" aria-labelledby="ai-semi-group-title">
                 <header class="competition-group-header">
                   <div>
@@ -457,32 +429,14 @@
                       전국 대학생 AI 반도체 회로 설계 경진대회
                     </p>
                   </div>
-                  <strong>3편</strong>
+                  <strong>4편</strong>
                 </header>
-                <article class="competition-project-summary">
-                  <span>PROJECT SUMMARY</span>
-                  <h4>공의 위치·속도를 네 방향 모터 스파이크로 변환</h4>
-                  <p>
-                    30×30cm 보드 중앙으로 공을 이동시키는 BallControl 과제를
-                    SNN 출력 제어 회로로 해석했습니다. signed X/Y 오차를 네 방향
-                    크기로 나누고, 4개의 LIF 뉴런이 모터 제어 스파이크를 만듭니다.
-                  </p>
-                  <dl class="competition-summary-facts">
-                    <div>
-                      <dt>수행 내용</dt>
-                      <dd>SNN/LIF 조사 · 요구사항 해석 · 출력 계층 RTL 구조 · 입력 실험</dd>
-                    </div>
-                    <div>
-                      <dt>핵심 기술</dt>
-                      <dd>Signed error · LIF neuron · Rate encoding · Verilog RTL</dd>
-                    </div>
-                    <div>
-                      <dt>확인 결과</dt>
-                      <dd>4방향 출력 파이프라인 · 합성 결과 · 전력 추정 · 실험 로그</dd>
-                    </div>
-                  </dl>
-                </article>
                 <div class="sitemap-grid competition-card-grid">
+                  <a class="sitemap-card competition-summary-card" href="pages/competitions/00-overview.html#ai-semi">
+                    <span class="sitemap-number">AI-00</span>
+                    <h2>경진대회 프로젝트 요약</h2>
+                    <p>BallControl 과제의 목표, 제가 수행한 범위, SNN 출력 제어 회로의 핵심 기술과 확인 결과를 정리했습니다.</p>
+                  </a>
                   <a class="sitemap-card" href="pages/competitions/ai-semi-01-problem-and-design.html">
                     <span class="sitemap-number">AI-01</span>
                     <h2>BallControl 문제 이해하기</h2>
@@ -510,32 +464,14 @@
                       AIX 2026 Deep Learning Hardware 설계경진대회
                     </p>
                   </div>
-                  <strong>3편</strong>
+                  <strong>4편</strong>
                 </header>
-                <article class="competition-project-summary">
-                  <span>PROJECT SUMMARY</span>
-                  <h4>양자화된 YOLOv2 전체 그래프를 FPGA에서 실행</h4>
-                  <p>
-                    대표 이미지와 detector mAP로 INT8 조건을 정하고, 22개
-                    Conv·Pool·Route·Upsample 단계를 descriptor와 DDR 작업 공간으로
-                    연결했습니다. 두 detection head를 포함한 전체 모델을 보드에서 검증했습니다.
-                  </p>
-                  <dl class="competition-summary-facts">
-                    <div>
-                      <dt>수행 내용</dt>
-                      <dd>양자화 탐색 · 정수 모델–RTL 연결 · 통합·병목 개선 · 보드 검증</dd>
-                    </div>
-                    <div>
-                      <dt>핵심 기술</dt>
-                      <dd>INT8/INT32 · Requantization · Descriptor scheduling · DDR buffering</dd>
-                    </div>
-                    <div>
-                      <dt>확인 결과</dt>
-                      <dd>229/229 PASS · 11.420687 compute-only FPS · 78.60% mAP</dd>
-                    </div>
-                  </dl>
-                </article>
                 <div class="sitemap-grid competition-card-grid">
+                  <a class="sitemap-card competition-summary-card" href="pages/competitions/00-overview.html#aix">
+                    <span class="sitemap-number">AIX-00</span>
+                    <h2>경진대회 프로젝트 요약</h2>
+                    <p>YOLOv2 FPGA 가속기의 목표, 제가 수행한 범위, 전체 그래프 구현과 보드 검증 결과를 정리했습니다.</p>
+                  </a>
                   <a class="sitemap-card" href="pages/competitions/aix-01-quantization.html">
                     <span class="sitemap-number">AIX-01</span>
                     <h2>YOLOv2를 정수 연산으로 바꾸기</h2>
@@ -555,7 +491,17 @@
               </section>
             </div>
           </section>
-</article>
+        </article>
+        <aside class="page-toc home-page-toc" aria-label="대표 페이지 바로가기">
+          <strong>기술 노트와 진행 계획</strong>
+          <a href="#planned-work">진행 중인 연구·개발</a>
+          <a href="#snn-research">SNN 연구 노트</a>
+          <a href="#nrv-dvs-calibration">NRV DVS 캘리브레이션 설명</a>
+          <a href="#nrv-fpga-troubleshooting">NRV FPGA 트러블슈팅 노트</a>
+          <a href="#github-projects">GitHub 프로젝트 링크</a>
+          <a href="#hardware-notes">SoC/FPGA 학습 노트</a>
+          <a href="#competition-case-studies">경진대회 기술 노트</a>
+        </aside>
       </main>
     </div>
   </body>
