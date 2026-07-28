@@ -34,6 +34,7 @@
               <a href="01-camera-calibration.html">1. 카메라 캘리브레이션이란?</a>
               <a class="current" href="02-dvs-calibration-method.html" aria-current="page">2. NRV DVS 캘리브레이션 방법</a>
               <a href="03-capture-preparation.html">3. 촬영 환경과 준비</a>
+              <a href="04-calibration-workflow.html">4. 캘리브레이션 촬영 및 처리 절차</a>
             </div>
           </nav>
 
@@ -69,15 +70,15 @@
               직접 검출할 수 있습니다.
             </p>
             <p>
-              NRV DVS는 다르게 동작합니다. 전체 밝기 프레임을 계속 보내는
-              대신, 각 픽셀의 밝기가 변할 때만 event를 출력합니다. 그래서 CIS
+              반면 NRV DVS는 전체 밝기 프레임을 계속 보내는 대신, 각 픽셀의
+              밝기가 변할 때만 이벤트를 출력합니다. 그래서 CIS
               카메라에는 선명하게 보이는 정지된 캘리브레이션 보드도 NRV DVS에는
               충분한 데이터를 만들지 못할 수 있습니다.
             </p>
             <p>
               NRV DVS 캘리브레이션에서는 캘리브레이션 포인트가 시간에 따라
-              변해야 합니다. 그래야 NRV DVS가 알고 있는 패턴 위치에서 event를 생성할
-              수 있습니다.
+              변해야 합니다. 그래야 NRV DVS가 미리 알고 있는 패턴 위치에서
+              이벤트를 생성할 수 있습니다.
             </p>
 
             <figure class="doc-figure comparison-figure">
@@ -95,7 +96,7 @@
                     src="../../assets/github-dvs-5.png"
                     alt="밝기 변화로 생성된 NRV DVS의 원 그리드 관측"
                   />
-                  <span>NRV DVS: 변화 지점의 event</span>
+                  <span>NRV DVS: 밝기가 변한 지점의 이벤트</span>
                 </div>
               </div>
               <figcaption>
@@ -113,39 +114,39 @@
             <h3>2.2 이벤트 생성이 필요한 이유</h3>
             <p>
               NRV DVS 캘리브레이션에는 알려진 캘리브레이션 포인트 위치에서
-              명확한 ON event와 OFF event가 필요합니다. 따라서 캘리브레이션 타겟은
+              명확한 ON 이벤트와 OFF 이벤트가 필요합니다. 따라서 캘리브레이션 타깃은
               깜빡이거나, 움직이거나, 시간에 따라 밝기가 변해야 합니다. 이
               시스템에서는 모니터에 blinking circle grid를 표시합니다.
             </p>
             <p>
-              원들은 밝은 상태와 어두운 상태를 번갈아 가집니다. 원이 어두운
-              상태에서 밝은 상태로 바뀌면 NRV DVS는 원의 경계 주변에서 ON event를
-              생성합니다. 반대로 밝은 상태에서 어두운 상태로 바뀌면 OFF event가
-              생성됩니다. 목적은 NRV DVS가 원의 위치를 안정적인 event
+              각 원은 밝은 상태와 어두운 상태를 번갈아 표시합니다. 원이 어두운
+              상태에서 밝은 상태로 바뀌면 NRV DVS는 원의 경계 주변에서 ON 이벤트를
+              생성합니다. 반대로 밝은 상태에서 어두운 상태로 바뀌면 OFF 이벤트가
+              생성됩니다. 이렇게 밝기를 바꾸는 이유는 NRV DVS가 원의 위치를 안정적인 이벤트
               데이터로 볼 수 있게 만드는 것입니다.
             </p>
 
             <figure class="doc-figure comparison-figure">
-              <div class="figure-label">ON / OFF event 생성</div>
+              <div class="figure-label">ON / OFF 이벤트 생성</div>
               <div class="figure-grid two-up">
                 <div>
                   <img
                     src="../../assets/github-dvs-2.png"
                     alt="회색 배경 위의 밝은 원 그리드 상태"
                   />
-                  <span>밝은 상태 → ON event</span>
+                  <span>밝은 상태 → ON 이벤트</span>
                 </div>
                 <div>
                   <img
                     src="../../assets/github-dvs-3.png"
                     alt="회색 배경 위의 어두운 원 그리드 상태"
                   />
-                  <span>어두운 상태 → OFF event</span>
+                  <span>어두운 상태 → OFF 이벤트</span>
                 </div>
               </div>
               <figcaption>
-                깜빡이는 원은 알려진 캘리브레이션 포인트 주변에서 ON event와
-                OFF event를 생성합니다.
+                깜빡이는 원은 알려진 캘리브레이션 포인트 주변에서 ON 이벤트와
+                OFF 이벤트를 생성합니다.
               </figcaption>
             </figure>
           </section>
@@ -157,7 +158,7 @@
           >
             <h3>2.3 Blinking Asymmetric Circle Grid를 사용하는 이유</h3>
             <p>
-              NRV DVS용 캘리브레이션 타겟은 event 데이터에서 보여야 하고,
+              NRV DVS용 캘리브레이션 타깃은 이벤트 데이터에서 보여야 하고,
               각 포인트의 중심을 안정적으로 측정할 수 있어야 하며, 검출된 포인트를
               일관된 순서로 식별할 수 있어야 합니다. Blinking asymmetric circle
               grid는 이 세 가지 조건을 각각 만족시키기 때문에 사용합니다.
@@ -165,23 +166,23 @@
 
             <div class="rationale-grid" aria-label="패턴이 깜빡이고 비대칭 원 배열을 사용하는 이유">
               <div class="rationale-card">
-                <span>01 · Blinking</span>
-                <strong>패턴이 event로 보이게 합니다</strong>
+                <span>01 · 깜빡임</span>
+                <strong>패턴이 이벤트로 보이게 합니다</strong>
                 <p>
                   밝음과 어두움 사이의 전환이 알려진 캘리브레이션 포인트 위치에서
-                  ON event와 OFF event를 의도적으로 생성합니다.
+                  ON 이벤트와 OFF 이벤트를 의도적으로 생성합니다.
                 </p>
               </div>
               <div class="rationale-card">
-                <span>02 · Circles</span>
+                <span>02 · 원</span>
                 <strong>각 포인트의 중심을 측정하게 합니다</strong>
                 <p>
-                  서로 떨어진 원 경계는 독립된 event 묶음을 만들며, 이를 모아 각
-                  캘리브레이션 포인트의 circle center를 추정할 수 있습니다.
+                  서로 떨어진 원 경계는 독립된 이벤트 묶음을 만들며, 이를 모아 각
+                  캘리브레이션 포인트의 원 중심을 추정할 수 있습니다.
                 </p>
               </div>
               <div class="rationale-card">
-                <span>03 · Asymmetry</span>
+                <span>03 · 비대칭 배열</span>
                 <strong>포인트 순서를 식별하게 합니다</strong>
                 <p>
                   행마다 교대로 어긋난 배열은 구별 가능한 구조를 만들기 때문에
@@ -191,27 +192,27 @@
             </div>
 
             <p class="rationale-summary">
-              <strong>정리하면:</strong> blinking은 타겟을 event로 보이게 하고,
-              circle은 각 포인트의 중심을 측정하게 하며, asymmetric layout은
+              <strong>정리하면:</strong> 깜빡임은 타깃을 이벤트로 보이게 하고,
+              원은 각 포인트의 중심을 측정하게 하며, 비대칭 배열은
               검출된 포인트의 순서를 식별하게 합니다.
             </p>
 
             <p>
-              원들이 공간적으로 떨어져 있으므로 하나의 원에서 발생한 event를
+              원들이 공간적으로 떨어져 있으므로 하나의 원에서 발생한 이벤트를
               이웃한 캘리브레이션 포인트와 섞지 않고 모을 수 있습니다. 원 주변의
-              edge event에는 circle center를 계산할 수 있는 기하 정보가 포함되며,
+              경계 이벤트에는 원 중심을 계산할 수 있는 기하 정보가 포함되며,
               촬영 위치와 각도가 달라져도 중심은 비교적 명확한 특징으로 남습니다.
             </p>
             <p>
-              반면 checkerboard corner는 event 데이터에서 복원하기가 더 어렵습니다.
-              여러 흑백 edge가 한 위치에서 만나므로 서로 다른 edge에서 발생한
-              ON/OFF event가 교차점 주변에서 겹치거나 분산될 수 있습니다. 카메라
-              움직임, 밝기 변화 시점, 모니터 refresh 상태에 따라 관측되는 corner
-              위치도 흔들릴 수 있습니다. 특히 checkerboard를 모니터에서 blink하면
-              모니터가 밝기 변화를 이상적인 기하학적 corner로 한 순간에 출력하지
-              못할 수 있습니다. 이 경우 NRV DVS는 정확한 corner point가
-              아니라 번지거나 끊어진 corner 응답을 기록하게 되어 검출이
-              불안정해집니다. 독립된 원은 더 단순한 지역 event 묶음을 만들기 때문에
+              반면 체커보드 코너는 이벤트 데이터에서 복원하기가 더 어렵습니다.
+              여러 흑백 경계가 한 위치에서 만나므로 서로 다른 경계에서 발생한
+              ON/OFF 이벤트가 교차점 주변에서 겹치거나 분산될 수 있습니다. 카메라
+              움직임, 밝기 변화 시점과 모니터 화면 갱신 상태에 따라 관측되는 코너
+              위치도 흔들릴 수 있습니다. 특히 체커보드를 모니터에서 깜빡이게 하면
+              모니터가 밝기 변화를 이상적인 기하학적 코너 형태로 한순간에 표현하지
+              못할 수 있습니다. 이 경우 NRV DVS는 정확한 코너 지점이
+              아니라 번지거나 끊어진 코너 응답을 기록하므로 검출이
+              불안정해집니다. 독립된 원은 더 단순한 국소 이벤트 묶음을 만들기 때문에
               캘리브레이션 포인트를 안정적으로 검출하기 쉽습니다.
             </p>
             <p>
@@ -225,27 +226,27 @@
             </p>
 
             <figure class="doc-figure comparison-figure">
-              <div class="figure-label">Checkerboard corner vs. 분리된 asymmetric circle point</div>
+              <div class="figure-label">체커보드 코너와 분리된 비대칭 원 포인트 비교</div>
               <div class="figure-grid two-up">
                 <div>
                   <img
                     src="../../assets/github-dvs-8.jpg"
                     alt="corner 응답이 겹치는 checkerboard event 예시"
                   />
-                  <span>Checkerboard: corner에서 event가 만남</span>
+                  <span>체커보드: 코너에서 이벤트가 겹침</span>
                 </div>
                 <div>
                   <img
                     src="../../assets/asymmetric-circle-grid-corner-overlay.png"
                     alt="NRV DVS 캘리브레이션 데이터 위에 검출된 비대칭 원 그리드 중심을 표시한 예시"
                   />
-                  <span>Asymmetric circle grid: 분리된 캘리브레이션 포인트</span>
+                  <span>비대칭 원 그리드: 분리된 캘리브레이션 포인트</span>
                 </div>
               </div>
               <figcaption>
-                왼쪽 checkerboard 예시는 blink된 corner가 event 데이터에서
-                안정적으로 잡히기 어려운 경우를 보여줍니다. 모니터 refresh와 밝기
-                변화 타이밍 때문에 정확한 corner event가 형성되지 않을 수 있습니다.
+                왼쪽 체커보드 예시는 깜빡이는 코너가 이벤트 데이터에서
+                안정적으로 잡히기 어려운 경우를 보여줍니다. 모니터 화면 갱신과 밝기
+                변화 시점 때문에 정확한 코너 이벤트가 형성되지 않을 수 있습니다.
                 반면 서로 떨어진 원 포인트는 안정적인 캘리브레이션 중심을 추정하기
                 쉽고, 비대칭 배열은 일관된 포인트 순서를 제공합니다.
               </figcaption>
@@ -259,7 +260,7 @@
           >
             <h3>2.4 캘리브레이션 패턴 구성</h3>
             <p>
-              Blinking asymmetric circle grid는 모니터에 전체화면으로 표시됩니다.
+              Blinking asymmetric circle grid는 모니터에 전체 화면으로 표시됩니다.
               배경은 회색이며, 원은 밝은 값과 어두운 값을 번갈아 가집니다. 비대칭
               배열을 사용하면 캘리브레이션 포인트의 순서를 대칭 그리드와 혼동하지
               않고 고유하게 식별할 수 있습니다.
@@ -269,8 +270,8 @@
               <h4>Asymmetric circle grid란?</h4>
               <p>
                 Asymmetric circle grid는 서로 떨어진 원형 점들을 엇갈린 행으로
-                배치한 캘리브레이션 타깃입니다. checkerboard처럼 여러 edge가
-                만나는 corner를 찾는 방식이 아니라, 각 원의 중심을 캘리브레이션
+                배치한 캘리브레이션 타깃입니다. 체커보드처럼 여러 경계가
+                만나는 코너를 찾는 방식이 아니라, 각 원의 중심을 캘리브레이션
                 포인트로 사용합니다.
               </p>
               <p>
@@ -287,9 +288,9 @@
               있을 만큼 패턴이 충분히 커야 합니다.
             </p>
             <p>
-              참고 저장소의 예시 구성은 11 columns, 4 rows, gray background,
-              bright circle value 255, dark circle value 0이며, 시간에 따라 원
-              색상을 toggle하여 blink를 만듭니다. 이 값들은 필수값이 아닙니다.
+              참고 저장소의 예시 구성은 11열, 4행, 회색 배경, 밝은 원 값 255,
+              어두운 원 값 0이며, 시간에 따라 원의 색상을 반전해 깜빡임을 만듭니다.
+              이 값들은 필수값이 아닙니다.
               모니터 크기, 카메라 거리, 캘리브레이션 구성에 따라 조정할 수
               있습니다.
             </p>
@@ -322,7 +323,7 @@
             합니다. 다음 섹션에서는 이 준비 과정을 이어서 설명합니다.
           </p>
 
-          <p class="bottom-author">by jy</p>
+          <p class="bottom-author">작성: 박재연</p>
 
           <nav
             class="chapter-switcher chapter-switcher-bottom"
@@ -333,6 +334,7 @@
               <a href="01-camera-calibration.html">1. 카메라 캘리브레이션이란?</a>
               <a class="current" href="02-dvs-calibration-method.html" aria-current="page">2. NRV DVS 캘리브레이션 방법</a>
               <a href="03-capture-preparation.html">3. 촬영 환경과 준비</a>
+              <a href="04-calibration-workflow.html">4. 캘리브레이션 촬영 및 처리 절차</a>
             </div>
           </nav>
 
@@ -348,7 +350,7 @@
           <p class="search-empty" role="status" hidden>
             검색어와 일치하는 하위 섹션이 없습니다.
           </p>
-          <p class="repository-note">이 글은 NRV의 지원을 받아 작성했습니다. 공식 NRV docs에는 영문 버전이 제공됩니다.</p>
+          <p class="repository-note">이 페이지에는 제가 직접 작성한 NRV DVS 캘리브레이션 설명의 한글판만 수록했습니다.</p>
 
 
           <footer class="page-footer">

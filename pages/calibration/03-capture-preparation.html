@@ -34,6 +34,7 @@
               <a href="01-camera-calibration.html">1. 카메라 캘리브레이션이란?</a>
               <a href="02-dvs-calibration-method.html">2. NRV DVS 캘리브레이션 방법</a>
               <a class="current" href="03-capture-preparation.html" aria-current="page">3. 촬영 환경과 준비</a>
+              <a href="04-calibration-workflow.html">4. 캘리브레이션 촬영 및 처리 절차</a>
             </div>
           </nav>
 
@@ -42,9 +43,9 @@
           </h1>
           <p class="lead">
             좋은 NRV DVS 캘리브레이션 데이터는 안정적인 촬영 환경에서 나옵니다.
-            촬영 전에 NRV DVS, 용도가 구분된 모니터, 필요한 소프트웨어,
-            패턴의 실제 치수와 고정 조건을 먼저 맞춰 두어야 합니다.
-            이렇게 준비해야 blinking circle grid에서 발생하는 이벤트를
+            촬영 전에 NRV DVS, 용도별 모니터, 필요한 소프트웨어,
+            패턴의 실제 치수와 고정 조건을 먼저 확인해 두어야 합니다.
+            이렇게 준비해야 깜빡이는 원 그리드에서 발생하는 이벤트를
             깨끗하게 기록할 수 있습니다.
           </p>
 
@@ -87,14 +88,14 @@
                 <span>03</span>
                 <div>
                   <h4>카메라 제어 모니터</h4>
-                  <p>카메라 연결, 녹화 제어와 실시간 이벤트 출력을 확인합니다.</p>
+                  <p>카메라 연결 상태와 녹화 제어, 실시간 이벤트 출력을 확인합니다.</p>
                 </div>
               </article>
               <article class="equipment-card equipment-card-accent">
                 <span>04</span>
                 <div>
                   <h4>Blinking 패턴 모니터</h4>
-                  <p>Blinking circle grid를 표시하여 캘리브레이션 타깃으로 사용합니다.</p>
+                  <p>깜빡이는 원 그리드를 표시하여 캘리브레이션 타깃으로 사용합니다.</p>
                 </div>
               </article>
               <article class="equipment-card">
@@ -115,7 +116,7 @@
                 <span>07</span>
                 <div>
                   <h4>데이터 기록 소프트웨어</h4>
-                  <p>이후 포인트 선택과 캘리브레이션에 사용할 이벤트 스트림을 기록합니다.</p>
+                  <p>포인트 선택과 캘리브레이션에 사용할 이벤트 스트림을 기록합니다.</p>
                 </div>
               </article>
             </div>
@@ -129,12 +130,12 @@
               <div>
                 <span>캘리브레이션 타깃</span>
                 <strong>Blinking 패턴 모니터</strong>
-                <p>촬영 중 blinking circle grid만 전체 화면으로 표시합니다.</p>
+                <p>촬영 중에는 깜빡이는 원 그리드만 전체 화면으로 표시합니다.</p>
               </div>
             </div>
 
             <p>
-              Blinking 패턴 전용 모니터를 별도로 사용하는 것이 좋습니다. 이렇게
+              Blinking 패턴 전용 모니터를 따로 사용하는 것이 좋습니다. 이렇게
               하면 카메라 제어창이나 녹화창, 다른 UI가 패턴을 가리지 않도록
               캘리브레이션 타깃을 전체 화면으로 유지할 수 있습니다.
             </p>
@@ -161,8 +162,12 @@
           >
             <h3>3.2 필수 소프트웨어 다운로드</h3>
             <p>
-              촬영 전에 패턴 생성기를 내려받습니다. 이후 단계에서 사용할 자동
-              캘리브레이션 프로그램도 미리 준비할 수 있도록 함께 안내합니다.
+              촬영 전에 패턴 생성기를 내려받습니다. 자동 캘리브레이션은 별도의
+              프로그램을 내려받아 실행하는 방식이 아니라, DVS Viewer의
+              <strong>Calibration</strong> 버튼에서 진입하는 기능입니다. 설치된
+              Viewer에 해당 버튼이 있는지 확인하고, 없다면 Calibration 기능이
+              포함된 버전으로 Viewer를 업데이트합니다. 실제 촬영·검토·계산 방법은
+              4장에서 설명합니다.
             </p>
 
             <div class="download-list">
@@ -181,15 +186,21 @@
                   Blinking Circle Grid Generator 열기 ↗
                 </a>
               </article>
-              <article class="download-card download-card-pending">
-                <span class="download-type">파라미터 계산</span>
-                <h4>자동 캘리브레이션 프로그램</h4>
+              <article class="download-card">
+                <span class="download-type">DVS Viewer 기능</span>
+                <h4>DVS Viewer의 Calibration</h4>
                 <p>
-                  캘리브레이션 포인트를 검출하고 모노 또는 스테레오 캘리브레이션
-                  파라미터를 계산합니다. 자세한 사용법은 별도의 프로그램 설명에서
-                  이어서 정리할 수 있습니다.
+                  DVS Viewer에서 <strong>Calibration</strong>을 누르면 제가 구현한
+                  캘리브레이션 앱으로 진입합니다. 이 앱에서 세그먼트를 기록하고
+                  원 그리드 입력을 고른 뒤 모노 또는 스테레오 파라미터를 계산합니다.
                 </p>
-                <span class="pending-link">[다운로드 링크 추가 예정]</span>
+                <a
+                  href="https://github.com/nrvcorp/DVS_Viewer"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  nrvcorp/DVS_Viewer 열기 ↗
+                </a>
               </article>
             </div>
           </section>
@@ -210,7 +221,7 @@
             </p>
             <p>
               화면에 표시된 각 원의 정확한 중심에 자를 맞추기는 어렵습니다.
-              또한 한 칸 간격만 재면 작은 자 눈금 오차가 결과에 크게 반영됩니다.
+              또한 한 칸 간격만 재면 자의 작은 눈금 오차가 결과에 크게 반영됩니다.
               그래서 여러 간격을 한 번에 포함하도록 멀리 떨어진 두 원을 기준으로
               바깥쪽 가장자리 거리와 안쪽 가장자리 거리를 측정하고, 평균을 낸 뒤
               간격 개수로 나눕니다. 이렇게 하면 원 간격 값을 더 안정적으로 얻을
@@ -356,25 +367,79 @@
 
           <section
             class="doc-section searchable-section"
+            id="capture-guidance"
+            data-search-title="권장 캘리브레이션 촬영 조건"
+          >
+            <h3>3.6 권장 캘리브레이션 촬영 조건</h3>
+            <p>
+              Blinking 패턴 모니터는 고정된 평면 타깃입니다. 모니터의 위치와 화면 표시,
+              카메라의 초점·줌·해상도·센서 설정은 한 세션 동안 바꾸지 않습니다.
+              세그먼트 사이에는 <strong>카메라와 고정된 삼각대 전체</strong>를 옮겨
+              원 그리드가 센서의 다른 위치·크기·기울기로 보이게 합니다. 한 세그먼트를
+              기록하는 동안에는 카메라와 삼각대, 모니터를 모두 움직이지 않습니다.
+            </p>
+
+            <h4>1대 카메라 — Mono Calibration</h4>
+            <div class="capture-guidance-table-wrap">
+              <table class="capture-guidance-table">
+                <tbody>
+                  <tr><th scope="row">화면 점유율</th><td>최소 <strong>20%</strong>, 전체 원 그리드가 잘리지 않는 범위에서 <strong>50–80%</strong>를 권장합니다.</td></tr>
+                  <tr><th scope="row">타깃 각도</th><td>정면 0°와 좌·우·상·하 방향으로 <strong>15–45°</strong> 기울인 자세를 함께 기록합니다.</td></tr>
+                  <tr><th scope="row">최대 기울기</th><td>약 <strong>45° 이하</strong>로 유지합니다. 너무 비스듬하면 점이 작아지고 검출이 불안정해집니다.</td></tr>
+                  <tr><th scope="row">위치 분포</th><td>중앙뿐 아니라 좌·우·상·하와 네 모서리까지 고르게 사용합니다.</td></tr>
+                  <tr><th scope="row">거리</th><td>실제 사용 거리 부근을 중심으로 가까운 거리·중간 거리·먼 거리를 섞습니다.</td></tr>
+                  <tr><th scope="row">기록량</th><td>서로 다른 자세를 최소 <strong>20개</strong> 기록하고, 새로운 화면 영역을 계속 추가한다면 약 <strong>40개</strong>까지 권장합니다.</td></tr>
+                  <tr><th scope="row">모니터 타깃</th><td>평평하고 고정된 모니터에 전체 패턴을 표시하며, 원 그리드 위에 창이나 안내 UI가 겹치지 않게 합니다.</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h4>2대 카메라 — Stereo Calibration</h4>
+            <div class="capture-guidance-table-wrap">
+              <table class="capture-guidance-table">
+                <tbody>
+                  <tr><th scope="row">각 화면 점유율</th><td>좌·우 각각 최소 <strong>20%</strong>, 두 화면에서 전체 그리드가 보이는 범위에서 <strong>40–70%</strong>를 권장합니다.</td></tr>
+                  <tr><th scope="row">공통 관측</th><td>한 세그먼트 안에서 동일한 전체 원 그리드가 좌·우 두 화면 모두에 검출되어야 합니다.</td></tr>
+                  <tr><th scope="row">각도·위치</th><td>0°와 좌·우·상·하 15–45° 자세를 공통 시야의 중앙·가장자리·모서리에 고르게 배치합니다.</td></tr>
+                  <tr><th scope="row">거리</th><td>가까운 거리·중간 거리·먼 거리에서 기록하되, 두 카메라의 기준 거리와 상대 방향은 바꾸지 않습니다.</td></tr>
+                  <tr><th scope="row">기록량</th><td>서로 다른 스테레오 세그먼트를 최소 <strong>20개</strong>, 좌·우 화면이 계속 유효하다면 약 <strong>40쌍</strong>까지 권장합니다.</td></tr>
+                  <tr><th scope="row">고정 조건</th><td>카메라 사이 기준 거리와 상대 방향을 유지하고, 세그먼트 기록 중에는 카메라·삼각대·모니터를 움직이지 않습니다.</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <figure class="doc-figure capture-guidance-figure">
+              <div class="figure-label">크기·기울기·센서 영역을 함께 바꿔 기록</div>
+              <div class="figure-grid capture-guidance-grid">
+                <div><img src="../../assets/calibration-guide/capture-poses-grid.png" alt="여러 방향으로 배치된 원 그리드 모니터 타깃" /><span>정면만 반복하지 않고 여러 자세에서 기록합니다.</span></div>
+                <div><img src="../../assets/calibration-guide/capture-tilt-limit.png" alt="45도 이하의 타깃 기울기를 나타낸 도식" /><span>정면과 약 45° 이하의 제어된 기울기를 함께 사용합니다.</span></div>
+                <div><img src="../../assets/calibration-guide/capture-coverage-poses.png" alt="카메라 시야 전체에 분포한 원 그리드 자세를 나타낸 도식" /><span>화면의 가장자리와 모서리까지 관측점을 분포시킵니다.</span></div>
+              </div>
+              <figcaption>화면 중앙의 같은 정면 자세만 반복하면 렌즈 왜곡, 주점과 스테레오 관계를 안정적으로 구하기 어렵습니다.</figcaption>
+            </figure>
+          </section>
+
+          <section
+            class="doc-section searchable-section"
             id="capture-quality-checklist"
             data-search-title="촬영 품질 체크리스트"
           >
-            <h3>3.6 촬영 품질 체크리스트</h3>
+            <h3>3.7 촬영 품질 체크리스트</h3>
             <p>
               각 데이터를 기록하기 전에 실시간 이벤트 영상과 실제 설치 상태를
               다음 항목으로 확인합니다.
             </p>
             <ul class="capture-checklist">
-              <li>NRV DVS 시야에 전체 circle grid가 보입니까?</li>
+              <li>NRV DVS 시야에 전체 원 그리드가 보입니까?</li>
               <li>모든 원이 서로 명확하게 분리되어 있습니까?</li>
               <li>원 경계 주위에서 ON/OFF 이벤트가 선명하게 발생합니까?</li>
               <li>영상 경계에서 잘린 원이 없습니까?</li>
               <li>Blinking 패턴이 평면 모니터에 표시되어 있습니까?</li>
-              <li>카메라가 손떨림이나 진동 없이 고정되어 있습니까?</li>
+              <li>카메라가 흔들림이나 진동 없이 고정되어 있습니까?</li>
               <li>촬영 중 모니터가 움직이지 않고 안정적으로 고정되어 있습니까?</li>
-              <li>불필요한 이벤트를 피하도록 주변 물체가 정지해 있습니까?</li>
+              <li>주변 물체가 움직이지 않아 불필요한 이벤트가 억제되고 있습니까?</li>
               <li>손, 케이블 또는 반사 물체가 카메라 시야에서 제거되어 있습니까?</li>
-              <li>이벤트 영상이 주로 blinking circle grid에서 발생합니까?</li>
+              <li>이벤트 영상이 주로 깜빡이는 원 그리드에서 발생합니까?</li>
             </ul>
           </section>
 
@@ -383,7 +448,7 @@
             캘리브레이션 계산까지 전체 캘리브레이션 과정을 순서대로 진행합니다.
           </p>
 
-          <p class="bottom-author">by jy</p>
+          <p class="bottom-author">작성: 박재연</p>
 
           <nav
             class="chapter-switcher chapter-switcher-bottom"
@@ -394,6 +459,7 @@
               <a href="01-camera-calibration.html">1. 카메라 캘리브레이션이란?</a>
               <a href="02-dvs-calibration-method.html">2. NRV DVS 캘리브레이션 방법</a>
               <a class="current" href="03-capture-preparation.html" aria-current="page">3. 촬영 환경과 준비</a>
+              <a href="04-calibration-workflow.html">4. 캘리브레이션 촬영 및 처리 절차</a>
             </div>
           </nav>
 
@@ -401,15 +467,15 @@
             <a class="pager-link pager-prev" href="02-dvs-calibration-method.html">
               이전 글: 2. NRV DVS 캘리브레이션 방법
             </a>
-            <span class="pager-link pager-disabled">
-              다음 글 없음
-            </span>
+            <a class="pager-link pager-next" href="04-calibration-workflow.html">
+              다음 글: 4. 캘리브레이션 촬영 및 처리 절차
+            </a>
           </nav>
 
           <p class="search-empty" role="status" hidden>
             검색어와 일치하는 소제목이 없습니다.
           </p>
-          <p class="repository-note">이 글은 NRV의 지원을 받아 작성했습니다. 공식 NRV docs에는 영문 버전이 제공됩니다.</p>
+          <p class="repository-note">이 페이지에는 제가 직접 작성한 NRV DVS 캘리브레이션 준비 문서의 한글판만 수록했습니다.</p>
 
 
           <footer class="page-footer">

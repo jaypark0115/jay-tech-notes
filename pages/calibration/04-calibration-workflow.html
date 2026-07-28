@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="직접 구현한 NRV DVS Calibration 앱의 촬영, 검토, 계산과 결과 확인 절차."
+    />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>캘리브레이션 촬영 및 처리 절차 — 캘리브레이션 설명</title>
+    <link rel="stylesheet" href="../../styles.css" />
+    <script src="../../script.js" defer></script>
+  </head>
+  <body class="calibration-workflow-page">
+    <div class="site-shell">
+      <main class="content-wrap" id="top">
+        <article class="content">
+          <div class="document-kicker">
+            <span>캘리브레이션 가이드</span>
+            <div class="kicker-actions">
+              <span class="draft-label">직접 구현한 기능의 한글 사용 문서</span>
+            </div>
+          </div>
+
+          <a class="home-link" href="../../index.html">← Jay Tech Notes로 돌아가기</a>
+
+          <nav class="chapter-switcher" aria-label="캘리브레이션 챕터 이동">
+            <span class="chapter-switcher-label">캘리브레이션 글 목록</span>
+            <div>
+              <a href="01-camera-calibration.html">1. 카메라 캘리브레이션이란?</a>
+              <a href="02-dvs-calibration-method.html">2. NRV DVS 캘리브레이션 방법</a>
+              <a href="03-capture-preparation.html">3. 촬영 환경과 준비</a>
+              <a class="current" href="04-calibration-workflow.html" aria-current="page">4. 캘리브레이션 촬영 및 처리 절차</a>
+            </div>
+          </nav>
+
+          <h1>4. 캘리브레이션 촬영 및 처리 절차</h1>
+          <p class="lead">
+            이 장에서는 제가 직접 구현한 DVS Calibration 앱으로 실제 카메라 보정을
+            진행하는 방법을 설명합니다. 모니터의 원 그리드는 고정한 상태로 두고,
+            카메라와 고정된 삼각대를 옮겨 그리드가 화면의 여러 위치·거리·기울기로
+            보이도록 촬영합니다. 앱은 세그먼트마다 원 중심 후보를 찾고, 선택한 입력으로
+            모노 또는 스테레오 캘리브레이션 파라미터를 계산합니다.
+          </p>
+
+          <div class="scope-note" role="note">
+            <strong>제가 구현하고 문서화한 범위</strong>
+            <span>
+              카메라 자동 감지, 세그먼트 기록, 원 그리드 후보 선별, Coverage 확인,
+              모노·스테레오 캘리브레이션 계산과 결과 저장 기능을 구현했습니다.
+              이 페이지는 그 기능의 실제 사용 방법을 제가 직접 정리한 한글 문서입니다.
+            </span>
+          </div>
+
+          <section class="doc-section searchable-section" id="overview" data-search-title="Viewer에서 캘리브레이션 시작">
+            <h3>4.1 Viewer에서 캘리브레이션 시작</h3>
+            <p>
+              DVS Viewer에서 카메라 연결을 확인한 뒤 <strong>Calibration</strong>을
+              누릅니다. Viewer가 종료되면 DVS Calibration 앱이 동일한 카메라
+              연결을 이어받아 사용합니다.
+            </p>
+            <figure class="doc-figure workflow-figure workflow-entry-figure">
+              <img src="../../assets/calibration-guide/01-open-calibration.png" alt="DVS Viewer의 Calibration 버튼" />
+              <figcaption>캘리브레이션 작업은 Viewer의 <strong>Calibration</strong> 버튼에서 시작합니다.</figcaption>
+            </figure>
+          </section>
+
+          <section class="doc-section searchable-section" id="setup" data-search-title="카메라 감지와 물리 치수 확인">
+            <h3>4.2 카메라 감지와 물리 치수 확인</h3>
+            <figure class="doc-figure workflow-figure">
+              <img src="../../assets/calibration-guide/01-setup.jpg" alt="DVS Calibration 설정 화면" />
+              <figcaption>
+                <strong>1.</strong> 감지된 카메라 구성이 실제 장비와 맞는지 확인합니다.<br />
+                <strong>2.</strong> 그리드 행·열 수, 실제 원 간격과 스테레오 기준 거리를 입력합니다.<br />
+                <strong>3.</strong> 확인 후 <strong>Start live preview</strong>를 누릅니다.
+              </figcaption>
+            </figure>
+            <p>
+              카메라 종류와 모노·스테레오 구성은 연결된 장비를 기준으로 자동
+              결정됩니다. 촬영은 모든 카메라에서 <strong>100 FPS</strong>,
+              <strong>10프레임 누적</strong>으로 동작하므로 FPS와 누적 수를 별도로
+              설정하지 않습니다. 3장에서 측정한 원 간격(circle spacing)과 카메라
+              기준점 사이의 거리를 입력하고, 감지 결과가 실제 연결과 다를 때만
+              <strong>Rescan</strong>을 사용합니다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="capture" data-search-title="Live Preview에서 여러 자세 기록">
+            <h3>4.3 Live Preview에서 여러 자세 기록</h3>
+            <figure class="doc-figure workflow-figure">
+              <img src="../../assets/calibration-guide/02-live-recording.jpg" alt="세그먼트를 기록 중인 Live Preview 화면" />
+              <figcaption>
+                빨간 REC와 시간이 보이면 현재 자세를 기록 중입니다. 세그먼트를
+                끝내면 PNG 저장과 자동 소팅이 백그라운드에서 이어집니다.
+              </figcaption>
+            </figure>
+            <p>
+              Preview는 <strong>10 FPS</strong>로 표시되므로 움직일 때 다소 끊겨
+              보일 수 있습니다. 카메라 오류나 PC 성능 저하가 아니라, 캘리브레이션용
+              화면을 낮은 표시 속도로 갱신하는 동작입니다. 원 그리드의 점이 모두
+              분리되어 보이는지, 주변에서 불필요한 이벤트가 과도하게 발생하는지를
+              확인하는 용도로 사용합니다.
+            </p>
+            <p>
+              세그먼트가 끝난 뒤 PNG 저장과 원 그리드 <strong>소팅은 백그라운드에서
+              계속 진행</strong>됩니다. 소팅이 끝날 때까지 기다리지 않고 다음 자세로
+              옮겨 바로 기록할 수 있습니다. <strong>Accepted pairs</strong>는 소팅 결과,
+              캘리브레이션 입력으로 사용할 수 있다고 판단한 기록 수입니다.
+              스테레오에서는 같은 세그먼트의 좌·우 관측이 모두 유효해야 한 쌍으로
+              인정됩니다.
+            </p>
+            <p>
+              각 자세는 약 <strong>5초</strong> 기록하고, 화면 위치·거리·기울기가
+              서로 다른 약 <strong>40개 세그먼트</strong>를 목표로 합니다. 키보드
+              <kbd>S</kbd> 또는 <strong>Start/Stop segment recording</strong>으로
+              기록을 시작하고 끝냅니다. <strong>REC가 켜진 동안에는 카메라와
+              고정된 삼각대를 움직이지 않습니다.</strong>
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="review" data-search-title="Review에서 입력 고르기">
+            <h3>4.4 Review에서 입력 고르기</h3>
+            <figure class="doc-figure workflow-figure">
+              <img src="../../assets/calibration-guide/03-review.jpg" alt="소팅과 Coverage 확인이 가능한 Review 화면" />
+              <figcaption>
+                소팅 워커 수를 정하고 Coverage를 확인한 뒤, Rank 후보를 비교하거나
+                필요한 이미지를 직접 선택합니다. 입력이 충분하면
+                <strong>Start calibration</strong>을 누릅니다.
+              </figcaption>
+            </figure>
+            <p>
+              소팅은 한 세그먼트에 저장된 여러 깜빡임 시점의 이미지에서 유효한
+              그리드를 검출하고 점 순서를 확인한 뒤 점수화하는 사전 입력 처리입니다.
+              최대 세 후보를 Rank 1–3으로 자동 선택하며, 이 단계에서는 아직
+              보정값을 계산하지 않습니다.
+            </p>
+            <figure class="doc-figure sorting-samples-figure">
+              <img src="../../assets/calibration-guide/sorting-grid-samples.png" alt="한 세그먼트의 서로 다른 깜빡임 시점에서 저장된 원 그리드 이미지" />
+              <figcaption>한 세그먼트에서 모니터의 깜빡임 시점별로 저장된 이미지 예시입니다.</figcaption>
+            </figure>
+            <p>
+              Review에서는 PC 성능에 따라 <strong>1~5개</strong>의 세그먼트를 병렬로
+              소팅할 수 있고 기본값은 3개입니다. 자동 선택이 틀린 세그먼트만
+              <strong>Browse</strong>로 보완하고, 검출이 약한 경우에만
+              <strong>Rescan relaxed</strong>를 사용합니다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="rank" data-search-title="Rank 후보 이해">
+            <h3>4.5 Rank 후보 이해</h3>
+            <figure class="doc-figure workflow-figure">
+              <img src="../../assets/calibration-guide/04-rank-candidates.jpg" alt="Rank 1부터 Rank 3까지 표시된 후보 선택 창" />
+              <figcaption>
+                Rank 1은 대표 이미지이고 Rank 2와 Rank 3은 같은 정지 자세에서 얻은
+                추가 후보입니다.
+              </figcaption>
+            </figure>
+            <p>
+              세 후보가 모두 동일한 원 그리드를 담은 이미지로 확인되면 프로그램은 각 이미지에서
+              얻은 <strong>원 중심 좌표를 평균</strong>해 해당 자세의 중심 좌표를
+              안정화합니다. 자동 선택이 맞지 않으면 Browse로 원하는 이미지를
+              각 순위에 수동으로 넣을 수 있습니다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="coverage" data-search-title="Coverage Check로 촬영 범위 확인">
+            <h3>4.6 Coverage Check로 촬영 범위 확인</h3>
+            <figure class="doc-figure workflow-figure">
+              <img src="../../assets/calibration-guide/05-coverage-check.jpg" alt="좌우 카메라의 Coverage Check 화면" />
+              <figcaption>
+                Device 0과 Device 1의 분포를 각각 확인합니다. 흰 영역은 원 그리드
+                관측이 부족한 영역입니다.
+              </figcaption>
+            </figure>
+            <p>
+              Coverage Check는 촬영 데이터가 센서 화면을 충분히 덮었는지 보여
+              줍니다. 흰 영역이 넓으면 카메라와 고정된 삼각대를 옮겨 원 그리드가
+              그 위치에 보이도록 세그먼트를 더 촬영합니다. 스테레오는 좌·우 화면을
+              모두 확인해야 합니다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="running" data-search-title="캘리브레이션 계산 진행 확인">
+            <h3>4.7 계산 진행 확인</h3>
+            <figure class="doc-figure workflow-figure">
+              <img src="../../assets/calibration-guide/06-calibration-running.jpg" alt="캘리브레이션 계산 진행 화면" />
+              <figcaption>진행 막대와 로그로 계산 상태를 확인하고, 완료되면 <strong>Show result</strong>를 누릅니다.</figcaption>
+            </figure>
+            <p>
+              계산 중에는 선택 이미지와 카메라 구성을 바꾸지 않습니다. 오류가
+              발생하면 로그를 보관하고 Review로 돌아가 입력 선택부터 점검합니다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="result" data-search-title="결과 확인과 보관">
+            <h3>4.8 결과 확인과 보관</h3>
+            <figure class="doc-figure workflow-figure">
+              <img src="../../assets/calibration-guide/07-calibration-result.jpg" alt="캘리브레이션 계산 결과 화면" />
+              <figcaption>
+                Used pairs, reprojection RMS, epipolar error와 baseline difference를
+                함께 확인한 뒤 출력 폴더를 엽니다.
+              </figcaption>
+            </figure>
+            <p>실제 카메라 보정값을 적용할 때 사용하는 파일은 다음과 같습니다.</p>
+            <pre class="yaml-file-block"><code>calibration.yaml</code></pre>
+            <p>
+              결과 폴더에는 계산에 사용한 이미지 쌍을 정리한 pair report CSV와
+              계산 과정 및 제외된 입력을 확인할 수 있는 run log도 저장됩니다. 동일한 조건을
+              다시 검토하려면 이 YAML을 만든 <code>live_sampled_...</code> 세션
+              폴더도 함께 보관합니다.
+            </p>
+          </section>
+
+          <div class="transition-note" role="note">
+            <p>
+              <strong>지원 카메라:</strong> DVS Calibration은 Delta-01 모노 카메라
+              1대 또는 2대, Delta-10 모노 카메라 1대 또는 2대와 Delta Stereo를
+              지원합니다. Delta Sigma 지원은 예정되어 있습니다.
+            </p>
+            <p>
+              이벤트 카메라와 다른 종류의 카메라 사이 상대 자세(pose)까지 함께 측정해야 하는
+              경우에는 이 절차를 바탕으로 필요한 연동 기능을 별도로 구성해야 합니다.
+            </p>
+          </div>
+
+          <p class="bottom-author">기능 구현 및 한글 문서 작성: 박재연</p>
+
+          <nav class="chapter-switcher chapter-switcher-bottom" aria-label="캘리브레이션 챕터 이동">
+            <span class="chapter-switcher-label">캘리브레이션 글 목록</span>
+            <div>
+              <a href="01-camera-calibration.html">1. 카메라 캘리브레이션이란?</a>
+              <a href="02-dvs-calibration-method.html">2. NRV DVS 캘리브레이션 방법</a>
+              <a href="03-capture-preparation.html">3. 촬영 환경과 준비</a>
+              <a class="current" href="04-calibration-workflow.html" aria-current="page">4. 캘리브레이션 촬영 및 처리 절차</a>
+            </div>
+          </nav>
+
+          <nav class="article-pager" aria-label="이전 글과 다음 글">
+            <a class="pager-link pager-prev" href="03-capture-preparation.html">
+              이전 글: 3. 촬영 환경과 준비
+            </a>
+            <span class="pager-link pager-disabled">다음 글 없음</span>
+          </nav>
+
+          <p class="repository-note">
+            이 글은 제가 직접 구현한 NRV DVS 캘리브레이션 기능을 기준으로 작성한 한글 문서입니다.
+          </p>
+
+          <footer class="page-footer">
+            <span>캘리브레이션 설명</span>
+            <a href="#top">맨 위로 ↑</a>
+          </footer>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>

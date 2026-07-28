@@ -1100,6 +1100,10 @@ p {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.figure-grid.capture-guidance-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .figure-grid > div {
   overflow: hidden;
   border: 1px solid var(--line);
@@ -1522,6 +1526,7 @@ p {
   .chapter-local-nav div,
   .chapter-overview,
   .figure-grid.two-up,
+  .figure-grid.capture-guidance-grid,
   .article-pager,
   .equipment-grid,
   .monitor-role-note,
@@ -2938,6 +2943,86 @@ body.troubleshooting-page .hardware-reference-figure {
   display: grid;
   gap: 72px;
   margin: 42px 0 66px;
+}
+
+.capture-guidance-figure {
+  width: min(100%, 1080px);
+  margin: 1.75rem auto 2rem;
+}
+
+.capture-guidance-figure .figure-grid img {
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  background: #fff;
+}
+
+.capture-guidance-table-wrap {
+  overflow-x: auto;
+  margin: 1.25rem 0 2rem;
+  border: 1px solid var(--line);
+}
+
+.capture-guidance-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  color: var(--soft-ink);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.capture-guidance-table th,
+.capture-guidance-table td {
+  padding: 0.82rem 0.9rem;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.capture-guidance-table th {
+  width: 30%;
+  color: var(--ink);
+  background: #f7f8fa;
+  font-weight: 800;
+}
+
+.calibration-workflow-page .workflow-figure {
+  width: min(100%, 960px);
+  margin: 1.35rem auto 1.15rem;
+}
+
+.calibration-workflow-page .workflow-figure img {
+  max-height: 480px;
+  object-fit: contain;
+}
+
+.calibration-workflow-page .workflow-entry-figure {
+  width: min(100%, 780px);
+}
+
+.calibration-workflow-page .sorting-samples-figure {
+  width: min(100%, 360px);
+  margin: 1.25rem auto 1.5rem;
+}
+
+.calibration-workflow-page .sorting-samples-figure img {
+  max-height: 210px;
+  object-fit: contain;
+}
+
+.calibration-workflow-page .workflow-figure figcaption {
+  color: var(--ink);
+}
+
+.yaml-file-block {
+  margin: 1rem 0 1.25rem;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  background: #f6f8fb;
+  color: var(--ink);
+  font: 700 0.95rem/1.4 "Cascadia Mono", "JetBrains Mono", Consolas, monospace;
 }
 
 .competition-group {

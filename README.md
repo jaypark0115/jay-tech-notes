@@ -48,12 +48,16 @@ https://jaypark0115.github.io/jay-tech-notes/
 
 ### 2. NRV DVS 캘리브레이션 설명
 
+NRV 이벤트 카메라의 캘리브레이션 기능은 제가 직접 구현했으며, 아래 한글 사용·설명 문서도 직접 작성했습니다.
+
 1. [카메라 캘리브레이션이란?](https://jaypark0115.github.io/jay-tech-notes/pages/calibration/01-camera-calibration.html)
    - 카메라 캘리브레이션의 기본 개념, 필요한 이유, 추정되는 파라미터를 설명합니다.
 2. [NRV DVS 캘리브레이션 방법](https://jaypark0115.github.io/jay-tech-notes/pages/calibration/02-dvs-calibration-method.html)
    - 이벤트 카메라 캘리브레이션에서 밝기 변화와 blinking asymmetric circle grid가 필요한 이유를 정리했습니다.
 3. [촬영 환경과 준비](https://jaypark0115.github.io/jay-tech-notes/pages/calibration/03-capture-preparation.html)
-   - 캘리브레이션 데이터를 얻기 전 필요한 장비, 모니터 설정, 원 간격 측정, 카메라 고정 조건을 정리했습니다.
+   - 캘리브레이션 데이터를 얻기 전 필요한 장비, 모니터 설정, 원 간격 측정, 카메라 고정과 권장 촬영 조건을 정리했습니다.
+4. [캘리브레이션 촬영 및 처리 절차](https://jaypark0115.github.io/jay-tech-notes/pages/calibration/04-calibration-workflow.html)
+   - 직접 구현한 DVS Calibration 앱에서 촬영, 후보 선별, Coverage 확인, 계산과 결과 보관까지 진행하는 방법을 정리했습니다.
 
 ### 3. NRV FPGA 트러블슈팅 노트
 
