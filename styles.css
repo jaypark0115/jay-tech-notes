@@ -4143,3 +4143,635 @@ body.troubleshooting-page .reference-section a {
     grid-template-columns: 1fr;
   }
 }
+
+/* Competition case studies — rebuilt as a quiet, consistent reading layout. */
+.competition-home {
+  --case-accent: #0f766e;
+  margin-top: 5rem;
+  padding-top: 2.4rem;
+  border-top: 1px solid #cbd5e1;
+}
+
+.competition-home-heading {
+  max-width: 780px;
+  margin-bottom: 3.75rem;
+}
+
+.competition-home-heading > span,
+.competition-project-meta {
+  display: block;
+  margin: 0 0 0.65rem;
+  color: var(--case-accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.competition-home-heading h2 {
+  margin: 0 0 1rem;
+  font-size: clamp(1.65rem, 2.2vw, 2rem);
+  line-height: 1.25;
+}
+
+.competition-home-heading h2::before {
+  display: none;
+}
+
+.competition-home-heading p {
+  margin: 0;
+  color: #475569;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.competition-home .competition-collection {
+  gap: 5rem;
+  margin: 0;
+}
+
+.competition-home .competition-group {
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.competition-project-intro {
+  padding: 0 0 1.75rem;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.competition-project-intro h3 {
+  margin: 0 0 1rem;
+  padding: 0;
+  border: 0;
+  font-size: clamp(1.35rem, 1.8vw, 1.6rem);
+  line-height: 1.35;
+}
+
+.competition-project-intro h3::before {
+  display: none;
+}
+
+.competition-project-intro > p:not(.competition-project-meta) {
+  max-width: 920px;
+  margin: 0;
+  color: #475569;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.competition-project-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin: 1.5rem 0 0;
+}
+
+.competition-project-facts div {
+  padding-top: 0.9rem;
+  border-top: 2px solid #d9e2e8;
+}
+
+.competition-project-facts dt {
+  margin-bottom: 0.35rem;
+  color: #0f766e;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.competition-project-facts dd {
+  margin: 0;
+  color: #475569;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.competition-home .competition-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.4rem;
+}
+
+.competition-card {
+  display: flex;
+  min-height: 220px;
+  flex-direction: column;
+  padding: 1.35rem 1.25rem;
+  border: 1px solid #dbe3e8;
+  border-top: 3px solid #0f766e;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.competition-card:hover {
+  border-color: #94a3b8;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgb(15 23 42 / 8%);
+}
+
+.competition-card > span {
+  color: #0f766e;
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+}
+
+.competition-card h4 {
+  margin: 1rem 0 0.7rem;
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+
+.competition-card p {
+  margin: 0;
+  color: #5b6573;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  word-break: keep-all;
+}
+
+body.competition-page {
+  --competition-accent: #0f766e;
+  --competition-accent-dark: #0b5f59;
+  --competition-accent-soft: #f3faf9;
+  color: #334155;
+  font-size: 17px;
+  line-height: 1.78;
+}
+
+body.competition-page .content-wrap {
+  width: min(100%, 1120px);
+  padding-top: 3.5rem;
+}
+
+body.competition-page .content {
+  width: 100%;
+}
+
+body.competition-page .document-kicker {
+  margin-bottom: 0.7rem;
+  color: #0f766e;
+  font-size: 0.78rem;
+  letter-spacing: 0.045em;
+  text-transform: none;
+}
+
+body.competition-page .draft-label {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.78rem;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+body.competition-page .home-link {
+  margin-bottom: 1.1rem;
+  font-size: 0.84rem;
+}
+
+body.competition-page .chapter-switcher {
+  margin: 0 0 3rem;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid #cbd5e1;
+  border-bottom: 1px solid #cbd5e1;
+  background: transparent;
+}
+
+body.competition-page .chapter-switcher-label {
+  display: block;
+  padding: 0.85rem 0 0;
+  color: #0f766e;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+body.competition-page .chapter-switcher div {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0;
+  padding: 0.55rem 0 0.8rem;
+  background: transparent;
+}
+
+body.competition-page .chapter-switcher a {
+  margin-right: 1.25rem;
+  padding: 0.25rem 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+body.competition-page .chapter-switcher a:hover,
+body.competition-page .chapter-switcher a.current {
+  border: 0;
+  border-bottom: 2px solid #0f766e;
+  background: transparent;
+  color: #0b5f59;
+}
+
+body.competition-page h1 {
+  max-width: 900px;
+  margin: 0 0 1.2rem;
+  padding: 0;
+  border: 0;
+  font-size: clamp(2rem, 3.35vw, 2.65rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.22;
+  word-break: keep-all;
+}
+
+body.competition-page .lead {
+  max-width: 900px;
+  margin: 0 0 2.4rem;
+  color: #475569;
+  font-size: 1.06rem;
+  line-height: 1.8;
+}
+
+body.competition-page .doc-section {
+  margin-top: 4.75rem;
+}
+
+body.competition-page .doc-section > h2 {
+  margin: 0 0 1.15rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid #cbd5e1;
+  font-size: clamp(1.45rem, 2.1vw, 1.85rem);
+  line-height: 1.35;
+  word-break: keep-all;
+}
+
+body.competition-page .doc-section > h2::before {
+  display: none;
+}
+
+body.competition-page .doc-section h3 {
+  margin: 2.1rem 0 0.75rem;
+  padding: 0;
+  border: 0;
+  font-size: 1.08rem;
+  line-height: 1.5;
+}
+
+body.competition-page .doc-section h3::before {
+  display: none;
+}
+
+body.competition-page p,
+body.competition-page li,
+body.competition-page dd,
+body.competition-page td {
+  word-break: keep-all;
+}
+
+.case-summary {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 2.5rem;
+  margin: 2.2rem 0 3rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid #cbd5e1;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.case-summary h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.2rem;
+  line-height: 1.45;
+}
+
+.case-summary h2::before {
+  display: none;
+}
+
+.case-summary p {
+  margin: 0;
+  color: #475569;
+}
+
+.case-facts {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+}
+
+.case-facts div {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.case-facts dt {
+  color: #0f766e;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.case-facts dd {
+  margin: 0;
+  color: #475569;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.case-flow {
+  display: grid;
+  grid-template-columns: repeat(var(--flow-count, 4), minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  margin: 1.6rem 0 2rem;
+  border: 1px solid #cbd5e1;
+  background: #cbd5e1;
+}
+
+.case-flow-step {
+  min-height: 132px;
+  padding: 1.1rem;
+  background: #fff;
+}
+
+.case-flow-step span {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #0f766e;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.case-flow-step strong {
+  display: block;
+  color: #1e293b;
+  font-size: 0.96rem;
+  line-height: 1.45;
+}
+
+.case-flow-step small {
+  display: block;
+  margin-top: 0.5rem;
+  color: #64748b;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.case-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.4rem 0 2rem;
+}
+
+.case-card {
+  padding: 1.2rem;
+  border: 1px solid #dbe3e8;
+  background: #fff;
+}
+
+.case-card > span {
+  color: #0f766e;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.case-card h3 {
+  margin: 0.45rem 0 0.5rem !important;
+  font-size: 1.02rem !important;
+}
+
+.case-card p,
+.case-card li {
+  color: #566171;
+  font-size: 0.9rem;
+  line-height: 1.68;
+}
+
+.case-card p:last-child,
+.case-card ul:last-child {
+  margin-bottom: 0;
+}
+
+.evidence-note {
+  margin: 1.5rem 0 2rem;
+  padding: 1rem 1.15rem;
+  border-left: 3px solid #0f766e;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.evidence-note strong {
+  color: #1e293b;
+}
+
+.evidence-note.warning {
+  border-left-color: #b45309;
+  background: #fffbeb;
+}
+
+.result-band {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin: 1.5rem 0 2rem;
+  border-top: 1px solid #cbd5e1;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.result-band article {
+  padding: 1.15rem;
+  border-right: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.result-band article:last-child {
+  border-right: 0;
+}
+
+.result-band strong {
+  display: block;
+  color: #0b5f59;
+  font-size: 1.25rem;
+  line-height: 1.35;
+}
+
+.result-band span {
+  display: block;
+  margin-top: 0.35rem;
+  color: #64748b;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.code-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 1.1rem 0 2rem;
+}
+
+.code-links a {
+  padding: 0.5rem 0.72rem;
+  border: 1px solid #cbd5e1;
+  color: #0b5f59;
+  font: 700 0.82rem/1.4 "Cascadia Mono", Consolas, monospace;
+  text-decoration: none;
+}
+
+.code-links a:hover {
+  border-color: #0f766e;
+  background: #f3faf9;
+}
+
+body.competition-page .signal-table-wrap {
+  margin: 1.4rem 0 2rem;
+  overflow-x: auto;
+  border: 1px solid #dbe3e8;
+}
+
+body.competition-page .signal-table {
+  min-width: 680px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+body.competition-page .signal-table th,
+body.competition-page .signal-table td {
+  padding: 0.75rem 0.85rem;
+}
+
+body.competition-page .signal-table th {
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+body.competition-page .doc-figure {
+  overflow: hidden;
+  margin: 1.6rem 0 2.2rem;
+  border: 1px solid #dbe3e8;
+  background: #fff;
+}
+
+body.competition-page .figure-label {
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #0b5f59;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+body.competition-page .doc-figure img {
+  width: 100%;
+  max-height: 680px;
+  object-fit: contain;
+  background: #fff;
+}
+
+body.competition-page .doc-figure figcaption {
+  padding: 0.75rem 0.9rem;
+  border-top: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+body.competition-page .page-footer {
+  margin-top: 5rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid #cbd5e1;
+}
+
+body.competition-page .page-footer a {
+  font-size: 0.86rem;
+}
+
+@media (max-width: 1000px) {
+  .competition-home .competition-card-grid,
+  .result-band {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .competition-project-facts {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .case-flow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .result-band article:nth-child(2) {
+    border-right: 0;
+  }
+
+  .result-band article:nth-child(-n + 2) {
+    border-bottom: 1px solid #e2e8f0;
+  }
+}
+
+@media (max-width: 720px) {
+  body.competition-page {
+    font-size: 16px;
+  }
+
+  body.competition-page .content-wrap {
+    padding: 2rem 1.25rem 4rem;
+  }
+
+  body.competition-page h1 {
+    font-size: clamp(1.8rem, 8vw, 2.35rem);
+  }
+
+  body.competition-page .lead {
+    font-size: 1rem;
+  }
+
+  body.competition-page .chapter-switcher div {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  body.competition-page .chapter-switcher a {
+    margin: 0;
+  }
+
+  .competition-home .competition-card-grid,
+  .case-grid,
+  .case-summary,
+  .case-flow,
+  .result-band {
+    grid-template-columns: 1fr;
+  }
+
+  .competition-card {
+    min-height: 0;
+  }
+
+  .case-summary {
+    gap: 1.5rem;
+  }
+
+  .result-band article,
+  .result-band article:nth-child(2) {
+    border-right: 0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .result-band article:last-child {
+    border-bottom: 0;
+  }
+}

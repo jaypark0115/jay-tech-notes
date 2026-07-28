@@ -5,43 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="SNN BallControl 출력 제어 회로와 YOLOv2 FPGA 가속기 프로젝트 소개 페이지로 이동하는 경진대회 기술 기록 색인."
+      content="SNN BallControl 제어 회로와 YOLOv2 Full-Graph FPGA 가속기 기술 케이스 스터디 색인."
     />
-    <title>경진대회 프로젝트 기술 기록</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260728-competition-final" />
+    <title>경진대회 기술 케이스 스터디</title>
+    <link rel="stylesheet" href="../../styles.css?v=20260729-competition-redesign" />
     <script src="../../script.js" defer></script>
   </head>
-  <body class="competition-page competition-overview-page">
+  <body class="competition-page">
     <div class="site-shell">
       <main class="content-wrap" id="top">
         <article class="content">
           <div class="document-kicker">
-            <span>Competition Case Studies</span>
-            <div class="kicker-actions"><span class="draft-label">PROJECT INDEX</span></div>
+            <span>설계에서 검증까지</span>
+            <div class="kicker-actions"><span class="draft-label">프로젝트 색인</span></div>
           </div>
-          <a class="home-link" href="../../index.html#competition-case-studies">← 경진대회 글묶음으로 돌아가기</a>
-          <h1>경진대회 프로젝트 기술 기록</h1>
+          <a class="home-link" href="../../index.html#competition-case-studies">← 대표 페이지로 돌아가기</a>
+          <h1>경진대회 기술 케이스 스터디</h1>
           <p class="lead">
-            두 프로젝트는 각각 독립적인 소개 페이지와 세 편의 기술 글로 정리했습니다.
-            처음 읽는다면 프로젝트 소개에서 문제, 제작물, 담당 범위와 결과를 확인한
-            뒤 세부 구현 글로 이동하면 됩니다.
+            두 프로젝트를 결과 목록이 아니라 문제 정의, 설계 판단, 구현과 검증의
+            연결로 정리했습니다. 각 프로젝트의 전체 소개를 먼저 읽은 뒤 세부
+            기술 글로 이어갈 수 있습니다.
           </p>
-          <section class="doc-section" aria-label="경진대회 프로젝트 선택">
-            <div class="article-link-grid project-index-grid">
-              <a href="ai-semi-00-overview.html">
-                <span>2025 AI SEMICONDUCTOR</span>
-                <strong>SNN BallControl 출력 제어 RTL</strong>
-                <small>위치·속도 입력을 네 방향 LIF 제어 이벤트로 변환한 output-layer 회로</small>
-              </a>
-              <a href="aix-00-overview.html">
-                <span>AIX 2026</span>
-                <strong>YOLOv2 Full-Graph FPGA 가속기</strong>
-                <small>INT8 양자화부터 두 detection head와 229장 보드 검증까지 연결한 가속기</small>
-              </a>
+
+          <section class="doc-section" aria-labelledby="case-index-title">
+            <h2 id="case-index-title">프로젝트 선택</h2>
+            <div class="case-grid">
+              <article class="case-card">
+                <span>2025 · SNN CONTROL</span>
+                <h3><a href="ai-semi-00-overview.html">SNN 기반 BallControl 제어 회로</a></h3>
+                <p>
+                  99개 위치 입력과 32개 은닉 뉴런, 4개 방향 출력을 이용해
+                  공의 위치와 무게를 제어 이벤트로 바꾼 프로젝트입니다.
+                </p>
+              </article>
+              <article class="case-card">
+                <span>2026 · FPGA ACCELERATOR</span>
+                <h3><a href="aix-00-overview.html">YOLOv2 Full-Graph FPGA 가속기</a></h3>
+                <p>
+                  정수화한 YOLOv2의 22개 처리 단계와 두 detection head를
+                  Nexys 4 DDR에서 실행하고 229장으로 검증한 프로젝트입니다.
+                </p>
+              </article>
             </div>
           </section>
+
           <footer class="page-footer">
-            <a href="../../index.html#competition-case-studies">← 경진대회 글묶음</a>
+            <a href="../../index.html#competition-case-studies">← 경진대회 기술 노트</a>
             <a href="ai-semi-00-overview.html">첫 프로젝트 읽기 →</a>
           </footer>
         </article>

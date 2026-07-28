@@ -1,7 +1,8 @@
-# Competition RTL reference
+# 경진대회 RTL 참고 코드
 
-이 디렉터리는 경진대회 기술 케이스 스터디에서 설명하는 실제 RTL 일부를
-페이지의 설명과 함께 읽을 수 있도록 정리한 공간입니다.
+기술 케이스 스터디에서 신호 흐름을 설명할 때 직접 참조하는 모듈을
+모았습니다. 전체 Vivado 프로젝트, 데이터셋, weight와 테스트 실행 환경은
+포함하지 않습니다.
 
 ## 2025 전국 대학생 AI 반도체 회로 설계 경진대회
 
@@ -9,9 +10,9 @@
 - `ai-semi/lif_neuron.v`
 - `ai-semi/controller_top.v`
 
-위 세 파일은 BallControl 결과물에서 직접 확인한 output-layer 제어
-파이프라인입니다. 공의 위치와 속도 크기를 입력으로 받아 오차를 네 방향으로
-나누고, 네 개의 LIF 뉴런 출력을 모터 방향 신호로 연결합니다.
+세 파일을 순서대로 읽으면 signed X·Y 오차를 네 방향 크기로 나누고,
+네 개의 LIF 뉴런 출력을 방향 신호로 연결하는 과정을 확인할 수 있습니다.
+최종 발표에서 설명한 99→32→4 전체 실험망과는 구분해 설명합니다.
 
 ## AIX 2026 Deep Learning Hardware 설계경진대회
 
@@ -19,6 +20,7 @@
 - `aix/fastv2_mac_array_packed_pair.v`
 - `aix/fastv2_postproc_requant_pipe.v`
 
-각각 22-layer graph descriptor, 144-lane packed-pair INT8 MAC,
-fixed-point requantization 파이프라인을 보여줍니다. 각 기술 글에서는
-이 파일들이 전체 실행 흐름에서 맡는 역할과 연결 관계를 설명합니다.
+각각 22개 graph descriptor, 144-lane packed-pair INT8 MAC,
+fixed-point requantization 경로를 보여줍니다. 전체 가속기의 scheduler,
+DDR interface와 board design 가운데 본문에서 설명하는 핵심 구조만
+선별했습니다.

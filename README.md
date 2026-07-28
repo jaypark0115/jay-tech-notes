@@ -86,29 +86,29 @@ NRV 이벤트 카메라의 캘리브레이션 기능은 제가 직접 구현했�
 4. [AXI-to-APB Bridge](https://jaypark0115.github.io/jay-tech-notes/pages/soc/07-axi-to-apb-bridge.html)
    - AXI-to-APB protocol conversion, write/read FSM, APB slave, testbench, PASS 로그를 기준으로 최종 프로젝트를 정리했습니다.
 
-### 6. 경진대회 기술 노트
+### 6. 경진대회 기술 케이스 스터디
 
-두 경진대회가 어떤 문제를 다뤘고 무엇을 만들었는지 설명한 뒤, 각 프로젝트에서
-수행한 일과 사용한 기술 개념, 설계·구현·검증 과정을 세 편씩 이어서 정리했습니다.
+문제 정의, 입력 표현, 하드웨어 구조와 검증 결과가 어떻게 이어지는지
+두 프로젝트를 네 편씩 정리했습니다.
 
 #### 2025 전국 대학생 AI 반도체 회로 설계 경진대회 · 팀 반짝반짝
 
-1. [프로젝트 소개: SNN BallControl 출력 제어 RTL](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-00-overview.html)
-   - 대회 문제, 제작물, 실제 구현 범위와 팀장으로 맡은 일을 먼저 설명합니다.
-2. [BallControl 문제 이해하기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-01-problem-and-design.html)
-   - 30×30cm 보드 위의 공을 중앙으로 옮기는 문제가 회로의 입력과 출력으로 어떻게 바뀌는지 설명합니다.
-3. [위치 오차가 스파이크가 되는 과정](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-02-snn-control-rtl.html)
-   - `error_encoder`, `lif_neuron`, `controller_top`을 따라 위치 오차가 네 방향 제어 신호가 되는 과정을 읽습니다.
-4. [입력 실험과 구현 결과 읽기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-03-verification-results.html)
-   - 위치만 사용한 입력과 공의 무게까지 반영한 입력을 비교하고 합성·전력 결과의 의미를 정리했습니다.
+1. [프로젝트 전체 보기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-00-overview.html)
+   - BallControl 문제와 99→32→4 SNN 구조, 담당 범위와 검증 경계를 먼저 설명합니다.
+2. [문제를 뉴런 입력으로 바꾸기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-01-problem-and-design.html)
+   - 11×9 one-hot 위치 입력과 무게 rate encoding을 정의한 과정을 다룹니다.
+3. [SNN 제어 회로 읽기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-02-snn-control-rtl.html)
+   - LIF 뉴런, 시간 단계 FSM, 99→32→4 구조와 선별 Verilog의 관계를 설명합니다.
+4. [입력 실험과 결과 해석](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-03-verification-results.html)
+   - 15g·30g 시뮬레이션, 합성 자원과 Vivado 전력 추정값을 검증 범위와 함께 읽습니다.
 
 #### AIX 2026 Deep Learning Hardware 설계경진대회 · 팀 경이원지
 
-1. [프로젝트 소개: YOLOv2 Full-Graph FPGA 가속기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-00-overview.html)
-   - 대회 문제, 전체 실행 경로, 담당 범위와 229장 보드 검증 결과를 한 페이지에서 요약합니다.
-2. [YOLOv2를 정수 연산으로 바꾸기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-01-quantization.html)
-   - 대표 이미지로 값의 범위를 찾고 실제 검출 정확도를 확인하며 INT8 양자화 조건을 정한 과정을 설명합니다.
-3. [모델 전체를 FPGA에서 실행하기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-02-fpga-architecture.html)
-   - 22개 처리 단계, DDR 작업 공간, 144-lane MAC과 두 검출 출력을 하나의 실행 흐름으로 연결한 구조를 살펴봅니다.
-4. [한 장에서 229장 검증까지](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-03-board-verification.html)
-   - 실행 경로를 한 장으로 확인한 뒤 229장으로 확장해 속도, 정확도와 하드웨어 보고서를 함께 검증합니다.
+1. [프로젝트 전체 보기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-00-overview.html)
+   - 정수 모델, 22개 descriptor, 두 detection head와 최종 보드 결과를 한 흐름으로 정리합니다.
+2. [YOLOv2 정수 양자화](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-01-quantization.html)
+   - 최신 32장 calibration과 detector mAP를 기준으로 scale을 선택한 과정을 설명합니다.
+3. [Full-Graph FPGA 구조](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-02-fpga-architecture.html)
+   - DDR workspace, 22개 descriptor, 144-lane packed MAC과 두 detection head의 연결을 다룹니다.
+4. [229장 보드 검증](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-03-board-verification.html)
+   - test_one에서 test_all로 확장해 detector mAP, compute-only FPS, timing과 자원을 확인합니다.

@@ -3,9 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="BallControl SNN 회로의 one-shot 입력과 무게 반영 rate encoding 실험, 합성·전력 추정 결과와 프로젝트 기여를 설명한 글." />
-    <title>AI 반도체 경진대회 3 - 입력 실험과 구현 결과 읽기</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260728-competition-final" />
+    <meta
+      name="description"
+      content="BallControl SNN의 one-shot과 무게 반영 rate encoding 실험, 합성 자원과 전력 추정 결과를 검증 범위와 함께 설명한 글."
+    />
+    <title>AI 반도체 경진대회 3 - 실험과 구현 결과</title>
+    <link rel="stylesheet" href="../../styles.css?v=20260729-competition-redesign" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="competition-page">
@@ -13,237 +16,209 @@
       <main class="content-wrap" id="top">
         <article class="content">
           <div class="document-kicker">
-            <span>AI Semiconductor Circuit Design · 팀 반짝반짝</span>
+            <span>2025 전국 대학생 AI 반도체 회로 설계 경진대회 · 팀 반짝반짝</span>
             <div class="kicker-actions"><span class="draft-label">3 / 3</span></div>
           </div>
-          <a class="home-link" href="../../index.html#competition-case-studies">← 경진대회 글묶음으로 돌아가기</a>
+          <a class="home-link" href="../../index.html#competition-case-studies">← 경진대회 기술 노트로 돌아가기</a>
           <nav class="chapter-switcher" aria-label="AI 반도체 경진대회 글 이동">
-            <span class="chapter-switcher-label">2025 전국 대학생 AI 반도체 회로 설계 경진대회</span>
+            <span class="chapter-switcher-label">SNN 기반 BallControl 제어 회로</span>
             <div>
-              <a href="ai-semi-00-overview.html">프로젝트 소개</a>
-              <a href="ai-semi-01-problem-and-design.html">1. BallControl 문제 이해하기</a>
-              <a href="ai-semi-02-snn-control-rtl.html">2. 위치 오차가 스파이크가 되는 과정</a>
-              <a class="current" href="ai-semi-03-verification-results.html">3. 입력 실험과 구현 결과 읽기</a>
+              <a href="ai-semi-00-overview.html">전체 보기</a>
+              <a href="ai-semi-01-problem-and-design.html">1. 문제와 입력 표현</a>
+              <a href="ai-semi-02-snn-control-rtl.html">2. SNN 제어 회로</a>
+              <a class="current" href="ai-semi-03-verification-results.html">3. 실험과 결과</a>
             </div>
           </nav>
 
-          <h1>3. 입력 방식을 바꾸며 제어 반응 확인하기</h1>
+          <h1>3. 입력 방식을 바꾸며 제어 반응과 한계를 확인하기</h1>
           <p class="lead">
-            위치 오차가 네 방향 출력으로 이어지는 기본 경로를 만든 뒤에는, 공의
-            무게가 달라질 때 입력을 어떻게 표현할지 살펴봤습니다. 위치 값을 한 번
-            전달하는 실험과 무게에 따라 입력 스파이크의 빈도를 바꾸는 실험을 비교했고,
-            합성 보고서에서는 회로 규모와 I/O, 전력 추정값을 각각 어떤 의미로
-            읽어야 하는지 확인했습니다.
+            검증의 목적은 “공이 중앙에 도착했다”는 한 문장을 만드는 것이 아니라,
+            어떤 입력 표현이 어떤 출력 차이를 만드는지 확인하는 것이었습니다.
+            위치만 한 번 넣는 one-shot 실험에서 시작해 무게를 spike rate에
+            반영했고, 기능 시뮬레이션과 합성·전력 자료를 서로 다른 증거로 나눠
+            해석했습니다.
           </p>
-          <dl class="concept-list">
-            <div>
-              <dt>One-shot encoding</dt>
-              <dd>좌표 한 세트를 한 번 전달해 방향 연결과 기본 동작을 확인하는 입력 방식입니다.</dd>
-            </div>
-            <div>
-              <dt>Rate encoding</dt>
-              <dd>일정 시간 동안의 스파이크 수나 간격에 물리량의 크기를 담는 방식으로, 두 번째 실험에서 무게 차이를 표현했습니다.</dd>
-            </div>
-            <div>
-              <dt>Logic utilization</dt>
-              <dd>LUT·레지스터처럼 내부 회로 규모를 나타내는 값이며, 외부 핀 수를 뜻하는 I/O 사용률과 의미가 다릅니다.</dd>
-            </div>
-            <div>
-              <dt>Power estimate</dt>
-              <dd>설계 도구가 신호 활동률을 가정해 계산한 값입니다. 실제 보드에서 전력계로 측정한 값과 구분해야 합니다.</dd>
-            </div>
-          </dl>
 
-          <section class="doc-section searchable-section" id="experiments" data-search-title="두 입력 실험">
-            <h2>위치 one-shot에서 무게 반영 rate encoding으로 확장</h2>
-            <p>
-              첫 실험은 위치 오차가 올바른 방향의 뉴런으로 전달되는지 확인하는
-              기능 검증에 가깝습니다. 두 번째 실험은 같은 위치에 있더라도 공의
-              무게가 다르면 제어 반응도 달라져야 한다는 조건을 입력 스파이크의
-              빈도로 표현했습니다. 한 번의 큰 입력만 보는 대신, 시간축에서
-              반복되는 스파이크의 간격으로 자극의 차이를 나타낸 것입니다.
-            </p>
+          <section class="case-summary" aria-labelledby="ai3-summary-title">
+            <div>
+              <h2 id="ai3-summary-title">검증은 세 층으로 나눴습니다</h2>
+              <p>
+                첫째, 파형과 로그로 방향 연결과 막전위 반응을 확인했습니다.
+                둘째, 15g와 30g 입력의 spike 수와 최종 좌표를 비교했습니다.
+                셋째, Vivado 결과로 논리 자원과 전력 추정치를 확인했습니다.
+                어느 단계도 실제 보드 위 공의 폐루프 제어를 대신하지는 않습니다.
+              </p>
+            </div>
+            <dl class="case-facts">
+              <div><dt>기능</dt><dd>100 time-step Verilog simulation</dd></div>
+              <div><dt>입력</dt><dd>one-shot → 무게 반영 rate encoding</dd></div>
+              <div><dt>합성</dt><dd>LUT · FF · I/O 사용량</dd></div>
+              <div><dt>전력</dt><dd>Vivado 추정, 보드 실측 아님</dd></div>
+            </dl>
+          </section>
+
+          <section class="doc-section searchable-section" id="experiment-design" data-search-title="입력 실험">
+            <h2>첫 실험은 방향 연결을, 두 번째 실험은 무게 반영을 확인했습니다</h2>
             <div class="signal-table-wrap">
               <table class="signal-table">
-                <thead><tr><th>실험</th><th>입력 표현</th><th>확인하려는 내용</th><th>주요 파라미터</th></tr></thead>
+                <thead><tr><th>실험</th><th>입력 표현</th><th>확인한 질문</th><th>주요 파라미터</th></tr></thead>
                 <tbody>
-                  <tr><td>실험 1</td><td>위치 기반 one-shot</td><td>좌표의 부호와 네 방향 출력이 맞게 연결되는가</td><td>THRESHOLD 40, LEAK_SHIFT 4</td></tr>
-                  <tr><td>실험 2</td><td>무게 반영 rate encoding</td><td>무게 변화가 스파이크 밀도와 제어 반응에 반영되는가</td><td>THRESHOLD 300, LEAK_SHIFT 6</td></tr>
+                  <tr>
+                    <td>1</td>
+                    <td>위치 one-shot</td>
+                    <td>좌표 부호와 네 방향 출력이 의도대로 연결되는가</td>
+                    <td>Threshold 40 · Leak shift 4</td>
+                  </tr>
+                  <tr>
+                    <td>2</td>
+                    <td>무게 반영 rate encoding</td>
+                    <td>무게 변화가 spike 밀도와 제어 반응에 반영되는가</td>
+                    <td>Threshold 300 · Leak shift 6</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
             <p>
-              이 비교에서 중요한 점은 두 파라미터 숫자 자체가 아닙니다. 첫 실험으로
-              방향 연결을 확인한 뒤, 두 번째 실험에서 시간에 따른 입력 패턴까지
-              검토했다는 데 의미가 있습니다. 실제 기구부의 안정성까지 판단하려면
-              공의 관성, 모터 응답과 센서 지연을 포함한 폐루프 실험이 더 필요합니다.
+              파라미터를 그대로 유지한 채 입력 방식만 바꾼 실험은 아닙니다.
+              두 번째 실험에서는 rate encoding에 맞춰 threshold와 leak 조건도
+              함께 조정했습니다. 따라서 결과 차이는 무게 입력 하나의 영향으로만
+              분해할 수 없고, “무게를 반영하는 입력 경로가 작동하는가”를 보는
+              기능 실험으로 읽어야 합니다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="weight-results" data-search-title="15g 30g 결과">
+            <h2>30g 조건은 반응이 커졌지만 overshoot도 함께 나타났습니다</h2>
+            <p>
+              15g에는 digital weight 123, 30g에는 255를 사용했습니다. 아래 표는
+              최종 발표자료의 열 개 결과를 그대로 옮긴 것입니다. 15g은 다섯
+              초기 위치 중 세 경우에 (0,0)에 도달했고, 30g은 더 많은 spike를
+              냈지만 정확한 중앙에는 도달하지 못했습니다. 큰 입력이 항상 더 좋은
+              제어를 만든 것은 아닙니다.
             </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
                 <thead>
-                  <tr><th>무게</th><th>Digital weight</th><th>초기 위치</th><th>네 방향 motor spikes</th><th>최종 위치</th><th>오차</th></tr>
+                  <tr><th>무게</th><th>Weight</th><th>초기 위치</th><th>방향별 spike</th><th>최종 위치</th><th>오차</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td>15g</td><td>123</td><td>(4, 4)</td><td>+X:0 · −X:4 · +Y:0 · −Y:4</td><td>(0, 0)</td><td>0</td></tr>
-                  <tr><td>15g</td><td>123</td><td>(3, 3)</td><td>+X:0 · −X:1 · +Y:0 · −Y:1</td><td>(2, 2)</td><td>4</td></tr>
-                  <tr><td>15g</td><td>123</td><td>(2, 2)</td><td>+X:0 · −X:1 · +Y:0 · −Y:1</td><td>(1, 1)</td><td>2</td></tr>
-                  <tr><td>15g</td><td>123</td><td>(1, 1)</td><td>+X:0 · −X:1 · +Y:0 · −Y:1</td><td>(0, 0)</td><td>0</td></tr>
-                  <tr><td>15g</td><td>123</td><td>(0, 0)</td><td>+X:0 · −X:0 · +Y:0 · −Y:0</td><td>(0, 0)</td><td>0</td></tr>
-                  <tr><td>30g</td><td>255</td><td>(−4, −4)</td><td>+X:4 · −X:1 · +Y:4 · −Y:0</td><td>(−1, 0)</td><td>1</td></tr>
-                  <tr><td>30g</td><td>255</td><td>(−3, −3)</td><td>+X:4 · −X:0 · +Y:4 · −Y:0</td><td>(1, 1)</td><td>2</td></tr>
-                  <tr><td>30g</td><td>255</td><td>(−2, −2)</td><td>+X:3 · −X:0 · +Y:3 · −Y:0</td><td>(1, 1)</td><td>2</td></tr>
-                  <tr><td>30g</td><td>255</td><td>(−1, −1)</td><td>+X:1 · −X:1 · +Y:2 · −Y:0</td><td>(−1, 1)</td><td>2</td></tr>
-                  <tr><td>30g</td><td>255</td><td>(0, 0)</td><td>+X:0 · −X:0 · +Y:1 · −Y:0</td><td>(0, 1)</td><td>1</td></tr>
+                  <tr><td>15g</td><td>123</td><td>(4, 4)</td><td>+X 0 · −X 4 · +Y 0 · −Y 4</td><td>(0, 0)</td><td>0</td></tr>
+                  <tr><td>15g</td><td>123</td><td>(3, 3)</td><td>+X 0 · −X 1 · +Y 0 · −Y 1</td><td>(2, 2)</td><td>4</td></tr>
+                  <tr><td>15g</td><td>123</td><td>(2, 2)</td><td>+X 0 · −X 1 · +Y 0 · −Y 1</td><td>(1, 1)</td><td>2</td></tr>
+                  <tr><td>15g</td><td>123</td><td>(1, 1)</td><td>+X 0 · −X 1 · +Y 0 · −Y 1</td><td>(0, 0)</td><td>0</td></tr>
+                  <tr><td>15g</td><td>123</td><td>(0, 0)</td><td>+X 0 · −X 0 · +Y 0 · −Y 0</td><td>(0, 0)</td><td>0</td></tr>
+                  <tr><td>30g</td><td>255</td><td>(−4, −4)</td><td>+X 4 · −X 1 · +Y 4 · −Y 0</td><td>(−1, 0)</td><td>1</td></tr>
+                  <tr><td>30g</td><td>255</td><td>(−3, −3)</td><td>+X 4 · −X 0 · +Y 4 · −Y 0</td><td>(1, 1)</td><td>2</td></tr>
+                  <tr><td>30g</td><td>255</td><td>(−2, −2)</td><td>+X 3 · −X 0 · +Y 3 · −Y 0</td><td>(1, 1)</td><td>2</td></tr>
+                  <tr><td>30g</td><td>255</td><td>(−1, −1)</td><td>+X 1 · −X 1 · +Y 2 · −Y 0</td><td>(−1, 1)</td><td>2</td></tr>
+                  <tr><td>30g</td><td>255</td><td>(0, 0)</td><td>+X 0 · −X 0 · +Y 1 · −Y 0</td><td>(0, 1)</td><td>1</td></tr>
                 </tbody>
               </table>
             </div>
-            <div class="metric-grid" aria-label="무게 반영 시뮬레이션 결과 요약">
-              <article><strong>10</strong><span>15g·30g 전체 초기 위치</span></article>
-              <article><strong>3 / 10</strong><span>정확히 (0,0)에 도달</span></article>
-              <article><strong>2 / 10</strong><span>오차 1로 종료</span></article>
-              <article><strong>5 / 10</strong><span>오차 2 이상 잔존</span></article>
-            </div>
-            <p>
-              모든 사례가 중앙에 도달한 것은 아닙니다. 15g에서는 5개 중 3개가
-              정확히 (0,0)에 도달했지만, 30g에서는 정확한 중앙 도달이 없었습니다.
-              발표 표의 오차는 정수 좌표의 Manhattan distance로 보이며, 이 좌표
-              단위가 실제 cm와 동일하다는 근거는 없습니다. 따라서 “반경 1cm
-              목표를 달성했다”는 물리 성능으로 환산하지 않았습니다.
-            </p>
             <figure class="doc-figure">
-              <div class="figure-label">15g·30g 입력 실험의 결과 표와 실행 로그</div>
+              <div class="figure-label">무게별 spike 수와 이동 경로</div>
               <img
                 src="../../assets/ai-semi-weight-experiment-results.png"
-                alt="15g과 30g 공의 초기 위치, digital weight, 네 방향 motor spike, 최종 위치와 오차를 비교한 표와 시뮬레이션 로그"
+                alt="15g과 30g 조건에서 방향별 spike 수와 위치 변화를 비교한 최종 발표자료"
               />
               <figcaption>
-                발표자료에서 장식과 제목을 제외하고 결과 표와 실행 로그만 발췌했습니다.
-                무게에 따라 digital weight와 방향별 spike 수가 달라지고, 최종 위치와
-                오차를 함께 기록한 실험입니다.
+                반응량을 키우는 것과 목표점에 안정적으로 수렴하는 것은 다른
+                문제입니다. 30g 결과의 overshoot는 다음 설계에서 감쇠와 출력
+                scaling을 함께 조정해야 한다는 근거가 됐습니다.
               </figcaption>
             </figure>
           </section>
 
-          <section class="doc-section searchable-section" id="environment" data-search-title="검증 환경">
-            <h2>보관된 프로젝트에서 확인한 검증 환경</h2>
-            <div class="signal-table-wrap">
-              <table class="signal-table">
-                <thead><tr><th>항목</th><th>확인된 내용</th><th>해석</th></tr></thead>
-                <tbody>
-                  <tr><td>기능 실험</td><td>Verilog testbench · 100 simulation steps 로그</td><td>behavioral 기능 실험 자료</td></tr>
-                  <tr><td>Vivado</td><td>2025.1</td><td>보관된 output_layer.xpr metadata</td></tr>
-                  <tr><td>Target part</td><td>xc7vx485tffg1157-1</td><td>로컬 XPR에 기록된 합성 target</td></tr>
-                  <tr><td>Top module</td><td>controller_top</td><td>output-layer snapshot의 top</td></tr>
-                  <tr><td>Board part</td><td>미지정</td><td>발표의 AC701 표기와 XPR이 일치하지 않음</td></tr>
-                  <tr><td>Clock·timing</td><td>constraint와 timing report 미확인</td><td>timing closure 또는 bitstream 동작을 주장하지 않음</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="scope-note">
-              <strong>두 코드 묶음의 관계</strong>
-              <span>
-                무게 실험은 <code>Input_Neuron_RateEncoder</code>와
-                <code>Baby_Neuron_Core</code>를 포함한 별도 네트워크 코드입니다.
-                확인한 <code>controller_top/error_encoder/lif_neuron</code> 세 파일은
-                output-layer 구조를 설명하는 snapshot이며, 앞의 실험 결과가 이 세
-                파일의 bit-accurate 검증을 뜻하지 않습니다.
-              </span>
-            </div>
-          </section>
-
-          <section class="doc-section searchable-section" id="resources" data-search-title="합성 자원 결과">
-            <h2>작은 내부 로직과 높은 top-level I/O 사용률</h2>
+          <section class="doc-section searchable-section" id="synthesis" data-search-title="합성 자원">
+            <h2>내부 로직 자원과 top-level I/O를 따로 읽었습니다</h2>
             <p>
-              아래 값은 발표자료에 기록된 FPGA 합성 결과입니다. LUT, 레지스터,
-              DSP와 BRAM은 제어 로직의 크기를 보여 주지만, I/O는 외부로 노출한
-              신호 수를 보여 줍니다. I/O 비율이 높다고 해서 내부 계산 회로가 큰
-              것은 아니므로 같은 의미로 합치지 않고 읽어야 합니다.
+              최종 발표자료의 합성 표에는 LUT 10개, FF 41개, BRAM과 DSP 0개가
+              기록돼 있습니다. 한편 I/O는 83개로 장치의 I/O 자원 대부분을
+              사용합니다. “전체 자원 20.78%”라는 발표 문구보다 세부 표가 더
+              구체적이므로, 이 페이지는 논리 자원과 I/O를 분리해 표시합니다.
             </p>
-            <div class="metric-grid" aria-label="AI 반도체 SNN 출력 회로의 합성 자원">
+            <div class="result-band" aria-label="AI 반도체 프로젝트 합성 자원">
               <article><strong>10</strong><span>LUT · 0.05%</span></article>
-              <article><strong>41</strong><span>FF/Reg · 0.10%</span></article>
-              <article><strong>0 / 0</strong><span>DSP / BRAM</span></article>
-              <article><strong>83</strong><span>I/O pins · 99.85%</span></article>
-            </div>
-            <div class="scope-note">
-              <strong>수치의 성격</strong>
-              <span>
-                실제 장치에서 측정한 처리 성능이 아니라 발표자료에 기록된 도구
-                결과입니다. 특히 83개 I/O는 top-level 포트 구성이 크게 반영된
-                값입니다. 현재 XPR과 발표자료의 target 표기가 달라 이 비율을
-                재현 가능한 보드 사용률로 해석하지 않습니다.
-              </span>
+              <article><strong>41</strong><span>FF/Register · 0.10%</span></article>
+              <article><strong>0 / 0</strong><span>BRAM / DSP</span></article>
+              <article><strong>83</strong><span>I/O · 99.85%</span></article>
             </div>
             <figure class="doc-figure">
-              <div class="figure-label">발표자료의 FPGA 합성 자원 표</div>
+              <div class="figure-label">최종 발표자료의 합성 자원 표</div>
               <img
                 src="../../assets/ai-semi-utilization-crop.png"
-                alt="LUT 10개, 레지스터 41개, BRAM과 DSP 0개, I/O 핀 83개를 보여 주는 FPGA 자원 표"
+                alt="LUT 10개, 레지스터 41개, BRAM과 DSP 0개, I/O 83개로 표시된 합성 자원 표"
               />
               <figcaption>
-                내부 제어 로직은 LUT 10개와 레지스터 41개로 작지만, top-level에
-                노출한 신호 때문에 I/O 핀은 83개로 기록됐습니다.
+                이 표는 내부 SNN 계산 로직이 작다는 점과 top-level 포트가 넓다는
+                점을 동시에 보여줍니다. I/O 사용률을 계산 자원 사용률처럼 합치지
+                않았습니다.
               </figcaption>
             </figure>
+            <p class="evidence-note warning">
+              발표자료에는 Artix-7 AC701이 적혀 있지만, 보관된 XPR metadata의
+              target part는 <code>xc7vx485tffg1157-1</code>이고 board part와
+              clock constraint는 확인되지 않았습니다. 따라서 특정 보드의 timing
+              closure나 bitstream 동작 결과로 설명하지 않습니다.
+            </p>
           </section>
 
-          <section class="doc-section searchable-section" id="power" data-search-title="전력 추정 결과">
-            <h2>I/O switching이 큰 비중을 차지한 2.302W 전력 추정</h2>
-            <div class="metric-grid metric-grid-featured" aria-label="AI 반도체 SNN 출력 회로의 전력 추정">
-              <article><strong>2.302W</strong><span>도구가 계산한 총 전력</span></article>
-              <article><strong>2.165W</strong><span>dynamic power</span></article>
-              <article><strong>0.137W</strong><span>static power</span></article>
-              <article><strong>I/O 중심</strong><span>dynamic power 구성</span></article>
-            </div>
+          <section class="doc-section searchable-section" id="power" data-search-title="전력 추정">
+            <h2>2.302W는 I/O switching이 지배적인 Vivado 추정값입니다</h2>
             <p>
-              이 값은 전력계로 보드에서 측정한 결과가 아니라 발표자료에 포함된
-              설계 도구 추정치입니다. 내부 연산 로직이 매우 작은데도 dynamic power가
-              크게 나타난 것은 많은 I/O의 switching 가정이 포함됐기 때문입니다.
-              실제 소비전력을 말하려면 최종 핀 구성과 동작률을 적용한 뒤 보드에서
-              별도로 측정해야 합니다.
+              총 전력은 2.302W, 그중 dynamic power는 2.165W, static power는
+              0.137W로 제시됐습니다. dynamic power 안에서는 I/O가 1.968W로
+              가장 큽니다. 회로 코어의 에너지 효율을 측정한 값이 아니라 입력
+              activity와 구현 조건을 바탕으로 한 도구 추정입니다.
             </p>
-            <figure class="doc-figure compact-figure">
-              <div class="figure-label">발표자료의 on-chip power 분포</div>
+            <div class="result-band" aria-label="AI 반도체 프로젝트 전력 추정">
+              <article><strong>2.302W</strong><span>총 전력 추정</span></article>
+              <article><strong>2.165W</strong><span>Dynamic · 94%</span></article>
+              <article><strong>1.968W</strong><span>I/O dynamic</span></article>
+              <article><strong>0.137W</strong><span>Static</span></article>
+            </div>
+            <figure class="doc-figure">
+              <div class="figure-label">최종 발표자료의 Vivado 전력 추정</div>
               <img
                 src="../../assets/ai-semi-power-crop.png"
-                alt="Dynamic 2.165W, signals 0.163W, logic 0.033W, I/O 1.968W와 device static 0.137W를 보여 주는 전력 분포 차트"
+                alt="총 전력 2.302W와 I/O 1.968W 등 세부 항목이 표시된 Vivado 전력 추정 결과"
               />
               <figcaption>
-                총 2.302W 가운데 dynamic 2.165W, static 0.137W로 계산됐고,
-                dynamic 항에서는 I/O가 1.968W로 가장 큽니다. 모두 도구 추정값입니다.
+                실제 보드 전원 레일에서 측정한 값이 아니므로 “소비전력 실측”으로
+                표현하지 않았습니다.
               </figcaption>
             </figure>
           </section>
 
-          <section class="doc-section searchable-section" id="contribution" data-search-title="프로젝트에서 맡은 일">
-            <h2>프로젝트에서 맡은 일</h2>
-            <p>
-              팀장으로서 1차 SNN 조사와 2차 회로 설계의 일정과 발표 흐름을 관리했습니다.
-              SNN/LIF 및 관련 하드웨어 사례를 조사하고, BallControl의 물리 조건을
-              위치·속도·무게 입력과 네 방향 출력으로 옮기는 작업에 참여했습니다.
-              output-layer의 encoder, LIF, top-level 구조를 정리했으며, 실험 코드와
-              발표자료가 같은 설계를 설명하도록 최종 자료를 구성했습니다.
-            </p>
-            <p>
-              팀 프로젝트이므로 이 글은 모든 기계·전자 시스템이나 코드 전체를
-              개인이 단독으로 완성했다는 뜻이 아닙니다. 여기서 확인할 수 있는 기여는
-              요구사항 해석, SNN 출력 제어 구조, RTL 통합과 실험·문서 정리입니다.
-            </p>
-          </section>
-
-          <section class="doc-section searchable-section" id="next" data-search-title="한계와 다음 개선">
-            <h2>다음 단계에서 확인할 것</h2>
-            <ul class="check-list">
-              <li>Python 또는 HDL 기준 모델과 막전위·스파이크를 클록 단위로 비교합니다.</li>
-              <li>고정 폭 곱셈에서 overflow와 saturation이 생길 때의 규칙을 명시합니다.</li>
-              <li>반대 방향 출력이 동시에 켜지지 않도록 보호 로직과 motor pulse shaping을 추가합니다.</li>
-              <li>실제 센서·모터·기구부의 지연과 관성을 포함해 LIF 파라미터를 다시 조정합니다.</li>
-            </ul>
+          <section class="doc-section searchable-section" id="lessons" data-search-title="한계와 개선 방향">
+            <h2>다음 단계는 더 큰 spike가 아니라 안정적인 폐루프입니다</h2>
+            <div class="case-grid">
+              <article class="case-card">
+                <span>Gain과 감쇠</span>
+                <h3>무거운 공의 overshoot를 줄이기</h3>
+                <p>무게별 rate뿐 아니라 threshold, leak와 출력 scaling을 함께 조정해야 합니다.</p>
+              </article>
+              <article class="case-card">
+                <span>센서 입력</span>
+                <h3>좌표 추정 오차를 포함하기</h3>
+                <p>카메라 지연과 노이즈를 넣고 목표 반경 1cm 안에서 안정적으로 머무는지 확인해야 합니다.</p>
+              </article>
+              <article class="case-card">
+                <span>모터 인터페이스</span>
+                <h3>spike를 실제 구동량으로 변환하기</h3>
+                <p>1-bit 방향 이벤트를 PWM이나 pulse width로 바꾸는 출력 계층이 필요합니다.</p>
+              </article>
+              <article class="case-card">
+                <span>검증</span>
+                <h3>모델·RTL·보드 결과를 같은 기준으로 비교하기</h3>
+                <p>bit-accurate reference와 물리 로그를 함께 남겨 최초 차이가 난 단계를 찾을 수 있어야 합니다.</p>
+              </article>
+            </div>
           </section>
 
           <footer class="page-footer">
-            <a href="ai-semi-02-snn-control-rtl.html">← 이전: 위치 오차가 스파이크가 되는 과정</a>
-            <a href="aix-01-quantization.html">다음 프로젝트: YOLOv2 정수 양자화 →</a>
+            <a href="ai-semi-02-snn-control-rtl.html">← SNN 제어 회로</a>
+            <a href="aix-00-overview.html">다음 프로젝트: YOLOv2 FPGA 가속기 →</a>
           </footer>
         </article>
       </main>

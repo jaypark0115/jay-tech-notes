@@ -5,217 +5,245 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="INT8 YOLOv2의 22단계 전체 그래프를 Nexys 4 DDR FPGA에서 실행하고 229장으로 검증한 AIX 2026 프로젝트 소개."
+      content="양자화된 YOLOv2의 22개 처리 단계를 Nexys 4 DDR FPGA에서 실행하고 229장으로 검증한 full-graph 가속기 프로젝트 소개."
     />
-    <title>AIX 2026 - YOLOv2 Full-Graph FPGA 가속기</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260728-competition-final" />
+    <title>AIX 2026 - YOLOv2 Full-Graph FPGA 가속기 소개</title>
+    <link rel="stylesheet" href="../../styles.css?v=20260729-competition-redesign" />
     <script src="../../script.js" defer></script>
   </head>
-  <body class="competition-page competition-overview-page">
+  <body class="competition-page">
     <div class="site-shell">
       <main class="content-wrap" id="top">
         <article class="content">
           <div class="document-kicker">
-            <span>AIX 2026 Deep Learning Hardware · 팀 경이원지</span>
-            <div class="kicker-actions"><span class="draft-label">PROJECT OVERVIEW</span></div>
+            <span>AIX 2026 Deep Learning Hardware 설계경진대회 · 팀 경이원지</span>
+            <div class="kicker-actions"><span class="draft-label">프로젝트 소개</span></div>
           </div>
-          <a class="home-link" href="../../index.html#competition-case-studies">← 경진대회 글묶음으로 돌아가기</a>
+          <a class="home-link" href="../../index.html#competition-case-studies">← 경진대회 기술 노트로 돌아가기</a>
           <nav class="chapter-switcher" aria-label="AIX 경진대회 글 이동">
-            <span class="chapter-switcher-label">AIX 2026 Deep Learning Hardware 설계경진대회</span>
+            <span class="chapter-switcher-label">YOLOv2 Full-Graph FPGA 가속기</span>
             <div>
-              <a class="current" href="aix-00-overview.html">프로젝트 소개</a>
-              <a href="aix-01-quantization.html">1. YOLOv2 정수 양자화</a>
-              <a href="aix-02-fpga-architecture.html">2. Full-graph FPGA 구조</a>
-              <a href="aix-03-board-verification.html">3. 229장 보드 검증</a>
+              <a class="current" href="aix-00-overview.html">전체 보기</a>
+              <a href="aix-01-quantization.html">1. 정수 양자화</a>
+              <a href="aix-02-fpga-architecture.html">2. FPGA 구조</a>
+              <a href="aix-03-board-verification.html">3. 보드 검증</a>
             </div>
           </nav>
 
-          <h1>YOLOv2의 두 검출 경로를 끝까지 실행하는 FPGA 가속기</h1>
+          <h1>YOLOv2의 두 검출 경로를 한 번의 FPGA 실행으로 연결하기</h1>
           <p class="lead">
-            256×256 상품 이미지를 입력받아 60개 class를 검출하는 YOLOv2를
-            <strong>Nexys 4 DDR의 Artix-7 FPGA</strong>에서 실행했습니다.
-            convolution 연산기만 보여 주는 데모가 아니라, Pool·Route·Upsample과
-            8×8·16×16 두 detection head를 포함한 22단계 전체 그래프를 연결했습니다.
-            양자화된 소프트웨어 기준을 만들고 RTL과 DDR 데이터 형식을 맞춘 뒤,
-            229장 전체를 같은 bitstream으로 실행해 속도와 detector mAP를 확인했습니다.
+            이 프로젝트는 convolution 한 층만 빠르게 만드는 데서 끝나지 않았습니다.
+            256×256 RGB 입력에서 60개 클래스를 검출하는 YOLOv2를 정수화하고,
+            Conv·Pool·Route·Upsample과 8×8·16×16 두 detection head가 이어지는
+            전체 그래프를 Nexys 4 DDR에서 실행했습니다. 정확도, 처리 속도,
+            timing과 자원을 같은 최종 bitstream 기준으로 확인했습니다.
           </p>
 
-          <section class="project-at-a-glance" aria-labelledby="aix-glance-title">
-            <h2 id="aix-glance-title">프로젝트 한눈에 보기</h2>
-            <dl class="project-identity-grid">
-              <div><dt>대회</dt><dd>AIX 2026 Deep Learning Hardware 설계경진대회</dd></div>
-              <div><dt>기간</dt><dd>2025.12–2026.05</dd></div>
-              <div><dt>팀</dt><dd>경이원지 · 3명</dd></div>
-              <div><dt>문제</dt><dd>제공된 YOLOv2를 FPGA 객체검출 가속기로 구현</dd></div>
-              <div><dt>제작물</dt><dd>INT8 정수 모델 · full-graph RTL · bitstream · 보드 검증 스크립트</dd></div>
-              <div><dt>담당</dt><dd>양자화 탐색 · RTL 통합/최적화 · 보드 검증 · 최종 패키징</dd></div>
-              <div><dt>보드</dt><dd>Nexys 4 DDR · xc7a100tcsg324-1 · 100MHz</dd></div>
-              <div><dt>환경</dt><dd>Verilog/SystemVerilog · Python · Vivado 2025.2.1 · JTAG-to-AXI</dd></div>
+          <section class="case-summary" aria-labelledby="aix-summary-title">
+            <div>
+              <h2 id="aix-summary-title">무엇을 만든 프로젝트인가</h2>
+              <p>
+                Python host가 입력과 weight를 DDR에 적재하고, FPGA의 descriptor
+                scheduler가 22개 처리 단계를 순서대로 실행합니다. 144개 packed
+                MAC lane이 convolution을 담당하며 Pool, Route, Upsample을 거쳐
+                두 detection head를 DDR에 저장합니다. host는 결과를 읽어 같은
+                detector 후처리와 mAP 평가에 연결합니다.
+              </p>
+            </div>
+            <dl class="case-facts">
+              <div><dt>대상 보드</dt><dd>Nexys 4 DDR · xc7a100tcsg324-1</dd></div>
+              <div><dt>클록</dt><dd>100MHz</dd></div>
+              <div><dt>정수 경로</dt><dd>INT8 저장 · INT32 누산 · requantization</dd></div>
+              <div><dt>담당</dt><dd>양자화 · RTL 통합/최적화 · 보드 검증 · 패키징</dd></div>
             </dl>
           </section>
 
-          <section class="doc-section searchable-section" id="problem" data-search-title="문제와 제작물">
-            <h2>정확도와 하드웨어 제약을 함께 맞춘 full-graph 구현</h2>
+          <section class="doc-section searchable-section" id="problem" data-search-title="문제와 설계 목표">
+            <h2>정확한 정수 모델과 끝까지 실행되는 데이터 경로가 모두 필요했습니다</h2>
             <p>
-              제공된 모델은 256×256 RGB 입력과 60개 class를 사용하는 YOLOv2입니다.
-              feature map과 weight를 INT8로 저장하고 곱셈 결과를 INT32에 누산한 뒤,
-              layer마다 정해진 multiplier·round·shift·clamp 규칙으로 다음 INT8
-              도메인에 연결했습니다. 정수 변환은 중간 tensor의 오차만 보고 고르지
-              않고, 가까운 물체와 먼 물체가 섞인 대표 이미지에서 두 head를 모두
-              후처리해 얻은 detector mAP를 기준으로 선택했습니다.
+              YOLOv2는 convolution만 반복하지 않습니다. 서로 다른 해상도의
+              feature map을 저장하고 다시 불러오는 Route, 2배 해상도를 만드는
+              Upsample, 두 크기의 detection head가 함께 동작합니다. 한 연산기의
+              peak 처리량이 높아도 DDR 주소, layer별 scale과 head readback이
+              어긋나면 최종 검출 결과는 나오지 않습니다.
             </p>
-            <p>
-              FPGA에서는 descriptor ROM이 22개 처리 단계의 연산 종류, tensor 크기와
-              DDR offset을 공급합니다. scheduler는 같은 144-lane MAC을 3×3과 1×1
-              convolution에 재사용하고, Pool·Route·Upsample을 거쳐 8×8 CONV14와
-              16×16 CONV20 출력을 DDR에 남깁니다. Python host는 JTAG-to-AXI로
-              입력과 weight를 준비하고, 두 head를 읽어 NMS와 mAP 평가를 수행합니다.
-            </p>
+            <div class="case-grid">
+              <article class="case-card">
+                <span>모델 쪽 질문</span>
+                <h3>INT8로 바꿔도 검출 정확도가 유지되는가</h3>
+                <p>대표 이미지 calibration과 229장 detector mAP를 함께 사용해 layer별 scale을 선택했습니다.</p>
+              </article>
+              <article class="case-card">
+                <span>하드웨어 쪽 질문</span>
+                <h3>전체 그래프가 같은 데이터 형식으로 이어지는가</h3>
+                <p>descriptor, DDR workspace와 requantization 규칙을 일치시켜 다음 layer가 바로 읽을 수 있게 했습니다.</p>
+              </article>
+              <article class="case-card">
+                <span>성능 쪽 질문</span>
+                <h3>MAC 수보다 실제 병목은 어디인가</h3>
+                <p>weight cache, BRAM route, DDR read/write와 두 head 저장까지 포함한 cycle을 기준으로 봤습니다.</p>
+              </article>
+              <article class="case-card">
+                <span>검증 쪽 질문</span>
+                <h3>한 장의 검출 화면이 전체 결과를 대표하는가</h3>
+                <p>단일 이미지 점검 뒤 229장 전체를 같은 bitstream으로 실행하고 detector mAP를 계산했습니다.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="doc-section searchable-section" id="system" data-search-title="전체 실행 경로">
+            <h2>Host와 FPGA의 역할을 나누고 DDR에서 연결했습니다</h2>
+            <div class="case-flow" style="--flow-count: 5" aria-label="AIX YOLOv2 전체 실행 경로">
+              <div class="case-flow-step">
+                <span>01 · Host</span>
+                <strong>입력·weight 준비</strong>
+                <small>전처리와 DDR preload</small>
+              </div>
+              <div class="case-flow-step">
+                <span>02 · JTAG-to-AXI</span>
+                <strong>DDR workspace</strong>
+                <small>32-bit HWC packing</small>
+              </div>
+              <div class="case-flow-step">
+                <span>03 · FPGA</span>
+                <strong>22 descriptor 실행</strong>
+                <small>Conv · Pool · Route · Upsample</small>
+              </div>
+              <div class="case-flow-step">
+                <span>04 · Two heads</span>
+                <strong>CONV14 · CONV20</strong>
+                <small>8×8과 16×16 출력 저장</small>
+              </div>
+              <div class="case-flow-step">
+                <span>05 · Host</span>
+                <strong>Decode · NMS · mAP</strong>
+                <small>동일한 detector 평가 경로</small>
+              </div>
+            </div>
             <figure class="doc-figure">
-              <div class="figure-label">Host, DDR, full-graph accelerator와 detector의 연결</div>
+              <div class="figure-label">최종 발표자료의 Host–FPGA 역할 분리</div>
               <img
                 src="../../assets/aix-host-fpga-block-crop.png"
-                alt="Python host가 JTAG-to-AXI로 DDR에 입력과 weight를 기록하고 FPGA 가속기가 두 detection head를 계산하는 시스템 블록도"
+                alt="Host가 입력과 weight를 DDR에 적재하고 FPGA scheduler가 full graph를 실행한 뒤 두 detection head를 읽는 구조"
               />
               <figcaption>
-                host는 준비와 후처리를, FPGA는 두 head를 포함한 22단계 정수 연산을
-                맡습니다. 이 역할 구분이 compute-only 속도의 범위를 결정합니다.
+                FPGA가 full graph의 정수 연산을 담당하고, host는 프로그램·전처리·
+                데이터 적재와 detector 후처리를 담당합니다. 이 구분은 FPGA
+                계산 시간과 JTAG 전체 세션 시간을 나눠 해석하는 기준이기도 합니다.
               </figcaption>
             </figure>
           </section>
 
-          <section class="doc-section searchable-section" id="system" data-search-title="전체 시스템">
-            <h2>입력부터 최종 검출까지의 실행 경로</h2>
-            <div class="scope-pipeline scope-pipeline-aix" aria-label="YOLOv2 FPGA 가속기의 전체 실행 경로">
-              <article class="scope-node">
-                <span>Host</span>
-                <strong>전처리·INT8 변환</strong>
-                <small>Python</small>
-              </article>
-              <b>→</b>
-              <article class="scope-node">
-                <span>JTAG-to-AXI</span>
-                <strong>DDR workspace</strong>
-                <small>입력 · weights · 중간 feature</small>
-              </article>
-              <b>→</b>
-              <article class="scope-node scope-node-active">
-                <span>FPGA</span>
-                <strong>22단계 full graph</strong>
-                <small>Conv · Pool · Route · Upsample</small>
-              </article>
-              <b>→</b>
-              <article class="scope-node">
-                <span>Two heads</span>
-                <strong>8×8 + 16×16</strong>
-                <small>CONV14 · CONV20</small>
-              </article>
-              <b>→</b>
-              <article class="scope-node">
-                <span>Host</span>
-                <strong>NMS·mAP</strong>
-                <small>box · class · score</small>
-              </article>
+          <section class="doc-section searchable-section" id="final-basis" data-search-title="최종 구현 기준">
+            <h2>최종 구조는 발표 후반의 sign-off 자료와 실제 RTL을 기준으로 정리했습니다</h2>
+            <p>
+              최종 발표 앞부분에는 개발 중간 구조인 19개 연산 단계와 192 MAC/cycle이
+              남아 있습니다. 후반의 최종 구현 섹션, 보관된 XPR과 RTL에서는 22개
+              descriptor와 144개 packed lane이 확인됩니다. 이 페이지는 두 버전을
+              섞지 않고 최종 구현 값을 사용합니다.
+            </p>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>항목</th><th>중간 설계 설명</th><th>이 페이지의 최종 기준</th></tr></thead>
+                <tbody>
+                  <tr><td>그래프 단계</td><td>19개 연산 단계</td><td>RTL descriptor 22개</td></tr>
+                  <tr><td>MAC 병렬도</td><td>16-lane × 12 group = 192</td><td>144 packed MAC lane</td></tr>
+                  <tr><td>성능 판단</td><td>중간 FPS 실험</td><td>229장 최종 cycle counter</td></tr>
+                  <tr><td>정확도 판단</td><td>layer mismatch 중심</td><td>두 head detector mAP 78.60%</td></tr>
+                </tbody>
+              </table>
             </div>
-            <div class="verification-status-grid" aria-label="AIX 프로젝트 결과의 검증 수준">
-              <article>
-                <span class="status-tag status-implemented">보드 실행</span>
-                <p>229장 모두 FPGA done과 두 head readback을 완료</p>
-              </article>
-              <article>
-                <span class="status-tag status-simulated">보고서</span>
-                <p>100MHz timing closure와 LUT·FF·BRAM·DSP 사용률 확인</p>
-              </article>
-              <article>
-                <span class="status-tag status-estimated">추정</span>
-                <p>1.842W는 Vivado routed estimate이며 confidence Low</p>
-              </article>
-            </div>
+            <p class="evidence-note">
+              144개 lane은 한 weight와 두 activation을 packed 방식으로 처리합니다.
+              구조적으로 한 accepted cycle에 288개의 scalar product가 가능하지만,
+              이를 전체 그래프의 지속 처리량과 같은 값으로 표현하지 않습니다.
+            </p>
           </section>
 
-          <section class="doc-section searchable-section" id="contribution" data-search-title="담당 범위">
-            <h2>프로젝트에서 맡은 범위</h2>
-            <div class="contribution-matrix">
-              <article>
-                <span>주도</span>
-                <h3>정수 모델과 검증 기준</h3>
-                <p>대표 이미지 calibration, layer별 multiplier 후보와 detector mAP 평가 흐름을 정리했습니다.</p>
+          <section class="doc-section searchable-section" id="work" data-search-title="프로젝트 기여">
+            <h2>제가 맡은 일은 정수 모델과 최종 보드 결과 사이를 잇는 작업이었습니다</h2>
+            <div class="case-grid">
+              <article class="case-card">
+                <span>양자화</span>
+                <h3>Calibration과 mAP 기반 scale 탐색</h3>
+                <p>32개 대표 이미지로 layer별 후보를 만들고 detector mAP로 최종 조건을 선택했습니다.</p>
               </article>
-              <article>
-                <span>직접 구현·검증</span>
-                <h3>통합·병목 개선·보드 테스트</h3>
-                <p>정수 데이터 형식을 RTL과 연결하고 full-graph 실행 경로, DDR 병목, 229장 보드 검증을 확인했습니다.</p>
+              <article class="case-card">
+                <span>통합</span>
+                <h3>정수 데이터 형식과 RTL 경로 연결</h3>
+                <p>INT8 저장, INT32 누산과 requantization이 descriptor와 DDR 배치에서 같은 의미를 갖도록 맞췄습니다.</p>
               </article>
-              <article>
-                <span>공동 작업</span>
-                <h3>가속기 RTL과 최종 결과</h3>
-                <p>팀 프로젝트로 scheduler, MAC, memory path와 host 실행 환경을 통합해 최종 bitstream과 자료를 구성했습니다.</p>
+              <article class="case-card">
+                <span>최적화</span>
+                <h3>Full graph 병목과 routing 위험 조정</h3>
+                <p>최고 FPS보다 두 head 검증과 timing closure가 유지되는 구조를 기준으로 최종점을 정했습니다.</p>
               </article>
-              <article>
-                <span>제공 자산</span>
-                <h3>모델·데이터셋·보드 환경</h3>
-                <p>대회에서 제공한 YOLOv2 모델과 평가 자료를 기준으로 정수 모델, 가속기와 보드 검증 환경을 연결했습니다.</p>
+              <article class="case-card">
+                <span>검증</span>
+                <h3>단일 이미지에서 229장 평가로 확장</h3>
+                <p>보드 실행, readback, detector 후처리와 최종 제출 패키지를 같은 bitstream 기준으로 정리했습니다.</p>
               </article>
             </div>
           </section>
 
           <section class="doc-section searchable-section" id="results" data-search-title="최종 결과">
-            <h2>같은 구현 기준으로 묶은 최종 결과</h2>
-            <div class="metric-grid metric-grid-featured" aria-label="AIX 최종 결과">
+            <h2>최종 bitstream과 229장 평가에서 확인한 결과</h2>
+            <div class="result-band" aria-label="AIX 프로젝트 최종 결과">
               <article><strong>229 / 229</strong><span>보드 실행 완료</span></article>
-              <article><strong>11.420687</strong><span>compute-only FPS</span></article>
-              <article><strong>78.60%</strong><span>FPGA two-head mAP</span></article>
+              <article><strong>11.420687 FPS</strong><span>FPGA compute-only</span></article>
+              <article><strong>78.60%</strong><span>두 head detector mAP</span></article>
               <article><strong>+0.111ns</strong><span>100MHz WNS</span></article>
             </div>
-            <div class="signal-table-wrap">
-              <table class="signal-table">
-                <thead><tr><th>실행 조건</th><th>결과</th><th>의미</th></tr></thead>
-                <tbody>
-                  <tr><td>원본 FP32 software</td><td>최종 자료에서 기준값 미확인</td><td>확인되지 않은 숫자를 임의로 채우지 않음</td></tr>
-                  <tr><td>INT8 software reference</td><td>83.60% mAP</td><td>양자화 조건의 detector 정확도</td></tr>
-                  <tr><td>FPGA two-head</td><td>78.60% mAP</td><td>최종 하드웨어 출력 · INT8 SW 대비 −5.00%p</td></tr>
-                  <tr><td>FPGA cycle counter</td><td>0.087560404s · 11.420687 FPS</td><td>JTAG와 Python 후처리를 제외한 계산 시간</td></tr>
-                  <tr><td>전체 JTAG session</td><td>1,807.586s / 229장</td><td>준비·전송·readback을 포함한 세션 총시간</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <figure class="doc-figure wide-figure">
-              <div class="figure-label">동일 입력의 software와 FPGA two-head 검출 비교</div>
+            <p>
+              229장 모두에서 FPGA 실행과 두 head readback이 완료됐습니다. 평균
+              8,756,040 cycles, 87.560404ms로 계산한 11.420687 FPS는 FPGA
+              cycle counter 기준이며 JTAG 전송, Python 전처리와 후처리는
+              포함하지 않습니다. INT8 software reference는 83.60% mAP,
+              FPGA detector는 78.60% mAP였습니다.
+            </p>
+            <figure class="doc-figure">
+              <div class="figure-label">같은 입력에서 software와 FPGA 두 head 검출 비교</div>
               <img
                 src="../../assets/aix-sw-vs-fpga-twohead.png"
-                alt="동일한 상품 이미지에서 software와 FPGA의 두 detection head 결과를 나란히 비교한 화면"
+                alt="같은 상품 이미지에 대한 software와 FPGA의 8x8 및 16x16 detection head 결과 비교"
               />
               <figcaption>
-                한 이미지의 시각적 비교는 실행 경로 확인에 사용했고, 최종 정확도는
-                이 한 장이 아니라 229장 전체의 11-point mAP로 평가했습니다.
+                이 이미지는 두 실행 경로가 유사한 박스를 만드는지 확인하는 정성
+                비교입니다. 최종 정확도는 이 한 장이 아니라 229장 전체 detector
+                mAP로 판단했습니다.
               </figcaption>
             </figure>
+            <p class="evidence-note warning">
+              전력 1.842W는 Vivado routed design 추정값이며 confidence는
+              <strong>Low</strong>입니다. 보드 전력 실측이나 확정적인 에너지
+              효율 수치로 사용하지 않습니다.
+            </p>
           </section>
 
-          <section class="doc-section searchable-section" id="articles" data-search-title="기술 글 읽기">
-            <h2>세 편으로 이어지는 기술 기록</h2>
-            <div class="article-link-grid">
-              <a href="aix-01-quantization.html">
+          <section class="doc-section searchable-section" id="read-next" data-search-title="이어지는 글">
+            <h2>세부 설계는 세 편으로 나누어 설명합니다</h2>
+            <div class="case-grid">
+              <article class="case-card">
                 <span>AIX-01</span>
-                <strong>YOLOv2 정수 양자화</strong>
-                <small>32장 calibration, 실제 multiplier와 requantization</small>
-              </a>
-              <a href="aix-02-fpga-architecture.html">
+                <h3><a href="aix-01-quantization.html">정수 양자화</a></h3>
+                <p>Calibration, mAP 선택과 INT8·INT32·requantization 데이터 경로를 설명합니다.</p>
+              </article>
+              <article class="case-card">
                 <span>AIX-02</span>
-                <strong>Full-graph FPGA 구조</strong>
-                <small>보드 사양, 22단계, DDR와 144-lane MAC</small>
-              </a>
-              <a href="aix-03-board-verification.html">
+                <h3><a href="aix-02-fpga-architecture.html">FPGA 구조</a></h3>
+                <p>DDR, 22 descriptor, 144-lane MAC과 두 detection head의 연결을 따라갑니다.</p>
+              </article>
+              <article class="case-card">
                 <span>AIX-03</span>
-                <strong>229장 보드 검증</strong>
-                <small>데이터셋, 평가 조건, timing·자원과 정확도 차이</small>
-              </a>
+                <h3><a href="aix-03-board-verification.html">보드 검증</a></h3>
+                <p>test_one에서 229장 평가까지, timing·자원·전력 결과를 함께 읽습니다.</p>
+              </article>
             </div>
           </section>
 
           <footer class="page-footer">
-            <a href="../../index.html#competition-case-studies">← 경진대회 글묶음</a>
-            <a href="aix-01-quantization.html">다음: YOLOv2 정수 양자화 →</a>
+            <a href="../../index.html#competition-case-studies">← 경진대회 기술 노트</a>
+            <a href="aix-01-quantization.html">다음: 정수 양자화 →</a>
           </footer>
         </article>
       </main>
