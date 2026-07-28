@@ -83,8 +83,8 @@
               <span>경진대회 노트 묶음</span>
               <h2>경진대회 기술 노트</h2>
               <p>
-                제가 참여한 두 경진대회에서 진행한 SNN 제어 회로와
-                YOLOv2 FPGA 가속기의 설계·구현·검증 내용을 정리했습니다.
+              두 경진대회의 SNN 제어 회로와 YOLOv2 FPGA 가속기 설계·구현·검증
+              내용을 문서별로 구성한다.
               </p>
             </a>
           </div>
@@ -421,8 +421,8 @@
               <span>설계에서 검증까지</span>
               <h2>경진대회 기술 케이스 스터디</h2>
               <p>
-                결과를 시간순으로 나열하지 않고, 문제를 어떻게 해석하고 어떤 구조를
-                선택했으며 무엇으로 동작을 확인했는지 프로젝트별 네 편으로 정리했습니다.
+                문제 정의, 입력 표현, 하드웨어 구조, 검증 결과를 프로젝트별 네 편으로
+                구성한 기술 문서 모음이다.
               </p>
             </div>
 
@@ -432,39 +432,39 @@
                   <p class="competition-project-meta">2025 · 팀 반짝반짝 · AI 반도체 회로 설계</p>
                   <h3 id="ai-semi-group-title">SNN 기반 BallControl 제어 회로</h3>
                   <p>
-                    30×30cm 보드 위 공의 위치를 중앙으로 되돌리는 과제를 SNN 회로
-                    문제로 바꿨습니다. 위치는 99개 one-hot 입력으로, 무게는 rate
-                    encoding으로 표현하고, 99→32→4 뉴런 구조에서 네 방향 제어
-                    이벤트를 만들었습니다. 최종 발표는 네트워크 시뮬레이션과
-                    합성·전력 추정까지 다루며, 실제 카메라와 모터를 연결한 물리
-                    폐루프 검증은 포함하지 않습니다.
+                    30×30cm 보드 위 공의 위치를 중앙으로 이동시키는 BallControl
+                    과제를 SNN 제어 문제로 모델링한다. 위치는 99개 one-hot 입력,
+                    무게는 rate encoding으로 표현하며, 99→32→4 뉴런 구조가 네 방향
+                    제어 이벤트를 생성한다. 네트워크 시뮬레이션, 합성 결과, 전력
+                    추정 자료를 포함하며, 카메라와 모터를 연결한 물리 폐루프 검증은
+                    범위 밖이다.
                   </p>
                   <dl class="competition-project-facts">
                     <div><dt>핵심 개념</dt><dd>One-hot 위치 부호화 · LIF 뉴런 · Rate encoding · 방향별 spike decoding</dd></div>
-                    <div><dt>제가 맡은 일</dt><dd>팀장 · 요구사항 해석 · SNN/LIF 조사 · RTL 통합 방향 · 실험과 발표 정리</dd></div>
+                    <div><dt>담당 범위</dt><dd>팀장 · 요구사항 해석 · SNN/LIF 조사 · RTL 통합 방향 · 실험과 발표 자료</dd></div>
                     <div><dt>확인 범위</dt><dd>기능 시뮬레이션 · 합성 자원 · Vivado 전력 추정 · 한계 분석</dd></div>
                   </dl>
                 </header>
                 <div class="competition-card-grid">
                   <a class="competition-card" href="pages/competitions/ai-semi-00-overview.html">
                     <span>AI-00</span>
-                    <h4>프로젝트 전체 보기</h4>
-                    <p>대회 문제, 99→32→4 구조, 구현·검증 범위와 제 역할을 한 페이지에서 설명합니다.</p>
+                    <h4>프로젝트 개요</h4>
+                    <p>대회 문제, 99→32→4 구조, 구현 범위와 검증 경계를 요약한다.</p>
                   </a>
                   <a class="competition-card" href="pages/competitions/ai-semi-01-problem-and-design.html">
                     <span>AI-01</span>
-                    <h4>문제를 신호로 바꾸기</h4>
-                    <p>보드 좌표와 공의 무게를 one-hot·rate encoding 입력으로 정의한 이유를 다룹니다.</p>
+                    <h4>입력 표현과 출력 정의</h4>
+                    <p>보드 좌표와 공의 무게를 one-hot·rate encoding 입력으로 정의한다.</p>
                   </a>
                   <a class="competition-card" href="pages/competitions/ai-semi-02-snn-control-rtl.html">
                     <span>AI-02</span>
-                    <h4>SNN 제어 회로 읽기</h4>
-                    <p>LIF 막전위 갱신, FSM, 4채널 출력과 보관된 Verilog의 관계를 따라갑니다.</p>
+                    <h4>SNN 제어 회로와 RTL</h4>
+                    <p>LIF 막전위 갱신, FSM, 4채널 출력과 Verilog 모듈의 관계를 설명한다.</p>
                   </a>
                   <a class="competition-card" href="pages/competitions/ai-semi-03-verification-results.html">
                     <span>AI-03</span>
-                    <h4>실험과 결과 해석</h4>
-                    <p>one-shot과 무게 반영 입력을 비교하고 합성·전력 결과의 의미와 한계를 구분합니다.</p>
+                    <h4>시뮬레이션과 구현 결과</h4>
+                    <p>one-shot과 무게 반영 입력, 합성·전력 결과, 검증 한계를 제시한다.</p>
                   </a>
                 </div>
               </section>
@@ -476,36 +476,36 @@
                   <p>
                     256×256 RGB 입력에서 60개 클래스를 검출하는 YOLOv2를 정수화하고,
                     Conv·Pool·Route·Upsample과 두 detection head를 하나의 FPGA
-                    실행 경로로 연결했습니다. 최종 RTL의 22개 descriptor와 144개
-                    packed MAC lane을 기준으로 구조를 설명하고, 229장 전체 평가의
-                    속도와 detector mAP로 결과를 확인했습니다.
+                    실행 경로로 구성한다. 최종 RTL의 22개 descriptor와 144개 packed
+                    MAC lane을 기준으로 하며, 229장 전체 평가의 속도와 detector mAP를
+                    결과 지표로 사용한다.
                   </p>
                   <dl class="competition-project-facts">
                     <div><dt>핵심 개념</dt><dd>INT8 저장 · INT32 누산 · Requantization · Descriptor scheduler · DDR workspace</dd></div>
-                    <div><dt>제가 맡은 일</dt><dd>양자화 탐색 · 정수 모델–RTL 연결 · 통합과 병목 개선 · 보드 검증 · 제출 패키징</dd></div>
+                    <div><dt>담당 범위</dt><dd>양자화 탐색 · 정수 모델–RTL 연결 · 통합과 병목 분석 · 보드 검증 · 제출 패키징</dd></div>
                     <div><dt>최종 확인</dt><dd>229/229 PASS · 11.420687 compute-only FPS · 78.60% detector mAP</dd></div>
                   </dl>
                 </header>
                 <div class="competition-card-grid">
                   <a class="competition-card" href="pages/competitions/aix-00-overview.html">
                     <span>AIX-00</span>
-                    <h4>프로젝트 전체 보기</h4>
-                    <p>정수 모델부터 FPGA 두 검출 경로, 최종 수치와 제 역할까지 먼저 살펴봅니다.</p>
+                    <h4>프로젝트 개요</h4>
+                    <p>정수 모델, FPGA 두 검출 경로, 최종 수치와 담당 범위를 요약한다.</p>
                   </a>
                   <a class="competition-card" href="pages/competitions/aix-01-quantization.html">
                     <span>AIX-01</span>
                     <h4>정수 양자화 설계</h4>
-                    <p>32장 calibration과 mAP 평가로 INT8·INT32·requantization 조건을 정한 과정을 설명합니다.</p>
+                    <p>32장 calibration과 mAP 평가를 사용한 INT8·INT32·requantization 조건을 설명한다.</p>
                   </a>
                   <a class="competition-card" href="pages/competitions/aix-02-fpga-architecture.html">
                     <span>AIX-02</span>
                     <h4>Full-graph 구조</h4>
-                    <p>22개 descriptor, DDR 데이터 배치, 144-lane MAC과 두 detection head의 연결을 다룹니다.</p>
+                    <p>22개 descriptor, DDR 데이터 배치, 144-lane MAC과 두 detection head의 연결을 설명한다.</p>
                   </a>
                   <a class="competition-card" href="pages/competitions/aix-03-board-verification.html">
                     <span>AIX-03</span>
                     <h4>229장 보드 검증</h4>
-                    <p>단일 이미지 점검을 전체 평가로 확장하고 mAP·속도·timing·자원을 함께 읽습니다.</p>
+                    <p>단일 이미지 점검, 229장 평가, mAP·속도·timing·자원 결과를 제시한다.</p>
                   </a>
                 </div>
               </section>

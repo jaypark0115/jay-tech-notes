@@ -23,30 +23,28 @@
           <nav class="chapter-switcher" aria-label="AIX 경진대회 글 이동">
             <span class="chapter-switcher-label">YOLOv2 Full-Graph FPGA 가속기</span>
             <div>
-              <a href="aix-00-overview.html">전체 보기</a>
+              <a href="aix-00-overview.html">개요</a>
               <a href="aix-01-quantization.html">1. 정수 양자화</a>
               <a class="current" href="aix-02-fpga-architecture.html">2. FPGA 구조</a>
               <a href="aix-03-board-verification.html">3. 보드 검증</a>
             </div>
           </nav>
 
-          <h1>2. YOLOv2 전체 그래프를 FPGA 안에서 이어 가는 구조</h1>
+          <h1>2. YOLOv2 Full-Graph FPGA 구조</h1>
           <p class="lead">
-            Full-graph 가속기에서 어려운 점은 MAC array 하나를 빠르게 만드는
-            것이 아니라, 서로 다른 크기의 feature map과 분기 경로를 올바른
-            순서와 주소로 연결하는 것입니다. 이 설계는 DDR을 공용 workspace로
-            사용하고, 22개 descriptor가 Conv·Pool·Route·Upsample과 두 detection
-            head의 실행을 제어합니다.
+            Full-graph 가속기는 서로 다른 크기의 feature map과 분기 경로를
+            정해진 순서와 주소로 연결한다. DDR은 공용 workspace이며, 22개
+            descriptor가 Conv·Pool·Route·Upsample과 두 detection head의 실행을
+            제어한다.
           </p>
 
           <section class="case-summary" aria-labelledby="aix2-summary-title">
             <div>
               <h2 id="aix2-summary-title">최종 구현 사양</h2>
               <p>
-                Nexys 4 DDR의 Artix-7을 100MHz로 동작시키고, JTAG-to-AXI로
-                host와 DDR을 연결했습니다. FPGA 내부에서는 144개 packed MAC lane,
-                layer descriptor ROM, weight cache와 feature buffer가 하나의
-                scheduler 아래에서 동작합니다.
+                Nexys 4 DDR의 Artix-7은 100MHz로 동작하며, JTAG-to-AXI가 host와
+                DDR을 연결한다. FPGA 내부는 144개 packed MAC lane, layer descriptor
+                ROM, weight cache, feature buffer, scheduler로 구성된다.
               </p>
             </div>
             <dl class="case-facts">
@@ -58,13 +56,12 @@
           </section>
 
           <section class="doc-section searchable-section" id="host-fpga" data-search-title="Host FPGA 역할">
-            <h2>Host는 준비와 평가를, FPGA는 정수 full graph를 맡습니다</h2>
+            <h2>Host–FPGA 역할</h2>
             <p>
-              host는 bitstream program, 입력 전처리, weight와 input의 DDR preload,
-              시작 명령과 완료 polling을 담당합니다. FPGA scheduler는 layer
-              descriptor를 따라 22개 단계를 실행하고 두 detection head를 DDR에
-              기록합니다. host는 두 출력을 읽어 box decode, class score와 NMS를
-              수행합니다.
+              host는 bitstream program, 입력 전처리, weight·input DDR preload,
+              시작 명령, 완료 polling을 수행한다. FPGA scheduler는 layer descriptor를
+              따라 22개 단계를 실행하고 두 detection head를 DDR에 기록한다. host는
+              두 출력을 읽어 box decode, class score, NMS를 수행한다.
             </p>
             <div class="case-flow" style="--flow-count: 5" aria-label="Host와 FPGA 역할">
               <div class="case-flow-step">
@@ -96,13 +93,11 @@
           </section>
 
           <section class="doc-section searchable-section" id="ddr" data-search-title="DDR workspace">
-            <h2>DDR workspace가 분기와 두 detection head를 연결합니다</h2>
+            <h2>DDR workspace와 두 detection head</h2>
             <p>
-              feature map을 layer마다 새 공간에 계속 쌓으면 DDR 용량과 주소 관리가
-              커집니다. 이 설계는 전역 workspace의 주소 구간을 재사용하고,
-              Route가 다시 읽어야 하는 feature map과 두 detection head의 출력은
-              필요한 시점까지 별도 주소에 보존합니다. 한 32-bit word에는 8-bit
-              HWC 값 네 개를 묶습니다.
+              전역 workspace는 feature map 주소 구간을 재사용한다. Route가 다시
+              읽는 feature map과 두 detection head 출력은 별도 주소에 보존한다.
+              하나의 32-bit word에는 8-bit HWC 값 네 개가 저장된다.
             </p>
             <figure class="doc-figure">
               <div class="figure-label">DDR workspace와 두 detection head 출력 배치</div>
@@ -112,30 +107,29 @@
               />
               <figcaption>
                 CONV14의 8×8 head와 CONV20의 16×16 head를 서로 다른 영역에
-                남겨 host가 같은 detector 평가에서 함께 읽을 수 있게 했습니다.
+                저장해 host가 같은 detector 평가에서 함께 읽는다.
               </figcaption>
             </figure>
             <div class="case-grid">
               <article class="case-card">
                 <span>Route</span>
-                <h3>이전 feature map을 다시 읽기</h3>
-                <p>분기 지점의 출력 주소를 descriptor에 보존하고, 이후 feature와 channel 방향으로 결합합니다.</p>
+                <h3>Route</h3>
+                <p>분기 지점의 출력 주소를 descriptor에 보존하고, 이후 feature와 channel 방향으로 결합한다.</p>
               </article>
               <article class="case-card">
                 <span>Upsample</span>
-                <h3>8×8을 16×16으로 확대</h3>
-                <p>2배 nearest-neighbor 경로로 해상도를 맞춘 뒤 16×16 feature와 Route합니다.</p>
+                <h3>Upsample</h3>
+                <p>2배 nearest-neighbor 경로로 해상도를 확장한 뒤 16×16 feature와 Route한다.</p>
               </article>
             </div>
           </section>
 
           <section class="doc-section searchable-section" id="descriptors" data-search-title="22개 descriptor">
-            <h2>22개 descriptor는 연산기 수가 아니라 실행 순서입니다</h2>
+            <h2>22개 layer descriptor</h2>
             <p>
               descriptor ROM에는 각 단계의 연산 종류, 입력·출력 shape, DDR 주소,
-              kernel과 stride, activation과 requantization 조건이 들어 있습니다.
-              scheduler는 같은 compute block을 재사용하면서 descriptor만 바꿔
-              전체 그래프를 진행합니다.
+              kernel·stride·activation·requantization 조건이 저장된다. scheduler는
+              같은 compute block을 재사용하며 descriptor에 따라 전체 그래프를 진행한다.
             </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
@@ -155,13 +149,13 @@
           </section>
 
           <section class="doc-section searchable-section" id="mac" data-search-title="144-lane MAC">
-            <h2>144-lane packed MAC을 3×3과 1×1 경로에서 재사용합니다</h2>
+            <h2>144-lane packed MAC</h2>
             <p>
               144는 3×3 kernel과 16개 입력 channel을 한 묶음으로 처리하는
               <code>3×3×16</code> 구조에서 나옵니다. packed-pair DSP 경로는
               하나의 weight와 두 activation을 공유해 두 spatial dot product를
-              계산합니다. 1×1 convolution에서는 필요한 lane group만 활성화해
-              같은 array를 재사용합니다.
+              계산한다. 1×1 convolution에서는 필요한 lane group만 활성화해 같은
+              array를 재사용한다.
             </p>
             <div class="result-band" aria-label="AIX MAC 구조">
               <article><strong>144</strong><span>Packed MAC lanes</span></article>
@@ -172,7 +166,7 @@
             <p class="evidence-note">
               2×144는 packed datapath가 만드는 구조적 연산 수입니다. descriptor
               전환, DDR 대기, Pool·Route·Upsample과 write-back까지 포함한
-              지속 처리량은 최종 cycle counter로 평가했습니다.
+              지속 처리량은 최종 cycle counter로 평가한다.
             </p>
             <div class="code-links" aria-label="AIX MAC Verilog 파일">
               <a href="../../code/competitions/aix/fastv2_mac_array_packed_pair.v">fastv2_mac_array_packed_pair.v</a>
@@ -180,7 +174,7 @@
           </section>
 
           <section class="doc-section searchable-section" id="bottlenecks" data-search-title="병목 개선">
-            <h2>계산량보다 데이터 공급과 write-back이 먼저 병목이 됐습니다</h2>
+            <h2>데이터 경로 병목</h2>
             <div class="signal-table-wrap">
               <table class="signal-table">
                 <thead><tr><th>지점</th><th>관찰한 문제</th><th>구조에 반영한 내용</th></tr></thead>
@@ -194,9 +188,8 @@
               </table>
             </div>
             <p>
-              최종 구조는 최고 peak FPS만을 목표로 삼지 않았습니다. 두 detection
-              head의 readback, 100MHz timing closure와 229장 detector 검증이
-              유지되는 지점을 최종 구현으로 선택했습니다.
+              두 detection head readback, 100MHz timing closure, 229장 detector
+              검증은 최종 구현의 성능·검증 조건이다.
             </p>
             <div class="code-links" aria-label="AIX 공개 Verilog 파일">
               <a href="../../code/competitions/aix/fastv2_network_desc_rom.v">Descriptor ROM</a>

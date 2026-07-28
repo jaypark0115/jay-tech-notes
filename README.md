@@ -88,27 +88,26 @@ NRV 이벤트 카메라의 캘리브레이션 기능은 제가 직접 구현했�
 
 ### 6. 경진대회 기술 케이스 스터디
 
-문제 정의, 입력 표현, 하드웨어 구조와 검증 결과가 어떻게 이어지는지
-두 프로젝트를 네 편씩 정리했습니다.
+문제 정의, 입력 표현, 하드웨어 구조, 검증 결과를 프로젝트별 네 문서로 구성한다.
 
 #### 2025 전국 대학생 AI 반도체 회로 설계 경진대회 · 팀 반짝반짝
 
 1. [프로젝트 전체 보기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-00-overview.html)
-   - BallControl 문제와 99→32→4 SNN 구조, 담당 범위와 검증 경계를 먼저 설명합니다.
-2. [문제를 뉴런 입력으로 바꾸기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-01-problem-and-design.html)
-   - 11×9 one-hot 위치 입력과 무게 rate encoding을 정의한 과정을 다룹니다.
-3. [SNN 제어 회로 읽기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-02-snn-control-rtl.html)
-   - LIF 뉴런, 시간 단계 FSM, 99→32→4 구조와 선별 Verilog의 관계를 설명합니다.
+   - BallControl 문제, 99→32→4 SNN 구조, 담당 범위, 검증 경계를 다룬다.
+2. [입력 표현과 출력 정의](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-01-problem-and-design.html)
+   - 11×9 one-hot 위치 입력과 무게 rate encoding을 다룬다.
+3. [SNN 제어 회로와 RTL](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-02-snn-control-rtl.html)
+   - LIF 뉴런, 시간 단계 FSM, 99→32→4 구조, 공개 Verilog의 관계를 다룬다.
 4. [입력 실험과 결과 해석](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-03-verification-results.html)
-   - 15g·30g 시뮬레이션, 합성 자원과 Vivado 전력 추정값을 검증 범위와 함께 읽습니다.
+   - 15g·30g 시뮬레이션, 합성 자원, Vivado 전력 추정값과 검증 경계를 다룬다.
 
 #### AIX 2026 Deep Learning Hardware 설계경진대회 · 팀 경이원지
 
 1. [프로젝트 전체 보기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-00-overview.html)
-   - 정수 모델, 22개 descriptor, 두 detection head와 최종 보드 결과를 한 흐름으로 정리합니다.
+   - 정수 모델, 22개 descriptor, 두 detection head, 최종 보드 결과를 다룬다.
 2. [YOLOv2 정수 양자화](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-01-quantization.html)
-   - 최신 32장 calibration과 detector mAP를 기준으로 scale을 선택한 과정을 설명합니다.
+   - 최신 32장 calibration, detector mAP, layer별 scale을 다룬다.
 3. [Full-Graph FPGA 구조](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-02-fpga-architecture.html)
-   - DDR workspace, 22개 descriptor, 144-lane packed MAC과 두 detection head의 연결을 다룹니다.
+   - DDR workspace, 22개 descriptor, 144-lane packed MAC, 두 detection head의 연결을 다룬다.
 4. [229장 보드 검증](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-03-board-verification.html)
-   - test_one에서 test_all로 확장해 detector mAP, compute-only FPS, timing과 자원을 확인합니다.
+   - test_one, test_all, detector mAP, compute-only FPS, timing, 자원을 다룬다.
