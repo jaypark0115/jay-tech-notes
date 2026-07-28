@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="연구·개발 계획, SNN 연구, NRV DVS 캘리브레이션, SoC/FPGA 학습 노트와 경진대회 기술 노트 모음." />
     <title>Jay Tech Notes</title>
-    <link rel="stylesheet" href="styles.css?v=20260727-home-panel-links" />
+    <link rel="stylesheet" href="styles.css?v=20260728-competition-final" />
     <script src="script.js" defer></script>
   </head>
   <body class="home-page">
@@ -419,8 +419,9 @@
           <section class="doc-section visible" id="competition-case-studies">
             <h2>경진대회 기술 노트</h2>
             <p>
-              제가 참여한 두 경진대회에서 진행한 설계, 구현과 검증 내용을
-              대회별 요약과 세 편의 기술 글로 나누어 기록했습니다.
+              두 프로젝트가 무엇을 입력받아 어떤 결과를 만드는지부터 시작합니다.
+              전체 그림을 먼저 읽은 뒤, SNN 제어 회로와 YOLOv2 FPGA 가속기의
+              설계·구현·검증 과정을 세 편씩 따라갈 수 있습니다.
             </p>
 
             <div class="competition-collection">
@@ -433,27 +434,56 @@
                       전국 대학생 AI 반도체 회로 설계 경진대회
                     </p>
                   </div>
+                  <strong>소개 + 기술 글 3편</strong>
                 </header>
+                <article class="competition-project-summary">
+                  <span>PROJECT SUMMARY</span>
+                  <h4>공의 위치·속도를 네 방향 제어 이벤트로 변환</h4>
+                  <p>
+                    30×30cm 보드 중앙으로 공을 이동시키는 BallControl 과제를
+                    SNN 출력 제어 회로로 해석했습니다. signed X/Y 오차를 네 방향
+                    크기로 나누고, 4개의 LIF 뉴런이 X/Y pull·push 이벤트를 만듭니다.
+                    실제 센서·모터·기구부를 합친 폐루프 장치는 구현 범위에 포함하지 않았습니다.
+                  </p>
+                  <dl class="competition-summary-facts">
+                    <div>
+                      <dt>수행 내용</dt>
+                      <dd>SNN/LIF 조사 · 요구사항 해석 · 출력 계층 RTL 구조 · 입력 실험</dd>
+                    </div>
+                    <div>
+                      <dt>핵심 기술</dt>
+                      <dd>Signed error · LIF neuron · Rate encoding · Verilog RTL</dd>
+                    </div>
+                    <div>
+                      <dt>확인 결과</dt>
+                      <dd>4방향 출력 파이프라인 · 합성 결과 · 전력 추정 · 실험 로그</dd>
+                    </div>
+                  </dl>
+                </article>
                 <div class="sitemap-grid competition-card-grid">
-                  <a class="sitemap-card competition-summary-card" href="pages/competitions/00-overview.html#ai-semi">
-                    <span class="sitemap-number">01</span>
-                    <h2>경진대회 프로젝트 요약</h2>
-                    <p>BallControl 과제의 목표, 제가 수행한 범위, SNN 출력 제어 회로의 핵심 기술과 확인 결과를 정리했습니다.</p>
+                  <a class="sitemap-card competition-intro-card" href="pages/competitions/ai-semi-00-overview.html">
+                    <span class="sitemap-number">AI-00</span>
+                    <small>PROJECT OVERVIEW</small>
+                    <h2>프로젝트 소개와 구현 범위</h2>
+                    <p>대회 문제, 실제 제작물, 팀장으로 맡은 역할과 검증된 결과를 한 페이지에서 먼저 확인합니다.</p>
                   </a>
                   <a class="sitemap-card" href="pages/competitions/ai-semi-01-problem-and-design.html">
-                    <span class="sitemap-number">02</span>
-                    <h2>BallControl 문제 이해하기</h2>
-                    <p>30×30cm 보드 위의 공을 중앙으로 옮기는 문제가 회로의 입력과 출력으로 어떻게 바뀌는지 살펴봅니다.</p>
+                    <span class="sitemap-number">AI-01</span>
+                    <small>PROBLEM &amp; SIGNALS</small>
+                    <h2>BallControl 문제와 신호 정의</h2>
+                    <p>30×30cm 보드, 중앙 반경 1cm, 공의 위치·속도·무게를 회로 입력으로 바꾼 과정을 설명합니다.</p>
                   </a>
                   <a class="sitemap-card" href="pages/competitions/ai-semi-02-snn-control-rtl.html">
-                    <span class="sitemap-number">03</span>
-                    <h2>위치 오차가 스파이크가 되는 과정</h2>
-                    <p>오차의 방향과 크기를 나누고, 네 개의 LIF 뉴런이 모터 방향 신호를 만드는 과정을 실제 RTL과 함께 읽습니다.</p>
+                    <span class="sitemap-number">AI-02</span>
+                    <small>RTL WALKTHROUGH</small>
+                    <h2>SNN 출력 제어 RTL</h2>
+                    <p>signed 오차가 네 방향 값과 LIF 상태를 거쳐 클록 동기 1-bit 출력 이벤트가 되는 과정을 수치와 코드로 읽습니다.</p>
                   </a>
                   <a class="sitemap-card" href="pages/competitions/ai-semi-03-verification-results.html">
-                    <span class="sitemap-number">04</span>
-                    <h2>입력 실험과 구현 결과 읽기</h2>
-                    <p>위치만 사용한 입력과 공의 무게까지 반영한 입력을 비교하고, 합성·전력 결과가 뜻하는 범위를 정리합니다.</p>
+                    <span class="sitemap-number">AI-03</span>
+                    <small>EXPERIMENT &amp; EVIDENCE</small>
+                    <h2>입력 실험과 구현 결과</h2>
+                    <p>one-shot과 무게 반영 rate encoding을 비교하고, 15g·30g 실험과 합성·전력 자료의 의미를 구분합니다.</p>
                   </a>
                 </div>
               </section>
@@ -467,27 +497,55 @@
                       AIX 2026 Deep Learning Hardware 설계경진대회
                     </p>
                   </div>
+                  <strong>소개 + 기술 글 3편</strong>
                 </header>
+                <article class="competition-project-summary">
+                  <span>PROJECT SUMMARY</span>
+                  <h4>양자화된 YOLOv2 전체 그래프를 FPGA에서 실행</h4>
+                  <p>
+                    대표 이미지와 detector mAP로 INT8 조건을 정하고, 22개
+                    Conv·Pool·Route·Upsample 단계를 descriptor와 DDR 작업 공간으로
+                    연결했습니다. 두 detection head를 포함한 전체 모델을 보드에서 검증했습니다.
+                  </p>
+                  <dl class="competition-summary-facts">
+                    <div>
+                      <dt>수행 내용</dt>
+                      <dd>양자화 탐색 · 정수 모델–RTL 연결 · 통합·병목 개선 · 보드 검증</dd>
+                    </div>
+                    <div>
+                      <dt>핵심 기술</dt>
+                      <dd>INT8/INT32 · Requantization · Descriptor scheduling · DDR buffering</dd>
+                    </div>
+                    <div>
+                      <dt>확인 결과</dt>
+                      <dd>229/229 PASS · 11.420687 compute-only FPS · 78.60% mAP</dd>
+                    </div>
+                  </dl>
+                </article>
                 <div class="sitemap-grid competition-card-grid">
-                  <a class="sitemap-card competition-summary-card" href="pages/competitions/00-overview.html#aix">
-                    <span class="sitemap-number">01</span>
-                    <h2>경진대회 프로젝트 요약</h2>
-                    <p>YOLOv2 FPGA 가속기의 목표, 제가 수행한 범위, 전체 그래프 구현과 보드 검증 결과를 정리했습니다.</p>
+                  <a class="sitemap-card competition-intro-card" href="pages/competitions/aix-00-overview.html">
+                    <span class="sitemap-number">AIX-00</span>
+                    <small>PROJECT OVERVIEW</small>
+                    <h2>프로젝트 소개와 최종 결과</h2>
+                    <p>FPGA 보드, 전체 실행 경로, 담당 범위와 229장·mAP·속도 결과를 먼저 한눈에 봅니다.</p>
                   </a>
                   <a class="sitemap-card" href="pages/competitions/aix-01-quantization.html">
-                    <span class="sitemap-number">02</span>
-                    <h2>YOLOv2를 정수 연산으로 바꾸기</h2>
-                    <p>대표 이미지로 값의 범위를 찾고, 실제 검출 정확도를 확인하며 INT8 양자화 조건을 정한 과정을 설명합니다.</p>
+                    <span class="sitemap-number">AIX-01</span>
+                    <small>QUANTIZATION</small>
+                    <h2>YOLOv2 정수 양자화</h2>
+                    <p>32장 calibration과 detector mAP를 기준으로 INT8·INT32·requantization 조건을 정한 과정을 설명합니다.</p>
                   </a>
                   <a class="sitemap-card" href="pages/competitions/aix-02-fpga-architecture.html">
-                    <span class="sitemap-number">03</span>
-                    <h2>모델 전체를 FPGA에서 실행하기</h2>
-                    <p>22개 처리 단계, DDR 작업 공간, 144-lane MAC과 두 검출 출력을 하나의 실행 흐름으로 연결한 구조를 살펴봅니다.</p>
+                    <span class="sitemap-number">AIX-02</span>
+                    <small>FPGA ARCHITECTURE</small>
+                    <h2>Full-graph FPGA 구조</h2>
+                    <p>22단계 descriptor, DDR workspace, 144-lane MAC과 두 detection head를 연결한 하드웨어 구조를 살펴봅니다.</p>
                   </a>
                   <a class="sitemap-card" href="pages/competitions/aix-03-board-verification.html">
-                    <span class="sitemap-number">04</span>
-                    <h2>한 장에서 229장 검증까지</h2>
-                    <p>한 장으로 실행 경로를 확인한 뒤 전체 평가 이미지로 확장해 속도, 정확도와 하드웨어 보고서를 함께 검증합니다.</p>
+                    <span class="sitemap-number">AIX-03</span>
+                    <small>BOARD VERIFICATION</small>
+                    <h2>229장 보드 검증</h2>
+                    <p>한 장의 smoke test를 229장으로 확장하고, 평가 조건·compute-only 속도·mAP·timing을 함께 검증합니다.</p>
                   </a>
                 </div>
               </section>

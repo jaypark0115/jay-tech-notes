@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="YOLOv2를 FPGA용 정수 연산으로 바꾸기 위해 대표 이미지, mAP, INT8 저장, INT32 누산과 requantization을 연결한 과정을 설명한 글." />
     <title>AIX 경진대회 1 - YOLOv2를 정수 연산으로 바꾸기</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260726-summaries" />
+    <link rel="stylesheet" href="../../styles.css?v=20260728-competition-final" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="competition-page">
@@ -20,7 +20,7 @@
           <nav class="chapter-switcher" aria-label="AIX 경진대회 글 이동">
             <span class="chapter-switcher-label">AIX 2026 Deep Learning Hardware 설계경진대회</span>
             <div>
-              <a href="00-overview.html">먼저 읽기</a>
+              <a href="aix-00-overview.html">프로젝트 소개</a>
               <a class="current" href="aix-01-quantization.html">1. YOLOv2를 정수 연산으로 바꾸기</a>
               <a href="aix-02-fpga-architecture.html">2. 모델 전체를 FPGA에서 실행하기</a>
               <a href="aix-03-board-verification.html">3. 한 장에서 229장 검증까지</a>
@@ -49,7 +49,7 @@
             </div>
             <div>
               <dt>Requantization</dt>
-              <dd>누산 결과에 bias와 활성화를 적용한 뒤 반올림·shift·clamp를 거쳐 다음 layer의 INT8 범위로 바꾸는 단계입니다.</dd>
+              <dd>누산 결과에 bias와 활성화를 적용한 뒤 multiplier·round offset·shift·clamp를 거쳐 다음 8-bit 범위로 바꾸는 단계입니다.</dd>
             </div>
             <div>
               <dt>Detector mAP</dt>
@@ -80,11 +80,12 @@
           <section class="doc-section searchable-section" id="calibration" data-search-title="대표 이미지와 mAP">
             <h2>대표 이미지와 detector mAP를 이용한 배율 탐색</h2>
             <p>
-              calibration에는 가까운 물체와 먼 물체처럼 서로 다른 크기의 대상이
-              함께 나타나는 대표 이미지를 사용했습니다. 각 layer의 activation
-              범위를 관찰해 배율 후보를 만들고, 후보마다 정수 추론과 detector
-              후처리를 실행했습니다. 이미 시험한 조합과 계속 성능이 나빠지는
-              방향을 기록해 같은 탐색을 반복하지 않도록 했습니다.
+              calibration은 고정 seed 20260213으로 선택한 32장을 사용했습니다.
+              <code>CAPP_testset_close</code>와 <code>CAPP_testset_long</code>에서
+              각각 16장씩 뽑아 가까운 물체와 먼 물체가 한쪽에 치우치지 않게
+              구성했습니다. 각 이미지를 정수 모델에 통과시키며 11개 convolution의
+              activation과 parameter hex를 저장하고 layer별 min/max·clipping 상태를
+              집계했습니다.
             </p>
             <p>
               중간 tensor가 소프트웨어 기준값과 얼마나 비슷한지는 오차가 시작된
@@ -93,6 +94,31 @@
               mAP는 여러 물체 종류에서 예측 상자와 정답 상자가 얼마나 잘 맞는지를
               종합한 정확도 지표입니다.
             </p>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>항목</th><th>프로젝트에서 사용한 조건</th></tr></thead>
+                <tbody>
+                  <tr><td>Calibration 이미지</td><td>32장 · close 16 + long 16 · seed 20260213</td></tr>
+                  <tr><td>Scale 단위</td><td>convolution layer별 · channel별 scale 아님</td></tr>
+                  <tr><td>표현 방식</td><td>zero-point 없이 multiplier 기반 scale</td></tr>
+                  <tr><td>Signedness</td><td>weight signed INT8 · activation은 ReLU/검출 head 조건에 따라 unsigned 또는 signed 8-bit</td></tr>
+                  <tr><td>후보 선택</td><td>한 layer씩, 필요할 때 두 layer를 함께 조정하고 detector mAP가 좋아질 때만 채택</td></tr>
+                  <tr><td>탐색 범위</td><td>고정 전역 범위는 최종 패키지에 남아 있지 않아 임의의 숫자로 제시하지 않음</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <h3>최종 scale 파일의 대표 layer</h3>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>Graph layer</th><th>Calibration index</th><th>Input multiplier</th><th>Weight multiplier</th></tr></thead>
+                <tbody>
+                  <tr><td>CONV00</td><td>0</td><td>127</td><td>21</td></tr>
+                  <tr><td>CONV10</td><td>5</td><td>14</td><td>745</td></tr>
+                  <tr><td>CONV14 · 8×8 head</td><td>8</td><td>17</td><td>283</td></tr>
+                  <tr><td>CONV20 · 16×16 head</td><td>10</td><td>5</td><td>511</td></tr>
+                </tbody>
+              </table>
+            </div>
             <figure class="doc-figure compact-figure">
               <div class="figure-label">발표자료의 layer-wise 양자화 조건 탐색</div>
               <img
@@ -113,7 +139,7 @@
             <div class="definition-grid">
               <article>
                 <h3>INT8 저장</h3>
-                <p>feature map과 weight를 8-bit 정수로 보관해 DDR 전송량과 내부 buffer 사용량을 줄입니다.</p>
+                <p>feature map은 layer 조건에 맞는 8-bit, weight는 signed INT8로 보관해 DDR 전송량과 내부 buffer 사용량을 줄입니다.</p>
               </article>
               <article>
                 <h3>INT32 누산</h3>
@@ -125,7 +151,7 @@
               </article>
               <article>
                 <h3>Requantization</h3>
-                <p>곱셈, 반올림, shift와 clamp를 거쳐 다음 layer가 사용할 8-bit 범위로 되돌립니다.</p>
+                <p>multiplier와 round offset을 더한 뒤 shift하고, unsigned 0–255 또는 signed −128–127로 clamp합니다.</p>
               </article>
             </div>
             <div class="rtl-card">
@@ -145,6 +171,26 @@ end</code></pre>
               <a href="../../code/competitions/aix/fastv2_postproc_requant_pipe.v">fastv2_postproc_requant_pipe.v</a>에서
               확인할 수 있습니다.
             </p>
+            <h3>최종 CONV00 계수로 계산한 예</h3>
+            <p>
+              최종 RTL source의 CONV00은 <code>requant_mul=1,006,507</code>,
+              <code>requant_shift=28</code>, <code>requant_round=0</code>을 사용합니다.
+              bias와 ReLU를 적용한 INT32 값이 18,432라면 다음처럼 8-bit 출력 69가
+              만들어집니다.
+            </p>
+            <div class="equation-card" aria-label="CONV00 requantization 숫자 예제">
+              <code>
+                product = 18,432 × 1,006,507 = 18,551,937,024<br />
+                shifted = product &gt;&gt; 28 = 69<br />
+                clamp_unsigned(69) = 69
+              </code>
+            </div>
+            <p>
+              이 최종 설정에서는 round offset이 0이므로 양수 값은 right shift에서
+              잘립니다. signed 출력의 음수는 절댓값을 shift한 뒤 부호를 되돌려
+              0 방향으로 자르고, 마지막에 −128–127 범위로 제한합니다. 즉 모든
+              layer에 무조건 round-to-nearest를 적용했다고 표현하지 않습니다.
+            </p>
           </section>
 
           <section class="doc-section searchable-section" id="timing" data-search-title="양자화와 timing">
@@ -157,7 +203,7 @@ end</code></pre>
               파이프라인 단계로 흘러갑니다.
             </p>
             <p>
-              중요한 점은 파이프라인을 추가한 뒤에도 모델에서 정한 배율, 반올림과
+              중요한 점은 파이프라인을 추가한 뒤에도 모델에서 정한 배율, round offset과
               clamp 규칙이 그대로 유지돼야 한다는 것입니다. 소프트웨어 양자화와
               RTL이 같은 숫자의 의미를 공유해야 최종 detector 결과도 일치합니다.
             </p>
@@ -165,7 +211,7 @@ end</code></pre>
             <p>
               대표 이미지 집합을 구성하고 layer별 배율 후보를 반복 평가하는 흐름을
               정리했습니다. 후보마다 정수 추론과 detector mAP를 계산해 결과를
-              기록했으며, 선택한 multiplier·rounding·shift 규칙이 소프트웨어와
+              기록했으며, 선택한 multiplier·round offset·shift 규칙이 소프트웨어와
               requantization RTL에서 같은 순서로 적용되는지 확인했습니다.
             </p>
           </section>
@@ -181,7 +227,7 @@ end</code></pre>
           </section>
 
           <footer class="page-footer">
-            <a href="00-overview.html">← 먼저 읽기</a>
+            <a href="aix-00-overview.html">← 프로젝트 소개</a>
             <a href="aix-02-fpga-architecture.html">다음: 모델 전체를 FPGA에서 실행하기 →</a>
           </footer>
         </article>

@@ -88,13 +88,13 @@ NRV 이벤트 카메라의 캘리브레이션 기능은 제가 직접 구현했�
 
 ### 6. 경진대회 기술 노트
 
-제가 참여한 두 경진대회에서 진행한 설계, 구현과 검증 내용을 대회별 요약과
-세 편의 기술 글로 나누어 기록했습니다.
+두 경진대회가 어떤 문제를 다뤘고 무엇을 만들었는지 설명한 뒤, 각 프로젝트에서
+수행한 일과 사용한 기술 개념, 설계·구현·검증 과정을 세 편씩 이어서 정리했습니다.
 
 #### 2025 전국 대학생 AI 반도체 회로 설계 경진대회 · 팀 반짝반짝
 
-1. [경진대회 프로젝트 요약](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/00-overview.html#ai-semi)
-   - BallControl 과제의 목표, 수행 범위, 핵심 기술과 확인 결과를 정리했습니다.
+1. [프로젝트 소개: SNN BallControl 출력 제어 RTL](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-00-overview.html)
+   - 대회 문제, 제작물, 실제 구현 범위와 팀장으로 맡은 일을 먼저 설명합니다.
 2. [BallControl 문제 이해하기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-01-problem-and-design.html)
    - 30×30cm 보드 위의 공을 중앙으로 옮기는 문제가 회로의 입력과 출력으로 어떻게 바뀌는지 설명합니다.
 3. [위치 오차가 스파이크가 되는 과정](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/ai-semi-02-snn-control-rtl.html)
@@ -104,8 +104,8 @@ NRV 이벤트 카메라의 캘리브레이션 기능은 제가 직접 구현했�
 
 #### AIX 2026 Deep Learning Hardware 설계경진대회 · 팀 경이원지
 
-1. [경진대회 프로젝트 요약](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/00-overview.html#aix)
-   - YOLOv2 FPGA 가속기의 목표, 수행 범위, 전체 그래프 구현과 보드 검증 결과를 정리했습니다.
+1. [프로젝트 소개: YOLOv2 Full-Graph FPGA 가속기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-00-overview.html)
+   - 대회 문제, 전체 실행 경로, 담당 범위와 229장 보드 검증 결과를 한 페이지에서 요약합니다.
 2. [YOLOv2를 정수 연산으로 바꾸기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-01-quantization.html)
    - 대표 이미지로 값의 범위를 찾고 실제 검출 정확도를 확인하며 INT8 양자화 조건을 정한 과정을 설명합니다.
 3. [모델 전체를 FPGA에서 실행하기](https://jaypark0115.github.io/jay-tech-notes/pages/competitions/aix-02-fpga-architecture.html)

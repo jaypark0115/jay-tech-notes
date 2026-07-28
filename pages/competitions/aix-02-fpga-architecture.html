@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="YOLOv2의 22개 처리 단계를 DDR, descriptor, 144-lane MAC, Route, Upsample과 두 detection head로 실행하는 FPGA 구조를 설명한 글." />
     <title>AIX 경진대회 2 - 모델 전체를 FPGA에서 실행하기</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260726-summaries" />
+    <link rel="stylesheet" href="../../styles.css?v=20260728-competition-final" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="competition-page">
@@ -20,7 +20,7 @@
           <nav class="chapter-switcher" aria-label="AIX 경진대회 글 이동">
             <span class="chapter-switcher-label">AIX 2026 Deep Learning Hardware 설계경진대회</span>
             <div>
-              <a href="00-overview.html">먼저 읽기</a>
+              <a href="aix-00-overview.html">프로젝트 소개</a>
               <a href="aix-01-quantization.html">1. YOLOv2를 정수 연산으로 바꾸기</a>
               <a class="current" href="aix-02-fpga-architecture.html">2. 모델 전체를 FPGA에서 실행하기</a>
               <a href="aix-03-board-verification.html">3. 한 장에서 229장 검증까지</a>
@@ -57,6 +57,26 @@
               <dd>다음 단계가 데이터를 받을 수 없을 때 valid/ready 흐름으로 앞단 연산을 안전하게 멈추는 제어입니다.</dd>
             </div>
           </dl>
+
+          <section class="doc-section searchable-section" id="hardware-spec" data-search-title="하드웨어 사양">
+            <h2>최종 XPR과 RTL에서 확인한 하드웨어 사양</h2>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>항목</th><th>최종 구현</th><th>근거</th></tr></thead>
+                <tbody>
+                  <tr><td>FPGA board</td><td>Nexys 4 DDR</td><td>XPR board part</td></tr>
+                  <tr><td>Device</td><td>xc7a100tcsg324-1 · Artix-7</td><td>final_yolo_accelerator.xpr</td></tr>
+                  <tr><td>Tool / clock</td><td>Vivado 2025.2.1 · 100MHz</td><td>XPR와 timing report</td></tr>
+                  <tr><td>DDR interface</td><td>DDR2 physical DQ 16-bit · MIG AXI UI 64-bit</td><td>생성된 MIG RTL</td></tr>
+                  <tr><td>Host interface</td><td>JTAG-to-AXI 32-bit</td><td>block design IP 설정</td></tr>
+                  <tr><td>Input</td><td>256×256×3 RGB</td><td>aix2024.cfg</td></tr>
+                  <tr><td>Number format</td><td>weight signed INT8 · activation 8-bit · accumulator INT32</td><td>정수 모델과 MAC RTL</td></tr>
+                  <tr><td>MAC array</td><td>144 packed lanes</td><td>NUM_MACS parameter</td></tr>
+                  <tr><td>Detection outputs</td><td>8×8×195 + 16×16×195</td><td>descriptor ROM</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
 
           <section class="doc-section searchable-section" id="roles" data-search-title="Host와 FPGA의 역할">
             <h2>Host 준비·후처리와 FPGA full-graph 연산의 역할 구분</h2>
@@ -117,6 +137,27 @@
             </figure>
           </section>
 
+          <section class="doc-section searchable-section" id="graph-summary" data-search-title="22단계 그래프 요약">
+            <h2>22개 descriptor를 다섯 구간으로 읽기</h2>
+            <p>
+              22라는 숫자는 convolution이 22개라는 뜻이 아닙니다. descriptor
+              index 0–21에 Conv, Pool, Route, Upsample과 두 detection 단계가 함께
+              들어 있습니다. 전체 흐름은 아래 다섯 구간으로 정리할 수 있습니다.
+            </p>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>구간</th><th>Descriptor</th><th>처리 내용</th><th>구간 출력</th></tr></thead>
+                <tbody>
+                  <tr><td>Backbone 전반부</td><td>0–9</td><td>Conv 5회 + 2×2 Pool 5회</td><td>8×8×256</td></tr>
+                  <tr><td>Backbone 후반부</td><td>10–13</td><td>3×3 Conv, stride-1 Pool, 1×1·3×3 Conv</td><td>8×8×512</td></tr>
+                  <tr><td>Head 1</td><td>14–15</td><td>1×1 Conv와 detection output</td><td>8×8×195</td></tr>
+                  <tr><td>Feature fusion</td><td>16–19</td><td>route → 1×1 Conv → 2× upsample → 앞선 16×16 feature와 route</td><td>16×16×384</td></tr>
+                  <tr><td>Head 2</td><td>20–21</td><td>1×1 Conv와 detection output</td><td>16×16×195</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
           <section class="doc-section searchable-section" id="descriptor" data-search-title="22단계 descriptor">
             <h2>Descriptor ROM이 제어하는 22개 처리 단계</h2>
             <p>
@@ -152,10 +193,18 @@ end</code></pre>
             <h2>3×3과 1×1 연산에 재사용되는 144-lane INT8 MAC</h2>
             <p>
               convolution의 핵심은 입력과 weight를 곱해 더하는 MAC 연산입니다.
-              이 구조는 144개의 signed INT8 곱셈 lane을 사용합니다. 3×3 layer에서는
-              같은 weight로 두 위치의 dot product를 계산하고, 1×1 layer에서는 같은
-              연산 자원을 네 output channel과 2×2 위치 묶음에 맞게 사용합니다.
-              layer 형태가 바뀌어도 별도의 MAC 배열을 추가하지 않는 구조입니다.
+              144는 임의의 병렬도 숫자가 아니라 <code>3×3×16</code>입니다. 3×3
+              kernel의 16-channel 묶음 하나를 한 번에 처리하면 한 출력 위치의
+              144개 곱셈 항이 만들어집니다. 입력 channel이 16보다 큰 layer는
+              16-channel chunk를 반복하고 INT32 accumulator에 이어서 더합니다.
+            </p>
+            <p>
+              각 lane은 같은 signed INT8 weight와 두 위치의 activation을 한 DSP
+              곱셈에 packing합니다. 정상 3×3 경로에서는 한 번 받아들인 cycle마다
+              두 개의 144-term spatial dot product를 파이프라인으로 계산합니다.
+              1×1 경로에서는 144개를 그대로 두지 않고 32-lane group 네 개로 나눠,
+              2×2 위치와 네 output channel을 처리한 뒤 결과를 순서대로 내보냅니다.
+              별도의 1×1 전용 MAC array를 추가하지 않은 이유입니다.
             </p>
             <div class="rtl-card">
               <span>fastv2_mac_array_packed_pair.v · 데이터 폭과 병렬 lane 수</span>
@@ -170,6 +219,23 @@ localparam integer SUM_W = 23;</code></pre>
               <a href="../../code/competitions/aix/fastv2_mac_array_packed_pair.v">fastv2_mac_array_packed_pair.v</a>에서
               확인할 수 있습니다.
             </p>
+            <div class="metric-grid" aria-label="144-lane MAC의 구조적 처리량">
+              <article><strong>144</strong><span>DSP packed lanes</span></article>
+              <article><strong>2 × 144</strong><span>3×3 경로의 scalar products / accepted cycle</span></article>
+              <article><strong>28.8G</strong><span>scalar products/s @ 100MHz · 구조적 peak</span></article>
+              <article><strong>205 / 240</strong><span>최종 design 전체 DSP</span></article>
+            </div>
+            <div class="scope-note">
+              <strong>이론 peak와 11.42 FPS의 차이</strong>
+              <span>
+                28.8G는 packed lane이 모두 유효한 3×3 구간의 구조적 상한입니다.
+                모델 전체에서는 channel chunk 반복, 1×1 lane 배치, DDR read/write,
+                descriptor 전환, Pool·Route·Upsample, requantization과 backpressure가
+                포함됩니다. 따라서 이 값으로 전체 FPS를 직접 계산하거나 실제
+                지속 처리량으로 표현하지 않습니다. 최종 DSP 205개에는 144개 MAC
+                lane 외에 requantization과 주변 산술도 포함됩니다.
+              </span>
+            </div>
           </section>
 
           <section class="doc-section searchable-section" id="bottlenecks" data-search-title="실제 병목">

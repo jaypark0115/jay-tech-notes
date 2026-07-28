@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="BallControl SNN 회로의 one-shot 입력과 무게 반영 rate encoding 실험, 합성·전력 추정 결과와 프로젝트 기여를 설명한 글." />
     <title>AI 반도체 경진대회 3 - 입력 실험과 구현 결과 읽기</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260726-summaries" />
+    <link rel="stylesheet" href="../../styles.css?v=20260728-competition-final" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="competition-page">
@@ -20,7 +20,7 @@
           <nav class="chapter-switcher" aria-label="AI 반도체 경진대회 글 이동">
             <span class="chapter-switcher-label">2025 전국 대학생 AI 반도체 회로 설계 경진대회</span>
             <div>
-              <a href="00-overview.html">먼저 읽기</a>
+              <a href="ai-semi-00-overview.html">프로젝트 소개</a>
               <a href="ai-semi-01-problem-and-design.html">1. BallControl 문제 이해하기</a>
               <a href="ai-semi-02-snn-control-rtl.html">2. 위치 오차가 스파이크가 되는 과정</a>
               <a class="current" href="ai-semi-03-verification-results.html">3. 입력 실험과 구현 결과 읽기</a>
@@ -78,6 +78,38 @@
               검토했다는 데 의미가 있습니다. 실제 기구부의 안정성까지 판단하려면
               공의 관성, 모터 응답과 센서 지연을 포함한 폐루프 실험이 더 필요합니다.
             </p>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead>
+                  <tr><th>무게</th><th>Digital weight</th><th>초기 위치</th><th>네 방향 motor spikes</th><th>최종 위치</th><th>오차</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>15g</td><td>123</td><td>(4, 4)</td><td>+X:0 · −X:4 · +Y:0 · −Y:4</td><td>(0, 0)</td><td>0</td></tr>
+                  <tr><td>15g</td><td>123</td><td>(3, 3)</td><td>+X:0 · −X:1 · +Y:0 · −Y:1</td><td>(2, 2)</td><td>4</td></tr>
+                  <tr><td>15g</td><td>123</td><td>(2, 2)</td><td>+X:0 · −X:1 · +Y:0 · −Y:1</td><td>(1, 1)</td><td>2</td></tr>
+                  <tr><td>15g</td><td>123</td><td>(1, 1)</td><td>+X:0 · −X:1 · +Y:0 · −Y:1</td><td>(0, 0)</td><td>0</td></tr>
+                  <tr><td>15g</td><td>123</td><td>(0, 0)</td><td>+X:0 · −X:0 · +Y:0 · −Y:0</td><td>(0, 0)</td><td>0</td></tr>
+                  <tr><td>30g</td><td>255</td><td>(−4, −4)</td><td>+X:4 · −X:1 · +Y:4 · −Y:0</td><td>(−1, 0)</td><td>1</td></tr>
+                  <tr><td>30g</td><td>255</td><td>(−3, −3)</td><td>+X:4 · −X:0 · +Y:4 · −Y:0</td><td>(1, 1)</td><td>2</td></tr>
+                  <tr><td>30g</td><td>255</td><td>(−2, −2)</td><td>+X:3 · −X:0 · +Y:3 · −Y:0</td><td>(1, 1)</td><td>2</td></tr>
+                  <tr><td>30g</td><td>255</td><td>(−1, −1)</td><td>+X:1 · −X:1 · +Y:2 · −Y:0</td><td>(−1, 1)</td><td>2</td></tr>
+                  <tr><td>30g</td><td>255</td><td>(0, 0)</td><td>+X:0 · −X:0 · +Y:1 · −Y:0</td><td>(0, 1)</td><td>1</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="metric-grid" aria-label="무게 반영 시뮬레이션 결과 요약">
+              <article><strong>10</strong><span>15g·30g 전체 초기 위치</span></article>
+              <article><strong>3 / 10</strong><span>정확히 (0,0)에 도달</span></article>
+              <article><strong>2 / 10</strong><span>오차 1로 종료</span></article>
+              <article><strong>5 / 10</strong><span>오차 2 이상 잔존</span></article>
+            </div>
+            <p>
+              모든 사례가 중앙에 도달한 것은 아닙니다. 15g에서는 5개 중 3개가
+              정확히 (0,0)에 도달했지만, 30g에서는 정확한 중앙 도달이 없었습니다.
+              발표 표의 오차는 정수 좌표의 Manhattan distance로 보이며, 이 좌표
+              단위가 실제 cm와 동일하다는 근거는 없습니다. 따라서 “반경 1cm
+              목표를 달성했다”는 물리 성능으로 환산하지 않았습니다.
+            </p>
             <figure class="doc-figure">
               <div class="figure-label">15g·30g 입력 실험의 결과 표와 실행 로그</div>
               <img
@@ -90,6 +122,33 @@
                 오차를 함께 기록한 실험입니다.
               </figcaption>
             </figure>
+          </section>
+
+          <section class="doc-section searchable-section" id="environment" data-search-title="검증 환경">
+            <h2>보관된 프로젝트에서 확인한 검증 환경</h2>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>항목</th><th>확인된 내용</th><th>해석</th></tr></thead>
+                <tbody>
+                  <tr><td>기능 실험</td><td>Verilog testbench · 100 simulation steps 로그</td><td>behavioral 기능 실험 자료</td></tr>
+                  <tr><td>Vivado</td><td>2025.1</td><td>보관된 output_layer.xpr metadata</td></tr>
+                  <tr><td>Target part</td><td>xc7vx485tffg1157-1</td><td>로컬 XPR에 기록된 합성 target</td></tr>
+                  <tr><td>Top module</td><td>controller_top</td><td>output-layer snapshot의 top</td></tr>
+                  <tr><td>Board part</td><td>미지정</td><td>발표의 AC701 표기와 XPR이 일치하지 않음</td></tr>
+                  <tr><td>Clock·timing</td><td>constraint와 timing report 미확인</td><td>timing closure 또는 bitstream 동작을 주장하지 않음</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="scope-note">
+              <strong>두 코드 묶음의 관계</strong>
+              <span>
+                무게 실험은 <code>Input_Neuron_RateEncoder</code>와
+                <code>Baby_Neuron_Core</code>를 포함한 별도 네트워크 코드입니다.
+                확인한 <code>controller_top/error_encoder/lif_neuron</code> 세 파일은
+                output-layer 구조를 설명하는 snapshot이며, 앞의 실험 결과가 이 세
+                파일의 bit-accurate 검증을 뜻하지 않습니다.
+              </span>
+            </div>
           </section>
 
           <section class="doc-section searchable-section" id="resources" data-search-title="합성 자원 결과">
@@ -110,8 +169,9 @@
               <strong>수치의 성격</strong>
               <span>
                 실제 장치에서 측정한 처리 성능이 아니라 발표자료에 기록된 도구
-                결과입니다. 특히 83개 I/O는 테스트와 관찰을 위해 top-level에
-                노출한 신호 구성이 크게 반영된 값입니다.
+                결과입니다. 특히 83개 I/O는 top-level 포트 구성이 크게 반영된
+                값입니다. 현재 XPR과 발표자료의 target 표기가 달라 이 비율을
+                재현 가능한 보드 사용률로 해석하지 않습니다.
               </span>
             </div>
             <figure class="doc-figure">
