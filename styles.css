@@ -4169,7 +4169,6 @@ body.troubleshooting-page .reference-section a {
   margin-bottom: 3.75rem;
 }
 
-.competition-home-heading > span,
 .competition-project-meta {
   display: block;
   margin: 0 0 0.65rem;
@@ -4197,20 +4196,32 @@ body.troubleshooting-page .reference-section a {
 }
 
 .competition-home .competition-collection {
-  gap: 5rem;
+  gap: 3.5rem;
   margin: 0;
 }
 
 .competition-home .competition-group {
+  --project-accent: #0f766e;
+  --project-soft: #ecfdf5;
+  --project-number-border: #99f6e4;
+  position: relative;
   overflow: visible;
   border: 0;
-  background: transparent;
+  border-top: 4px solid var(--project-accent);
+  padding: 2.25rem 2rem 2.5rem;
+  background: linear-gradient(180deg, var(--project-soft) 0, #f8fafc 150px);
   box-shadow: none;
+}
+
+.competition-home .competition-group:nth-child(2) {
+  --project-accent: #365b91;
+  --project-soft: #eff6ff;
+  --project-number-border: #bfdbfe;
 }
 
 .competition-project-intro {
   padding: 0 0 1.75rem;
-  border-bottom: 1px solid #cbd5e1;
+  border-bottom: 1px solid #d5dee7;
 }
 
 .competition-project-intro h3 {
@@ -4223,6 +4234,7 @@ body.troubleshooting-page .reference-section a {
 
 .competition-project-intro h3::before {
   display: block;
+  background: var(--project-accent);
 }
 
 .competition-project-intro > p:not(.competition-project-meta) {
@@ -4247,7 +4259,7 @@ body.troubleshooting-page .reference-section a {
 
 .competition-project-facts dt {
   margin-bottom: 0.35rem;
-  color: #0f766e;
+  color: var(--project-accent);
   font-size: 0.8rem;
   font-weight: 800;
 }
@@ -4272,7 +4284,7 @@ body.troubleshooting-page .reference-section a {
   flex-direction: column;
   padding: 2rem;
   border: 1px solid var(--border, #dfe4ea);
-  border-top: 6px solid var(--case-accent);
+  border-top: 6px solid var(--project-accent);
   background: #fff;
   color: inherit;
   text-decoration: none;
@@ -4281,7 +4293,7 @@ body.troubleshooting-page .reference-section a {
 }
 
 .competition-card:hover {
-  border-color: var(--case-accent);
+  border-color: var(--project-accent);
   transform: translateY(-3px);
   box-shadow: 0 24px 52px rgb(15 23 42 / 11%);
 }
@@ -4295,9 +4307,9 @@ body.troubleshooting-page .reference-section a {
   height: 58px;
   margin-bottom: 24px;
   padding: 0 0.55rem;
-  border: 1px solid #99f6e4;
-  background: var(--accent-soft);
-  color: var(--case-accent);
+  border: 1px solid var(--project-number-border);
+  background: var(--project-soft);
+  color: var(--project-accent);
   font-size: 0.76rem;
   font-weight: 850;
   letter-spacing: 0.05em;
@@ -4778,6 +4790,10 @@ body.competition-page .page-footer a {
   .case-flow,
   .result-band {
     grid-template-columns: 1fr;
+  }
+
+  .competition-home .competition-group {
+    padding: 1.5rem 1rem 1.75rem;
   }
 
   .competition-card {
