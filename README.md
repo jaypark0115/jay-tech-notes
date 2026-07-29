@@ -1,7 +1,7 @@
 # Jay Tech Notes
 
 제가 직접 작성하고 정리한 기술 글, 실험 기록, 논문 자료를 모아두는 개인 기술 노트입니다.
-현재 공개 페이지는 메인 화면에 보이는 순서와 동일하게 `진행 중인 연구·개발`, `SNN 연구 노트`, `NRV DVS 캘리브레이션 설명`, `NRV FPGA 트러블슈팅 노트`, `GitHub 프로젝트 링크`, `SoC/FPGA 학습 노트`, `경진대회 기술 노트` 순서로 구성되어 있습니다.
+현재 공개 페이지는 메인 화면에 보이는 순서와 동일하게 `진행 중인 연구·개발`, `SNN 연구 노트`, `NRV DVS 캘리브레이션 설명`, `NRV FPGA 트러블슈팅 노트`, `GitHub 프로젝트 링크`, `SoC/FPGA 학습 노트`, `경진대회 기술 노트 (작성중)` 순서로 구성되어 있습니다.
 
 이 저장소의 첫 화면은 개인적으로 정리한 글 목록이며, NRV 공식 문서가 아닙니다.
 NRV와 관련된 공식 정보는 NRV docs 웹페이지에서 확인해야 합니다.
@@ -86,7 +86,7 @@ NRV 이벤트 카메라의 캘리브레이션 기능은 제가 직접 구현했�
 4. [AXI-to-APB Bridge](https://jaypark0115.github.io/jay-tech-notes/pages/soc/07-axi-to-apb-bridge.html)
    - AXI-to-APB protocol conversion, write/read FSM, APB slave, testbench, PASS 로그를 기준으로 최종 프로젝트를 정리했습니다.
 
-### 6. 경진대회 기술 노트
+### 6. 경진대회 기술 노트 (작성중)
 
 제가 참여한 두 경진대회의 문제 정의, 입력 표현, 하드웨어 구조와 검증 결과를 프로젝트별 네 편의 기술 문서로 나누어 설명합니다.
 
