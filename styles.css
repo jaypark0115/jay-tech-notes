@@ -1772,6 +1772,7 @@ p {
 .calibration-card-thumb {
   display: block;
   width: calc(100% + 64px);
+  max-width: none;
   height: 172px;
   margin: -32px -32px 24px;
   border-bottom: 1px solid var(--border, #dfe4ea);
@@ -4211,12 +4212,6 @@ body.troubleshooting-page .reference-section a {
   padding: 2.25rem 2rem 2.5rem;
   background: linear-gradient(180deg, var(--project-soft) 0, #f8fafc 150px);
   box-shadow: none;
-}
-
-.competition-home .competition-group:nth-child(2) {
-  --project-accent: #365b91;
-  --project-soft: #eff6ff;
-  --project-number-border: #bfdbfe;
 }
 
 .competition-project-intro {
