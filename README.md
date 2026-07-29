@@ -62,9 +62,9 @@ NRV 이벤트 카메라의 캘리브레이션 기능은 제가 직접 구현했�
 ### 3. NRV FPGA 트러블슈팅 노트
 
 1. [FPGA I²C 디바이스 인식 오류](https://jaypark0115.github.io/jay-tech-notes/pages/troubleshooting/02-fpga-i2c-false-ack.html)
-   - 미연결 카메라 포트가 SDA를 Low로 만들며 가짜 ACK가 발생한 원인을 측정하고 Verilog 포트 결합 로직을 수정한 과정을 정리했습니다.
+   - 블록 디자인에서 미사용으로 제외한 포트를 내부 Verilog가 유효 SDA 변수로 다시 참조해 가짜 ACK가 발생한 원인과 수정 과정을 정리했습니다.
 2. [FX10 외부 SPI 플래시 쓰기 실패](https://jaypark0115.github.io/jay-tech-notes/pages/troubleshooting/01-fx10-external-spi-flash.html)
-   - page index 2의 readback mismatch를 외부 SPI NOR의 sector map과 erase 단위 문제로 좁히고 해결한 과정을 정리했습니다.
+   - 잘못된 bitstream이 CR3NV[3]을 변경해 hybrid mode가 되었지만 programmer는 uniform mode로 erase해 발생한 readback mismatch와 복구 과정을 정리했습니다.
 
 ### 4. GitHub 프로젝트 링크
 

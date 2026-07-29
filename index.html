@@ -327,8 +327,8 @@
                 <small>FPGA I²C</small>
                 <h2>미연결 포트가 만든 가짜 ACK</h2>
                 <p>
-                  센서가 없는데도 ACK가 발생한 현상을 포트별로 측정하고, 미사용 SDA가
-                  결합되던 Verilog 로직을 찾아 수정한 과정을 설명합니다.
+                  블록 디자인에서 미사용으로 제외한 포트를 내부 Verilog가 유효 SDA로 다시
+                  참조해 가짜 ACK를 만든 원인과 수정 과정을 설명합니다.
                 </p>
               </a>
               <a class="project-card" href="pages/troubleshooting/01-fx10-external-spi-flash.html">
@@ -337,8 +337,8 @@
                 <small>External SPI flash</small>
                 <h2>FX10 외부 SPI 플래시 쓰기 실패</h2>
                 <p>
-                  page index 2의 readback mismatch를 주소로 계산하고, 외부 SPI NOR의
-                  sector map과 erase 단위 문제로 원인을 좁혀 해결한 과정을 설명합니다.
+                  잘못된 bitstream이 CR3NV[3]을 바꿔 hybrid mode가 되었지만 programmer는
+                  uniform mode로 erase해 발생한 readback mismatch와 복구 과정을 설명합니다.
                 </p>
               </a>
             </div>

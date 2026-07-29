@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="FX10 외부 QSPI 플래시 기록이 page index 2에서 실패한 원인과 복구 과정."
+      content="잘못된 bitstream이 QSPI flash의 CR3NV[3]을 바꿔 hybrid mode가 된 뒤 uniform mode를 전제로 한 programmer에서 기록이 실패한 원인과 복구 과정."
     />
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
@@ -44,9 +44,20 @@
             팀에서 만든 잘못된 bitstream을 FX10 외부 QSPI 플래시에 기록한 뒤, Efinity USB
             프로그램으로 정상 bitstream을 다시 넣으려 해도 작업이 실패했습니다. 화면에는
             erase가 완료된 것으로 보였지만, 새 데이터를 쓴 뒤 읽어 비교하는 단계에서 오류가
-            났습니다. 이 글은 그 실패 위치를 해석해 플래시를 복구하고, 정상 firmware와
-            bitstream을 다시 기록한 과정입니다.
+            났습니다. 잘못된 bitstream이 Configuration Register 3의
+            <code>CR3NV[3]</code>을 건드려 sector mode를 hybrid로 바꿨지만, 기존
+            programmer는 계속 uniform mode를 전제로 erase 범위를 계산한 것이 원인이었습니다.
+            이 글은 그 실패 위치를 해석해 플래시를 복구하고, 정상 firmware와 bitstream을
+            다시 기록한 과정입니다.
           </p>
+
+          <div class="warning-note">
+            <strong>핵심 원인</strong>
+            <span>
+              잘못된 bitstream 기록으로 flash의 sector mode가 hybrid로 바뀌었지만,
+              programmer는 uniform flash map을 기준으로 erase를 수행했습니다.
+            </span>
+          </div>
 
           <section class="doc-section searchable-section" id="problem" data-search-title="문제 상황">
             <h3>1. 문제 상황</h3>
@@ -61,6 +72,8 @@
               지우고 올바른 firmware와 bitstream을 다시 기록하는 다음 단계까지 도달하지
               못했습니다. 먼저 host와 센서 레지스터도 확인했지만 장치 연결과 제어는
               정상적이어서, 원인을 외부 QSPI 플래시의 erase와 기록 과정으로 좁혔습니다.
+              이후 잘못된 bitstream이 <code>CR3NV[3]</code>을 변경해 flash를 hybrid mode로
+              바꾼 반면, programmer는 uniform mode를 전제로 동작하고 있음을 확인했습니다.
             </p>
 
             <figure class="doc-figure troubleshooting-figure figure-flash-failure">
@@ -116,12 +129,23 @@ Firmware download failed</code></pre>
             </p>
             <p>
               이 계열 QSPI NOR flash에는 앞부분을 4 KiB sector들로 세분화하는 hybrid mode와,
-              앞부분 구분 없이 전체를 64 KiB 단위로 구성하는 uniform mode가 있습니다. 이 선택은 Configuration
-              Register 3의 <code>CR3NV[3]</code> bit에 저장됩니다. <code>0</code>은 hybrid,
-              <code>1</code>은 uniform 구성을 뜻합니다. 이번에는 잘못된 bitstream을 기록한
-              뒤 확인한 flash map이 hybrid였지만, 기존 programmer는 uniform 구성을 전제로
-              erase 범위를 계산하고 있었습니다.
+              앞부분 구분 없이 전체를 64 KiB 단위로 구성하는 uniform mode가 있습니다. 이 선택은
+              Configuration Register 3의 <code>CR3NV[3]</code> bit에 저장됩니다.
+              <code>0</code>은 hybrid, <code>1</code>은 uniform 구성을 뜻합니다.
+              잘못된 bitstream을 기록하는 과정에서 이 register bit가 바뀌면서 flash의 sector
+              mode가 hybrid로 변경됐습니다. 하지만 기존 programmer는 이 변화를 확인하지 않고
+              uniform 구성을 전제로 erase 범위를 계산하고 있었습니다.
             </p>
+
+            <div class="root-cause-card">
+              <span>Root cause</span>
+              <h4>bitstream이 바꾼 hybrid sector map과 programmer의 uniform 가정이 충돌했습니다.</h4>
+              <p>
+                flash의 실제 erase 단위는 hybrid map을 따르고 있었지만 programmer는 uniform
+                map으로 주소를 계산했습니다. 그 결과 erase 성공 메시지와 달리
+                <code>0x1000</code>의 기존 데이터가 남았습니다.
+              </p>
+            </div>
             <p>
               그래서 <code>Successfully erased 82 sectors</code>라는 표시만으로는
               <code>0x1000</code>이 포함된 앞부분이 실제로 지워졌다고 볼 수 없었습니다.
@@ -135,9 +159,11 @@ Firmware download failed</code></pre>
           <section class="doc-section searchable-section" id="solution" data-search-title="해결 방법">
             <h3>4. 해결: flash를 직접 지운 뒤 다시 기록</h3>
             <p>
-              제가 직접 만든 복구 helper로 현재 flash map에 맞춰 erase 범위를 처리했습니다. hybrid 영역을 uniform sector처럼 가정하지
-              않고 실제 sector 구성에 맞춰 플래시를 지운 뒤, 문제가 났던 <code>0x1000</code>을
-              포함한 앞부분을 다시 읽어 <code>0xFF</code> 상태인지 확인했습니다.
+              제가 직접 만든 복구 helper로 <code>CR3NV[3]</code>과 현재 flash map을 확인한 뒤
+              실제 erase 범위를 처리했습니다. bitstream에 의해 바뀐 hybrid 영역을 uniform
+              sector처럼 가정하지 않고 실제 sector 구성에 맞춰 플래시를 지운 뒤, 문제가 났던
+              <code>0x1000</code>을 포함한 앞부분을 다시 읽어 <code>0xFF</code> 상태인지
+              확인했습니다.
             </p>
             <p>
               확인이 끝난 뒤에는 정상 firmware를 다시 올리고, 마지막으로 정상 bitstream을
@@ -159,9 +185,11 @@ Firmware download failed</code></pre>
             </figure>
 
             <p>
-              helper 로그에서 <code>0x1000</code>을 포함한 주소가 모두 통과한 것을 확인한 뒤,
-              정상 firmware와 정상 bitstream을 다시 기록했습니다. 이후 FX Control Center에서
-              firmware download와 bitstream 기록이 정상적으로 완료됐습니다.
+              programmer의 uniform 가정에 erase 검증을 맡기지 않고, helper가 hybrid map을
+              기준으로 <code>0x1000</code>을 포함한 주소를 직접 읽어 모두
+              <code>0xFF</code>인지 확인했습니다. 그 뒤 정상 firmware와 정상 bitstream을 다시
+              기록했으며, 이후 FX Control Center에서 firmware download와 bitstream 기록이
+              정상적으로 완료됐습니다.
             </p>
 
             <figure class="doc-figure troubleshooting-figure figure-program-result">
@@ -179,17 +207,20 @@ Firmware download failed</code></pre>
           <section class="doc-section searchable-section" id="prevention" data-search-title="정리">
             <h3>6. 정리</h3>
             <p>
-              이번 문제는 프로그램이 표시한 성공 메시지와 실제 플래시 상태가 다를 수 있다는
-              점을 보여줬습니다. 오류가 host 프로그램이나 센서 제어에서만 생기는 것은
-              아니며, 외부 flash의 주소 map과 erase 단위가 맞지 않아도 같은 증상이 나타날 수
-              있습니다.
+              이번 문제의 직접적인 원인은 잘못된 bitstream이
+              <code>CR3NV[3]</code>을 변경해 sector mode를 hybrid로 바꿨는데도, 기존
+              programmer가 uniform flash map을 계속 전제로 사용한 것이었습니다. 이 사례는
+              프로그램이 표시한 erase 성공 메시지와 실제 플래시 상태가 다를 수 있으며,
+              외부 flash의 실제 주소 map과 programmer의 erase 단위가 맞지 않아도 기록 오류가
+              발생할 수 있음을 보여줬습니다.
             </p>
             <p>
-              이번에는 <code>page index 2</code>를 <code>0x1000</code> 주소로 바꾸고, 그 주소가
-              sector map에서 어떤 구간에 속하는지 확인하면서 원인을 좁혔습니다. 전공에서
-              다뤘던 주소 계산과 메모리 map 개념을 실제 장비의 복구 과정에 적용해 볼 수
-              있었습니다. 이후에는 erase 완료 표시만 믿지 않고, 필요한 주소를 다시 읽어
-              <code>0xFF</code> 상태를 확인한 다음 정상 firmware와 bitstream을 기록했습니다.
+              이번에는 <code>page index 2</code>를 <code>0x1000</code> 주소로 바꾸고,
+              <code>CR3NV[3]</code>이 나타내는 현재 sector mode와 그 주소가 속한 erase 구간을
+              함께 확인하면서 원인을 좁혔습니다. 전공에서 다뤘던 주소 계산과 메모리 map 개념을
+              실제 장비의 복구 과정에 적용해 볼 수 있었습니다. 이후에는 erase 완료 표시만 믿지
+              않고, 현재 flash map에 맞춰 필요한 주소를 다시 읽어 <code>0xFF</code> 상태를
+              확인한 다음 정상 firmware와 bitstream을 기록했습니다.
             </p>
           </section>
 
