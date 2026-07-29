@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="연구·개발 계획, SNN 연구, NRV DVS 캘리브레이션, SoC/FPGA 학습 노트와 경진대회 기술 노트 모음." />
     <title>Jay Tech Notes</title>
-    <link rel="stylesheet" href="styles.css?v=20260729-competition-home-design" />
+    <link rel="stylesheet" href="styles.css?v=20260729-calibration-card-previews" />
     <script src="script.js" defer></script>
   </head>
   <body class="home-page">
@@ -290,22 +290,46 @@
               </span>
             </div>
             <div class="sitemap-grid">
-              <a class="sitemap-card" href="pages/calibration/01-camera-calibration.html">
+              <a class="sitemap-card calibration-preview-card" href="pages/calibration/01-camera-calibration.html">
+                <img
+                  class="calibration-card-thumb"
+                  src="assets/lens-distortion-before-after.png"
+                  alt="NRV DVS 영상의 렌즈 왜곡 보정 전후 비교"
+                  loading="lazy"
+                />
                 <span class="sitemap-number">01</span>
                 <h2>1. 카메라 캘리브레이션이란?</h2>
                 <p>카메라 캘리브레이션의 기본 개념, 필요한 이유, 추정되는 파라미터와 모노·스테레오 NRV DVS 적용 방식을 설명합니다.</p>
               </a>
-              <a class="sitemap-card" href="pages/calibration/02-dvs-calibration-method.html">
+              <a class="sitemap-card calibration-preview-card" href="pages/calibration/02-dvs-calibration-method.html">
+                <img
+                  class="calibration-card-thumb"
+                  src="assets/github-dvs-2.png"
+                  alt="회색 배경에 표시된 비대칭 원 그리드 패턴"
+                  loading="lazy"
+                />
                 <span class="sitemap-number">02</span>
                 <h2>2. NRV DVS 캘리브레이션 방법</h2>
                 <p>NRV DVS 캘리브레이션에서 밝기 변화와 blinking asymmetric circle grid가 필요한 이유를 설명합니다.</p>
               </a>
-              <a class="sitemap-card" href="pages/calibration/03-capture-preparation.html">
+              <a class="sitemap-card calibration-preview-card" href="pages/calibration/03-capture-preparation.html">
+                <img
+                  class="calibration-card-thumb"
+                  src="assets/calibration-environment-layout.png"
+                  alt="패턴 모니터와 카메라를 배치한 NRV DVS 캘리브레이션 환경"
+                  loading="lazy"
+                />
                 <span class="sitemap-number">03</span>
                 <h2>3. 촬영 환경과 준비</h2>
                 <p>필요한 장비와 모니터 설정, 원 간격 측정, 카메라 고정과 권장 촬영 조건을 설명합니다.</p>
               </a>
-              <a class="sitemap-card" href="pages/calibration/04-calibration-workflow.html">
+              <a class="sitemap-card calibration-preview-card" href="pages/calibration/04-calibration-workflow.html">
+                <img
+                  class="calibration-card-thumb"
+                  src="assets/calibration-guide/05-coverage-check.jpg"
+                  alt="좌우 카메라 촬영 범위를 확인하는 Coverage Check 화면"
+                  loading="lazy"
+                />
                 <span class="sitemap-number">04</span>
                 <h2>4. 캘리브레이션 촬영 및 처리 절차</h2>
                 <p>직접 구현한 DVS Calibration 앱에서 촬영, 후보 선별, Coverage 확인, 계산과 결과 보관까지 진행하는 방법을 설명합니다.</p>

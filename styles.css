@@ -1766,6 +1766,18 @@ p {
   border-color: var(--accent, #e4003a);
   box-shadow: 0 24px 52px rgba(15, 23, 42, 0.11);
 }
+.calibration-preview-card {
+  overflow: hidden;
+}
+.calibration-card-thumb {
+  display: block;
+  width: calc(100% + 64px);
+  height: 172px;
+  margin: -32px -32px 24px;
+  border-bottom: 1px solid var(--border, #dfe4ea);
+  background: #f8fafc;
+  object-fit: cover;
+}
 .sitemap-number {
   display: inline-flex;
   align-items: center;
