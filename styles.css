@@ -4144,12 +4144,12 @@ body.troubleshooting-page .reference-section a {
   }
 }
 
-/* Competition case studies — rebuilt as a quiet, consistent reading layout. */
+/* Competition notes — aligned with the homepage section and card system. */
 .competition-home {
-  --case-accent: #0f766e;
-  margin-top: 5rem;
-  padding-top: 2.4rem;
-  border-top: 1px solid #cbd5e1;
+  --case-accent: var(--accent);
+  margin-top: 6rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
 }
 
 .competition-home-heading {
@@ -4174,7 +4174,7 @@ body.troubleshooting-page .reference-section a {
 }
 
 .competition-home-heading h2::before {
-  display: none;
+  display: block;
 }
 
 .competition-home-heading p {
@@ -4210,7 +4210,7 @@ body.troubleshooting-page .reference-section a {
 }
 
 .competition-project-intro h3::before {
-  display: none;
+  display: block;
 }
 
 .competition-project-intro > p:not(.competition-project-meta) {
@@ -4250,40 +4250,51 @@ body.troubleshooting-page .reference-section a {
 .competition-home .competition-card-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-  margin-top: 1.4rem;
+  gap: 1.5rem;
+  margin-top: 1.75rem;
 }
 
 .competition-card {
   display: flex;
-  min-height: 220px;
+  min-height: 260px;
   flex-direction: column;
-  padding: 1.35rem 1.25rem;
-  border: 1px solid #dbe3e8;
-  border-top: 3px solid #0f766e;
+  padding: 2rem;
+  border: 1px solid var(--border, #dfe4ea);
+  border-top: 6px solid var(--case-accent);
   background: #fff;
   color: inherit;
   text-decoration: none;
+  box-shadow: 0 18px 40px rgb(15 23 42 / 7%);
   transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
 }
 
 .competition-card:hover {
-  border-color: #94a3b8;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 26px rgb(15 23 42 / 8%);
+  border-color: var(--case-accent);
+  transform: translateY(-3px);
+  box-shadow: 0 24px 52px rgb(15 23 42 / 11%);
 }
 
 .competition-card > span {
-  color: #0f766e;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  min-width: 58px;
+  height: 58px;
+  margin-bottom: 24px;
+  padding: 0 0.55rem;
+  border: 1px solid #99f6e4;
+  background: var(--accent-soft);
+  color: var(--case-accent);
   font-size: 0.76rem;
   font-weight: 850;
   letter-spacing: 0.05em;
 }
 
 .competition-card h4 {
-  margin: 1rem 0 0.7rem;
-  font-size: 1.05rem;
-  line-height: 1.45;
+  margin: 0 0 1rem;
+  font-size: 1.15rem;
+  line-height: 1.4;
 }
 
 .competition-card p {
