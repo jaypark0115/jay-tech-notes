@@ -32,23 +32,26 @@
 
           <h1>1. YOLOv2 정수 양자화</h1>
           <p class="lead">
-            학습된 YOLOv2의 실수 값을 그대로 FPGA에서 계산하면 곱셈기와 메모리 사용량이
-            커진다. 이 프로젝트는 feature map과 weight를 8-bit 정수로 저장하고,
-            convolution의 합을 32-bit로 누적한 뒤 다시 8-bit로 바꾸는 정수 경로를
-            구성했다. 양자화의 목표는 비트 수를 줄이는 데서 끝나지 않는다. 두 detection
-            head의 경계 상자와 클래스 출력이 유지되도록 대표 이미지에서 layer별 범위를
-            관찰하고, 후보 scale을 실제 detector mAP로 평가했다.
+            FPGA에서 YOLOv2를 실행하려면 학습된 실수 모델을 회로가 반복해서 계산할 수
+            있는 정수 규칙으로 바꿔야 한다. 이 프로젝트는 feature map과 weight를
+            8-bit로 저장하고, convolution의 합은 32-bit로 누적한 뒤, layer가 끝날 때
+            multiplier와 shift로 다시 8-bit 범위에 맞췄다. 중요한 점은 단순히 값을
+            8-bit로 자르는 것이 아니다. 범위를 지나치게 넓히면 자주 나오는 값의 구분이
+            사라지고, 지나치게 좁히면 큰 값이 포화된다. 32개 대표 이미지에서 layer별
+            분포를 관찰하고 11개 convolution의 input·weight multiplier를 조정했으며,
+            최종 후보는 두 detection head의 실제 detector mAP로 판단했다.
           </p>
 
           <section class="case-summary" aria-labelledby="aix1-summary-title">
             <div>
               <h2 id="aix1-summary-title">Calibration 구성</h2>
               <p>
-                고정 seed 20260213으로 중복 없이 선택한 32장을 사용한다. 가까운
-                장면 16장과 먼 장면 16장은 두 detection head의 물체 크기 범위를
-                함께 포함한다. scale은 convolution layer별로 적용하며 channel별
-                양자화는 사용하지 않는다. 동일한 seed와 목록을 사용하면 scale을 다시
-                계산하거나 후보를 비교할 때 입력 표본이 달라지는 문제를 막을 수 있다.
+                Calibration 표본은 고정 seed 20260213으로 중복 없이 선택한 32장이다.
+                가까운 장면 16장과 먼 장면 16장을 같은 수로 넣어 16×16 head와 8×8
+                head가 다루는 물체 크기를 함께 포함했다. Scale은 channel별이 아니라
+                convolution layer별로 적용했다. 표본 목록과 seed를 고정한 이유는
+                multiplier 후보를 바꿀 때 입력 이미지까지 달라져 결과 해석이 섞이는
+                것을 막기 위해서다.
               </p>
             </div>
             <dl class="case-facts">
@@ -70,11 +73,18 @@
             </p>
             <p>
               표현 범위를 너무 넓게 잡으면 대부분의 값이 몇 개 정수에 몰려 작은 차이가
-              사라진다. 반대로 범위를 너무 좁게 잡으면 큰 값이 −128·127 또는 0·255의
+              사라진다. 반대로 범위를 너무 좁게 잡으면 큰 값이 −128~127 또는 0~255의
               경계에 잘리는 saturation이 늘어난다. 드물게 나타나는 극단값을 모두
               보존할지, 일부를 clipping하고 자주 나타나는 값의 해상도를 높일지가
               calibration의 핵심 절충이다. 단순한 최대 절댓값만으로 scale을 정하지 않고
               최종 검출 정확도를 함께 본 이유가 여기에 있다.
+            </p>
+            <p class="evidence-note">
+              정수 추론에서 activation과 weight를 낮은 비트폭으로 저장하고, 누산 결과를
+              다음 layer의 정수 범위로 다시 맞추는 흐름은 integer-only quantization의
+              일반적인 구조다. 이 프로젝트에서는 그 구조를 layer별 multiplier와 shift,
+              signed·unsigned clamp 규칙으로 구체화했다.
+              <a href="https://openaccess.thecvf.com/content_cvpr_2018/html/Jacob_Quantization_and_Training_CVPR_2018_paper.html" target="_blank" rel="noreferrer">CVPR 2018 정수 양자화 논문</a>
             </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
@@ -127,14 +137,15 @@
               </div>
             </div>
             <figure class="doc-figure">
-              <div class="figure-label">Calibration에서 하드웨어 상수까지의 흐름</div>
+              <div class="figure-label">최종 software reference에 적용한 11개 layer multiplier</div>
               <img
-                src="../../assets/aix-quantization-process-crop.png"
-                alt="Layer별 calibration, multiplier와 shift 탐색, 하드웨어 상수 반영으로 이어지는 양자화 흐름"
+                src="../../assets/aix-final-calibration-multipliers.png"
+                alt="11개 convolution layer의 weight quant multiplier와 input quant multiplier 배열이 표시된 최종 양자화 코드"
               />
               <figcaption>
-                layer tensor의 mismatch 비율은 오류 위치를 찾는 지표이며,
-                scale 후보의 최종 평가는 detector mAP로 수행한다.
+                최종 제출 패키지의 양자화 소스에 들어간 input·weight multiplier이다.
+                발표 슬라이드 전체가 아니라 실제 코드의 해당 배열만 분리한 자료이며,
+                아래 표와 <code>multipliers_83pct.txt</code>의 값이 일치한다.
               </figcaption>
             </figure>
             <div class="signal-table-wrap">
@@ -142,16 +153,24 @@
                 <thead><tr><th>Graph layer</th><th>Calibration index</th><th>Input multiplier</th><th>Weight multiplier</th></tr></thead>
                 <tbody>
                   <tr><td>CONV00</td><td>0</td><td>127</td><td>21</td></tr>
+                  <tr><td>CONV02</td><td>1</td><td>10</td><td>203</td></tr>
+                  <tr><td>CONV04</td><td>2</td><td>15</td><td>215</td></tr>
+                  <tr><td>CONV06</td><td>3</td><td>8</td><td>221</td></tr>
+                  <tr><td>CONV08</td><td>4</td><td>16</td><td>150</td></tr>
                   <tr><td>CONV10</td><td>5</td><td>14</td><td>745</td></tr>
+                  <tr><td>CONV12</td><td>6</td><td>14</td><td>305</td></tr>
+                  <tr><td>CONV13</td><td>7</td><td>30</td><td>391</td></tr>
                   <tr><td>CONV14 · 8×8 head</td><td>8</td><td>17</td><td>283</td></tr>
+                  <tr><td>CONV17 · branch</td><td>9</td><td>27</td><td>130</td></tr>
                   <tr><td>CONV20 · 16×16 head</td><td>10</td><td>5</td><td>511</td></tr>
                 </tbody>
               </table>
             </div>
             <p class="evidence-note">
-              위 값은 최종 scale 파일의 대표 layer이다. 전체 layer에 하나의
-              전역 scale을 사용하지 않으며, multiplier 크기만으로 정확도를 판단하지
-              않는다.
+              위 11개 값은 최종 제출 패키지의
+              <code>dataset/config/multipliers_83pct.txt</code>와 양자화 소스 배열을
+              다시 대조한 값이다. 전체 layer에 하나의 전역 scale을 사용하지 않으며,
+              multiplier가 크다는 사실만으로 해당 layer가 더 정확하다고 판단하지 않는다.
             </p>
             <h3>mAP를 이용한 후보 탐색</h3>
             <p>
@@ -281,6 +300,18 @@
               <article><strong>83.60%</strong><span>INT8 software mAP</span></article>
               <article><strong>78.60%</strong><span>FPGA detector mAP</span></article>
             </div>
+            <figure class="doc-figure">
+              <div class="figure-label">최종 INT8 software detector 평가 출력</div>
+              <img
+                src="../../assets/aix-int8-software-map-output.png"
+                alt="mean average precision 0.835977 또는 83.60퍼센트가 표시된 정수 software 평가 출력"
+              />
+              <figcaption>
+                최종 multiplier를 사용한 software reference의 mAP는 0.835977,
+                반올림해 83.60%이다. FPGA 78.60%와 분리해 양자화 자체의 기준선으로
+                사용한다.
+              </figcaption>
+            </figure>
             <p>
               Software 정수 모델은 scale과 정수 연산 규칙이 검출 성능을 얼마나 보존하는지
               확인하는 기준선이다. FPGA 결과가 이 기준선보다 약 5.00%p 낮다는 사실은

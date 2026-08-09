@@ -32,25 +32,26 @@
 
           <h1>2. SNN 제어 회로와 RTL 구성</h1>
           <p class="lead">
-            SNN은 입력을 한 번의 숫자로 계산하는 대신, 여러 time step에 걸친
-            spike와 뉴런 내부 상태로 처리한다. 각 LIF 뉴런은 입력 가중합을 막전위에
-            더하고, 시간이 지나면 일부를 누설시키며, 임계값을 넘으면 spike를 낸다.
-            따라서 RTL에는 곱셈·덧셈뿐 아니라 막전위 레지스터, time-step counter,
-            발화와 reset의 순서를 관리하는 제어가 함께 들어간다. 이 문서는 최종
-            실험의 99→32→4 네트워크와 공개된 네 방향 output-layer RTL을 구분해
-            설명한다.
+            SNN 회로의 핵심은 뉴런 수가 아니라 시간에 따라 상태가 변한다는 점이다.
+            입력 spike가 들어오면 가중합이 막전위에 더해지고, 입력이 없더라도 누설이
+            적용되며, 임계값을 넘은 순간에만 1-bit spike가 발생한다. 이 동작을 RTL로
+            옮기려면 산술식과 함께 막전위 레지스터, time-step counter, 발화 판정과
+            reset 순서를 정의해야 한다. 이 글에서는 최종 발표의 99→32→4 실험망과
+            공개 저장소의 4채널 output-layer RTL을 구분한 뒤, 한 번의 clock에서 어떤
+            값이 읽히고 다음 상태가 언제 저장되는지까지 코드와 파형으로 설명한다.
           </p>
 
           <section class="case-summary" aria-labelledby="ai2-summary-title">
             <div>
               <h2 id="ai2-summary-title">네트워크와 RTL 모듈</h2>
               <p>
-                최종 발표의 실험 네트워크는 99→32→4 구조이다. 저장소의 세 Verilog
-                파일은 signed 위치 오차를 네 방향으로 나누고 LIF 출력에 연결하는
-                경로를 다룬다. 전체 실험망과 출력 계층 RTL은 서로 다른 범위의
-                자료이다. 실험망은 weight 파일과 100개 time step을 포함한 계층형
-                계산을 설명하고, 공개 RTL은 위치 오차가 네 방향 이벤트로 나가는
-                인터페이스를 코드 수준에서 보여준다.
+                최종 발표의 실험 네트워크는 위치 입력 99개, 은닉 뉴런 32개, 방향
+                출력 4개의 계층 구조이다. 저장소에 공개한 <code>error_encoder.v</code>,
+                <code>lif_neuron.v</code>, <code>controller_top.v</code>는 이 전체망의
+                독립 빌드가 아니라 signed 위치 오차를 네 방향으로 나누어 LIF spike로
+                내보내는 출력 제어 경로이다. 발표의 실험망은 weight 파일과 100개
+                time step을 포함한 계층 계산을 설명하고, 공개 RTL은 최종 인터페이스와
+                상태 갱신 방식을 코드 수준에서 보여준다.
               </p>
             </div>
             <dl class="case-facts">
@@ -76,6 +77,12 @@
               막전위를 0으로 초기화하거나 임계값만큼 빼는 방식이 사용될 수 있으며,
               최종 발표의 Baby Neuron은 reset-to-zero와 shift 기반 leak를 중심으로
               설명한다.
+            </p>
+            <p class="evidence-note">
+              LIF 모델의 기본 구성은 입력 누적, 시간에 따른 누설, 임계값 도달 시 spike,
+              발화 후 reset이다. 이 글에서는 이 일반적인 개념과 프로젝트 RTL의 실제
+              reset 방식이 섞이지 않도록 구분한다.
+              <a href="https://neuronaldynamics.epfl.ch/online/Ch1.S3.html" target="_blank" rel="noreferrer">Neuronal Dynamics의 Integrate-and-Fire 설명</a>
             </p>
             <div class="case-flow" style="--flow-count: 5" aria-label="LIF 뉴런 데이터 경로">
               <div class="case-flow-step">
@@ -133,6 +140,18 @@
               아니다. 공개 코드의 기본값을 전체 네트워크의 학습·실험 조건으로 대입하지
               않는 것이 구현 범위를 정확히 읽는 방법이다.
             </p>
+            <figure class="doc-figure">
+              <div class="figure-label">뉴런 상태와 weight를 확인한 회로 시뮬레이션 파형</div>
+              <img
+                src="../../assets/ai-semi-simvision-membrane-waveform.png"
+                alt="여러 membrane potential과 99개 입력 weight, clock 신호를 표시한 SimVision 파형"
+              />
+              <figcaption>
+                입력 weight와 뉴런별 막전위가 clock에 따라 갱신되는지를 확인한 실제
+                시뮬레이션 화면이다. 한 시점의 출력값만 보는 것이 아니라, 상태가
+                누적되고 발화 조건에 도달하는 순서를 확인하는 자료로 사용했다.
+              </figcaption>
+            </figure>
           </section>
 
           <section class="doc-section searchable-section" id="fsm" data-search-title="시간 단계 FSM">
@@ -177,6 +196,18 @@
                 <small>다음 입력 전까지 출력 확인</small>
               </div>
             </div>
+            <figure class="doc-figure">
+              <div class="figure-label">최종 발표자료의 time-step 제어 FSM</div>
+              <img
+                src="../../assets/ai-semi-fsm-flow.png"
+                alt="IDLE, INIT, RUN INPUT, RUN ACCUM, CALC DONE, DISPLAY 상태로 이어지는 SNN 제어 FSM"
+              />
+              <figcaption>
+                입력을 만드는 구간과 출력 spike를 누적하는 구간을 분리하고,
+                <code>TIME_STEPS</code>가 끝난 뒤 결과를 확정하는 순서를 나타낸다.
+                상태 이름은 발표자료의 구현 흐름을 따랐다.
+              </figcaption>
+            </figure>
             <p>
               FSM은 time step별 입력과 상태 갱신의 경계를 제공한다. 병렬 뉴런 수와
               cycle 수는 별도의 구현·합성 조건으로 해석한다. 100 time step은 생물학적
@@ -275,6 +306,24 @@
               갱신 전 막전위 <code>U</code>를 기준으로 하고, 같은 edge에서 다음
               <code>U</code>가 계산된다. 파형을 읽을 때 입력 변화와 spike 사이에 clock
               경계가 존재하는 이유가 여기에 있다.
+            </p>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>현재 clock에서 읽는 값</th><th>조건</th><th>다음 clock을 위해 저장하는 값</th></tr></thead>
+                <tbody>
+                  <tr><td>기존 막전위 <code>U</code></td><td><code>U &gt; U_THR</code></td><td><code>spike=1</code>, 막전위에서 threshold 차감</td></tr>
+                  <tr><td>기존 막전위 <code>U</code></td><td><code>U &lt; LEAK</code></td><td><code>U=0</code></td></tr>
+                  <tr><td><code>U</code>, <code>X_in</code>, <code>v_abs</code></td><td>그 외</td><td><code>U-LEAK+W_GAIN×X_in-K_V×v_abs</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              공개 RTL의 <code>lif_neuron</code>은 발화했을 때 막전위를 0으로 만드는
+              reset-to-zero가 아니라 임계값만큼 빼는 subtractive reset을 사용한다.
+              남아 있는 막전위가 다음 clock으로 이어지므로 강한 입력에서는 연속 발화가
+              가능하다. 반면 최종 발표의 계층형 Baby Neuron 설명은 reset-to-zero를
+              중심으로 한다. 두 방식을 같은 구현으로 섞지 않고, 발표 실험망과 공개
+              출력 모듈의 차이로 명시한 이유이다.
             </p>
             <div class="code-links" aria-label="AI 반도체 경진대회 Verilog 파일">
               <a href="../../code/competitions/ai-semi/error_encoder.v">error_encoder.v</a>

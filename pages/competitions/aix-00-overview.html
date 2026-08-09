@@ -32,25 +32,29 @@
 
           <h1>YOLOv2 Full-Graph FPGA 가속기</h1>
           <p class="lead">
-            이 프로젝트는 256×256 RGB 이미지에서 60개 상품 클래스를 검출하는
-            YOLOv2를 Nexys 4 DDR FPGA에서 실행한 정수 추론 시스템이다. 단일
-            convolution 블록만 빠르게 계산한 것이 아니라 Conv·Pool·Route·Upsample과
-            8×8·16×16 두 detection head를 포함한 전체 네트워크를 하나의 데이터
-            경로로 연결했다. 정확도, 계산 속도, timing, 자원 사용량은 모두 같은 최종
-            bitstream과 229장 평가 세트를 기준으로 정리한다.
+            AIX 2026의 과제는 학습된 딥러닝 모델을 실제 FPGA 가속기로 구현하는
+            것이었다. 프로젝트에서는 256×256 RGB 이미지에서 60개 상품 클래스를
+            검출하는 YOLOv2를 대상으로 삼았다. Convolution 하나의 데모를 만드는 데서
+            멈추지 않고, Pool·Route·Upsample과 8×8·16×16 두 detection head까지
+            이어지는 전체 추론 그래프를 Nexys 4 DDR에서 실행했다. Software에서
+            정한 INT8 양자화 조건, DDR 주소와 packing, descriptor 기반 scheduler,
+            packed MAC, 두 head readback과 detector 후처리가 하나의 실행 경로로
+            연결된다. 아래 수치와 결과 이미지는 모두 같은 최종 bitstream과 229장
+            평가 세트를 기준으로 한다.
           </p>
 
           <section class="case-summary" aria-labelledby="aix-summary-title">
             <div>
               <h2 id="aix-summary-title">프로젝트 개요</h2>
               <p>
-                Python host가 입력과 weight를 DDR에 적재하고, FPGA의 descriptor
-                scheduler가 22개 처리 단계를 순서대로 실행한다. 144개 packed
-                MAC lane이 convolution을 수행하며 Pool·Route·Upsample을 거쳐
-                두 detection head를 DDR에 저장한다. host는 결과를 읽어 detector
-                후처리와 mAP 평가를 수행한다. 모델의 중간값은 INT8로 저장하고 곱셈의
-                합은 INT32로 누적한 뒤, 다음 layer가 다시 INT8을 받을 수 있도록
-                requantization을 거친다.
+                Python host가 입력 이미지와 양자화 weight를 DDR에 적재하고 시작
+                레지스터를 설정하면, FPGA의 descriptor scheduler가 22개 처리 단계를
+                순서대로 실행한다. 144개 packed MAC lane이 convolution을 계산하고,
+                전용 경로가 Pool·Route·Upsample을 처리한다. 마지막 CONV14와 CONV20
+                detection head는 DDR의 서로 다른 주소에 보존된다. Host는 두 tensor를
+                읽어 같은 decode와 NMS를 적용하고 detector mAP를 계산한다. 중간
+                feature와 weight는 8-bit로 저장하고, 곱셈의 합은 32-bit로 누적한 뒤
+                layer별 requantization을 거쳐 다시 8-bit로 저장한다.
               </p>
             </div>
             <dl class="case-facts">
@@ -59,6 +63,53 @@
               <div><dt>정수 경로</dt><dd>INT8 저장 · INT32 누산 · requantization</dd></div>
               <div><dt>담당 범위</dt><dd>양자화 · RTL 통합/최적화 · 보드 검증 · 패키징</dd></div>
             </dl>
+          </section>
+
+          <section class="doc-section searchable-section" id="project-boundary" data-search-title="경진대회 과제와 구현 범위">
+            <h2>경진대회 과제와 구현 범위</h2>
+            <p>
+              객체 검출은 입력 이미지를 읽어 최종 상자를 그리는 하나의 함수처럼
+              보이지만, 하드웨어에서는 여러 시스템으로 나뉜다. 학습된 모델을 정수로
+              바꾸는 software reference, 대용량 tensor를 저장하는 DDR, layer를
+              순서대로 실행하는 RTL, 보드에 데이터를 넣고 결과를 회수하는 host,
+              raw detection tensor를 실제 상자로 바꾸는 후처리가 모두 맞아야 한다.
+              이 프로젝트의 FPGA 구현 범위는 입력 이후부터 CONV14·CONV20 두 head를
+              만드는 신경망 연산 그래프까지이다. 이미지 전처리, bitstream program,
+              DDR preload·readback, decode·NMS·mAP 평가는 host가 담당한다.
+            </p>
+            <div class="case-flow" style="--flow-count: 5" aria-label="AIX 프로젝트의 다섯 구성 요소">
+              <div class="case-flow-step">
+                <span>Model</span>
+                <strong>YOLOv2 60-class</strong>
+                <small>256×256 입력 · two-head detector</small>
+              </div>
+              <div class="case-flow-step">
+                <span>Quantization</span>
+                <strong>INT8 · INT32 · requant</strong>
+                <small>11개 convolution scale</small>
+              </div>
+              <div class="case-flow-step">
+                <span>Dataflow</span>
+                <strong>DDR workspace</strong>
+                <small>HWC 4-byte packing · global reuse</small>
+              </div>
+              <div class="case-flow-step">
+                <span>RTL</span>
+                <strong>22 descriptors · 144 lanes</strong>
+                <small>Conv · Pool · Route · Upsample</small>
+              </div>
+              <div class="case-flow-step">
+                <span>Validation</span>
+                <strong>229-image detector mAP</strong>
+                <small>같은 bitstream으로 보드 반복 실행</small>
+              </div>
+            </div>
+            <p>
+              “Full graph”라는 표현도 이 경계를 따른다. 학습이나 NMS까지 FPGA에
+              포함했다는 뜻이 아니라, YOLOv2가 두 detection head를 만들기까지 필요한
+              Conv·Pool·Route·Upsample 연산을 FPGA 내부 scheduler가 실행한다는 뜻이다.
+              정확도는 FPGA가 계산한 두 head를 host의 동일한 후처리에 넣어 평가했다.
+            </p>
           </section>
 
           <section class="doc-section searchable-section" id="background" data-search-title="객체 검출과 FPGA 가속">
@@ -188,20 +239,20 @@
           <section class="doc-section searchable-section" id="final-basis" data-search-title="최종 구현 기준">
             <h2>최종 구현 기준</h2>
             <p>
-              발표 앞부분에는 개발 중간 구조인 19개 연산 단계와 192 MAC/cycle이
-              남아 있다. 후반의 최종 구현 섹션, 보관된 XPR과 RTL에서는 22개
-              descriptor와 144개 packed lane이 확인된다. 구조·성능 수치는 최종
-              구현 값을 기준으로 기록한다. 이는 서로 모순되는 최종 사양이 아니라,
-              개발 과정에서 병렬도와 그래프 제어가 변경된 흔적이다.
+              개발 과정에는 병렬도와 그래프 범위가 서로 다른 여러 구현본이 남아 있다.
+              이 글에서는 최종 제출 패키지의 RTL, 보드 실행 결과, Vivado report가
+              서로 일치하는 값만 대표 사양으로 사용한다. 네트워크 제어는 descriptor
+              ROM의 22개 항목, MAC 병렬도는 공개 RTL의 <code>NUM_MACS=144</code>,
+              정확도와 속도는 <code>FINAL_RESULT.txt</code>의 229장 결과가 기준이다.
             </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
-                <thead><tr><th>항목</th><th>중간 설계 설명</th><th>이 페이지의 최종 기준</th></tr></thead>
+                <thead><tr><th>항목</th><th>최종 기준</th><th>근거가 답하는 질문</th></tr></thead>
                 <tbody>
-                  <tr><td>그래프 단계</td><td>19개 연산 단계</td><td>RTL descriptor 22개</td></tr>
-                  <tr><td>MAC 병렬도</td><td>16-lane × 12 group = 192</td><td>144 packed MAC lane</td></tr>
-                  <tr><td>성능 판단</td><td>중간 FPS 실험</td><td>229장 최종 cycle counter</td></tr>
-                  <tr><td>정확도 판단</td><td>layer mismatch 중심</td><td>두 head detector mAP 78.60%</td></tr>
+                  <tr><td>그래프</td><td>22개 RTL descriptor</td><td>어떤 연산과 head가 실제 실행되는가</td></tr>
+                  <tr><td>MAC</td><td>144 packed MAC lane</td><td>최종 계산 배열의 구조가 무엇인가</td></tr>
+                  <tr><td>성능</td><td>229장 평균 11.420687 FPS</td><td>두 head를 포함한 compute cycle은 얼마인가</td></tr>
+                  <tr><td>정확도</td><td>두 head detector mAP 78.60%</td><td>FPGA 출력이 실제 검출에 얼마나 유효한가</td></tr>
                 </tbody>
               </table>
             </div>
@@ -216,6 +267,38 @@
               Pool·Route·Upsample, 결과 저장 시간이 함께 존재하므로 288에 100MHz를
               곱한 값을 곧바로 실제 처리량으로 사용할 수 없다. 대표 속도는 최종
               bitstream에서 측정한 평균 cycle 수로 계산한다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="development-sequence" data-search-title="구현이 바뀐 과정">
+            <h2>단일 연산 검증에서 detector 검증까지</h2>
+            <p>
+              개발 초반에는 보드에 명령을 보내고 DDR의 정해진 주소를 읽고 쓰는
+              bring-up이 선행된다. 그다음 convolution 경로와 layer scheduler를
+              연결하고, Pool·Route·Upsample을 추가해 full graph로 확장했다. 그래프가
+              끝까지 실행된 뒤에는 HWC/CHW 배열 순서, 4-byte packing, detection head
+              stride와 signed scale을 맞추는 작업이 이어졌다. 마지막 단계에서는
+              중간 속도 실험에서 제외됐던 CONV14 branch를 복구하고 CONV14·CONV20을
+              모두 후처리에 사용하는 최종 검증 경로를 고정했다.
+            </p>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>개발 단계</th><th>확인한 문제</th><th>완료 기준</th></tr></thead>
+                <tbody>
+                  <tr><td>보드 bring-up</td><td>JTAG-to-AXI, control register, DDR 접근</td><td>지정 주소 preload·readback과 start/done 확인</td></tr>
+                  <tr><td>연산 경로</td><td>INT8 MAC, bias, requantization, clamp</td><td>Software layer 출력과 RTL 출력 비교</td></tr>
+                  <tr><td>Full graph</td><td>Pool·Route·Upsample과 layer 전환</td><td>Descriptor가 두 head까지 순서대로 실행</td></tr>
+                  <tr><td>데이터 배치</td><td>HWC packing, stride, branch 주소</td><td>CONV14·CONV20이 올바른 위치에 저장</td></tr>
+                  <tr><td>최종 signoff</td><td>Timing, 자원, 반복 실행, detector 정확도</td><td>229/229 PASS와 78.60% mAP</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              이 과정에서 단일 convolution의 최고 속도와 최종 detector의 완성도는
+              같은 목표가 아니었다. 두 head를 모두 보존하면 branch 계산과 DDR 저장,
+              readback 비용이 늘지만 실제 detector mAP를 평가할 수 있다. 대표 결과는
+              중간 속도 상한이 아니라 두 head, timing closure, 229장 평가가 모두 같은
+              bitstream에서 완료된 최종 구현점으로 통일했다.
             </p>
           </section>
 

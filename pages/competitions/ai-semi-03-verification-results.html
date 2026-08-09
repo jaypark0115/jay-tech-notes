@@ -32,24 +32,27 @@
 
           <h1>3. 입력 조건별 시뮬레이션과 구현 결과</h1>
           <p class="lead">
-            이 프로젝트의 결과는 하나의 “성공 화면”이 아니라 네 종류의 근거로
-            나뉜다. Verilog simulation은 입력과 방향 출력의 기능을 확인하고, 위치별
-            spike count는 제어 모델의 반응을 보여준다. 합성 표는 회로가 어떤 FPGA
-            자원을 사용하는지 나타내며, 전력 보고서는 구현 조건에 따른 추정치를
-            제공한다. 각 자료가 증명하는 범위가 다르므로, 기능 simulation을 실제
-            보드 제어 결과나 전력 실측으로 확대해 해석하지 않는다.
+            제어 회로의 검증은 “파형이 나왔다”에서 끝나지 않는다. 입력 spike가 의도한
+            횟수로 생성되는지, LIF 상태가 clock 순서에 맞게 갱신되는지, 네 방향 출력이
+            중앙 방향을 가리키는지, 그 반응량이 목표를 지나치지는 않는지를 분리해 봐야
+            한다. 프로젝트에서는 위치만 전달하는 one-shot 실험을 기준점으로 만든 뒤,
+            무게를 spike rate에 반영한 두 번째 실험을 추가했다. 이어서 대표 좌표의
+            방향별 spike 수, 합성 자원, Vivado 전력 추정치를 정리했다. 이 글은 각
+            결과가 실제로 증명하는 범위와, 아직 물리 장치에서 확인하지 않은 범위를
+            함께 기록한다.
           </p>
 
           <section class="case-summary" aria-labelledby="ai3-summary-title">
             <div>
               <h2 id="ai3-summary-title">검증 구성</h2>
               <p>
-                파형과 로그는 방향 연결과 막전위 반응을 나타낸다. 15g와 30g
-                입력은 spike 수와 최종 좌표를 비교하는 조건이다. Vivado 보고서는
-                논리 자원과 전력 추정치를 제공한다. 물리 보드의 폐루프 제어는
-                검증 범위에 포함되지 않는다. 최종 실험 zip에는 one-shot 버전과
-                무게 rate-encoding 버전의 RTL, testbench, weight 파일이 별도로
-                보관되어 있어 두 실험의 차이를 코드 수준에서 확인할 수 있다.
+                검증 자료는 네 층으로 나뉜다. Testbench는 좌표와 digital weight가
+                회로에 들어가는 조건을 고정하고, 파형은 입력·막전위·출력 spike의
+                시간 순서를 보여준다. 방향별 count와 최종 좌표 표는 제어 모델의
+                반응을 요약하고, Vivado 보고서는 합성된 논리와 추정 전력의 구성을
+                보여준다. 최종 실험 묶음에는 one-shot 버전과 rate-encoding 버전의
+                RTL·testbench·weight가 구분돼 있어 입력 방식이 바뀐 지점을 추적할 수
+                있다. 물리 보드의 폐루프 제어는 이 검증 범위에 포함되지 않는다.
               </p>
             </div>
             <dl class="case-facts">
@@ -104,6 +107,47 @@
                 </tbody>
               </table>
             </div>
+          </section>
+
+          <section class="doc-section searchable-section" id="weight-generation" data-search-title="Weight 생성과 RTL 입력 준비">
+            <h2>학습 결과를 RTL 입력으로 옮기는 과정</h2>
+            <p>
+              계층형 99→32→4 실험망의 연결 가중치는 software에서 학습한 뒤 정수
+              <code>.hex</code> 파일로 변환했다. 은닉층과 출력층의 최대 절댓값을
+              확인해 정수 범위에 맞는 scale factor를 적용하고, one-shot 실험과
+              rate-encoding 실험의 weight 묶음은 별도로 구성했다. RTL testbench는 이 파일을
+              읽어 동일한 입력 좌표에서 가중합과 spike count를 계산한다. 즉 학습과
+              회로 실행이 동시에 일어나는 online-learning 구조가 아니라, 학습된
+              파라미터를 고정해 사용하는 offline inference 구조이다.
+            </p>
+            <figure class="doc-figure">
+              <div class="figure-label">Rate-encoding 실험용 weight 파일 생성 기록</div>
+              <img
+                src="../../assets/ai-semi-weight-export-console.png"
+                alt="은닉층과 출력층 가중치를 정수 hex 파일로 변환하고 weights rate zip으로 저장한 콘솔 기록"
+              />
+              <figcaption>
+                학습된 은닉층·출력층 weight를 정수 파일로 내보내고 실험 묶음으로
+                정리한 실행 기록이다. 이 자료는 파라미터 생성 경로를 보여주며,
+                FPGA 안에서 실시간 학습이 수행됐다는 의미는 아니다.
+              </figcaption>
+            </figure>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>단계</th><th>산출물</th><th>검증 질문</th></tr></thead>
+                <tbody>
+                  <tr><td>Software 학습</td><td>은닉층·출력층 실수 weight</td><td>대표 위치에서 중앙 방향 반응을 학습했는가</td></tr>
+                  <tr><td>정수 변환</td><td><code>hidden_*.hex</code>, <code>output_*.hex</code></td><td>정수 범위에서 부호와 상대 크기가 유지되는가</td></tr>
+                  <tr><td>RTL 로드</td><td>Testbench가 읽는 weight memory</td><td>파일 순서와 뉴런 연결 순서가 일치하는가</td></tr>
+                  <tr><td>100 time steps</td><td>방향별 spike count</td><td>입력 방식에 따른 발화 차이가 나타나는가</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="evidence-note warning">
+              최종 발표자료도 offline learning을 한계로 명시한다. 실시간 센서 값으로
+              FPGA 내부 weight를 갱신하거나, 실제 공의 움직임을 보고 즉시 재학습하는
+              회로는 구현 범위가 아니다.
+            </p>
           </section>
 
           <section class="doc-section searchable-section" id="weight-results" data-search-title="15g 30g 결과">

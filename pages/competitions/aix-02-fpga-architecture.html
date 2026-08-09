@@ -32,23 +32,28 @@
 
           <h1>2. YOLOv2 Full-Graph FPGA 구조</h1>
           <p class="lead">
-            Full-graph 가속기는 convolution 하나의 속도만 높이는 회로가 아니다.
-            서로 다른 크기의 feature map, 이전 결과를 다시 사용하는 분기, 두 배
-            해상도로 확장하는 경로와 두 detection head를 정확한 순서와 주소로 연결해야
-            한다. 이 구현에서 DDR은 전체 모델의 공용 workspace이며, 22개 descriptor가
-            Conv·Pool·Route·Upsample의 실행 조건을 설정한다. 계산의 중심은 144-lane
-            packed MAC이지만, 실제 처리 속도와 정확도는 메모리 공급, 정수 후처리,
-            scheduler가 함께 결정한다.
+            YOLOv2를 FPGA로 옮길 때 가장 어려운 부분은 곱셈기를 만드는 일보다 모든
+            layer가 같은 데이터 규칙을 공유하도록 연결하는 일이다. 각 convolution의
+            출력 크기와 주소가 달라지고, Pool은 해상도를 줄이며, Route는 오래전에
+            저장한 feature map을 다시 읽고, Upsample은 두 번째 detection head를 위해
+            공간 크기를 두 배로 만든다. 이 구현은 DDR을 전체 모델의 공용 workspace로
+            사용하고, 22개 descriptor가 layer의 종류·shape·주소를 바꾸며 그래프를
+            진행한다. 144-lane packed MAC은 계산의 중심이지만, 실제 처리 속도는
+            weight 공급, feature 재사용, requantization, write-back과 scheduler의
+            대기까지 합친 결과로 결정된다.
           </p>
 
           <section class="case-summary" aria-labelledby="aix2-summary-title">
             <div>
               <h2 id="aix2-summary-title">최종 구현 사양</h2>
               <p>
-                Nexys 4 DDR의 Artix-7은 100MHz로 동작하며, JTAG-to-AXI가 host와
-                DDR을 연결한다. FPGA 내부는 144개 packed MAC lane, layer descriptor
-                ROM, weight cache, feature buffer, scheduler로 구성된다. 입력과 weight는
-                실행 전에 DDR에 적재하고, 네트워크가 끝난 뒤 두 head를 다시 읽는다.
+                Nexys 4 DDR의 Artix-7은 100MHz로 동작하며 JTAG-to-AXI가 host의
+                검증 스크립트와 DDR을 연결한다. FPGA 내부에는 22단계 descriptor ROM,
+                graph scheduler, op dispatcher, 144개 packed MAC lane, weight cache,
+                feature·accumulator buffer, requantization과 write-back 경로가 있다.
+                입력과 weight는 실행 전에 DDR에 적재하고, 네트워크가 끝나면 CONV14와
+                CONV20 두 head를 다시 읽는다. Host는 layer마다 명령하지 않고 start와
+                done만 관리하며 그래프 진행은 RTL scheduler가 담당한다.
               </p>
             </div>
             <dl class="case-facts">
@@ -77,6 +82,13 @@
               않도록 주소를 보존해야 한다. 하나의 연산기만 최적화하지 않고 그래프 전체를
               descriptor와 workspace로 관리한 이유이다.
             </p>
+            <p class="evidence-note">
+              YOLOv2가 한 번의 network evaluation으로 detection을 수행한다는 전체 개념은
+              원 논문을 따른다. 이 글의 세부 layer 수, tensor 크기, descriptor 순서와
+              메모리 주소는 논문 수치가 아니라 최종 프로젝트 RTL과 host package를 기준으로
+              정리했다.
+              <a href="https://arxiv.org/abs/1612.08242" target="_blank" rel="noreferrer">YOLO9000: Better, Faster, Stronger</a>
+            </p>
           </section>
 
           <section class="doc-section searchable-section" id="host-fpga" data-search-title="Host FPGA 역할">
@@ -90,6 +102,18 @@
               두 detection head를 만드는 신경망 연산 그래프 전체가 FPGA에서 실행된다는
               뜻이다.
             </p>
+            <figure class="doc-figure">
+              <div class="figure-label">Host·DDR·FPGA의 역할 분리</div>
+              <img
+                src="../../assets/aix-host-fpga-block-crop.png"
+                alt="PC host, JTAG-to-AXI, DDR workspace와 descriptor scheduler, 연산 경로, 두 detection head가 연결된 블록도"
+              />
+              <figcaption>
+                Host는 program·preload·readback을 담당하고, FPGA의 scheduler와 op
+                dispatcher가 graph compute를 수행한다. 두 head를 DDR에 저장한 뒤
+                host의 detector 후처리로 넘기는 경계를 나타낸다.
+              </figcaption>
+            </figure>
             <div class="case-flow" style="--flow-count: 5" aria-label="Host와 FPGA 역할">
               <div class="case-flow-step">
                 <span>Host</span>
@@ -124,6 +148,36 @@
               편리한 통로이지 실시간 카메라 입력 인터페이스가 아니다. 따라서 보드 검증의
               JTAG 전체 소요 시간과 FPGA 내부 cycle counter로 계산한 추론 시간은 서로
               다른 지표로 구분한다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="frame-walkthrough" data-search-title="한 프레임의 실행 순서">
+            <h2>한 프레임이 두 detection head가 되기까지</h2>
+            <p>
+              보드 실행은 입력을 DDR에 쓰는 순간부터 시작하지 않는다. Bitstream이
+              program된 뒤 quantized weight 전체와 256×256×3 입력이 정해진 base
+              address에 먼저 적재된다. Host가 control register의 start bit를 올리면
+              scheduler가 0번 descriptor를 읽고 첫 convolution을 시작한다. 이후 각
+              단계가 끝날 때 출력 주소와 완료 상태를 확인하고 다음 descriptor로
+              넘어간다. 이 과정에서 host는 layer마다 개입하지 않는다.
+            </p>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>실행 구간</th><th>읽는 데이터</th><th>수행하는 동작</th><th>남기는 결과</th></tr></thead>
+                <tbody>
+                  <tr><td>Descriptor 0–9</td><td>입력/이전 OFM, 3×3 weight</td><td>Conv와 2×2 Pool 반복</td><td>8×8×256 backbone feature</td></tr>
+                  <tr><td>Descriptor 10–13</td><td>깊어진 feature와 weight</td><td>Conv·stride-1 Pool·1×1/3×3 Conv</td><td>8×8×512 feature</td></tr>
+                  <tr><td>Descriptor 14–15</td><td>8×8×512</td><td>첫 1×1 detection convolution</td><td>CONV14 8×8×195 보존</td></tr>
+                  <tr><td>Descriptor 16–19</td><td>Branch feature와 과거 skip feature</td><td>Copy·1×1 Conv·Upsample·Route</td><td>16×16×384 fusion feature</td></tr>
+                  <tr><td>Descriptor 20–21</td><td>16×16×384</td><td>두 번째 1×1 detection convolution</td><td>CONV20 16×16×195 보존</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              첫 head는 해상도가 낮고 의미적으로 깊은 feature를 사용하고, 두 번째
+              head는 upsample한 feature와 앞쪽의 고해상도 feature를 Route로 결합한다.
+              둘 중 하나만 계산하면 YOLOv2 detector의 전체 경로를 평가할 수 없다.
+              최종 구현이 CONV14 branch와 CONV20을 모두 DDR에 남긴 이유가 여기에 있다.
             </p>
           </section>
 
@@ -192,7 +246,7 @@
               분기에 사용할 feature를 복사하고, 17번의 1×1 convolution과 18번의
               upsample을 거쳐 19번에서 16×16×384 feature를 만든다. 마지막으로 20번이
               16×16×195 두 번째 head를 계산하고 21번이 출력을 보존한다. 중간 발표의
-              19단계 설명보다 최종 RTL의 22개 descriptor를 기준으로 삼는다.
+              이 글의 구조와 수치는 최종 RTL에 구현된 22개 descriptor를 기준으로 설명한다.
             </p>
           </section>
 
