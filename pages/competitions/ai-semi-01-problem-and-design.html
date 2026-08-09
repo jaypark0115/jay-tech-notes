@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="BallControl의 보드 좌표와 공 무게를 one-hot 위치 입력과 rate encoding으로 정의한 과정."
+      content="BallControl의 물리 조건을 11×9 좌표 격자, one-hot 위치 입력, 무게 rate encoding, 네 방향 출력 신호로 변환한 설계 문서."
     />
     <title>AI 반도체 경진대회 1 - BallControl 문제와 입력 표현</title>
     <link rel="stylesheet" href="../../styles.css?v=20260729-competition-redesign" />
@@ -32,17 +32,23 @@
 
           <h1>1. BallControl 입력 표현과 출력 정의</h1>
           <p class="lead">
-            BallControl 제어 모델은 연속적인 물리 상태를 이산 입력으로 변환한다.
-            위치는 현재 좌표를, 무게는 시간축 자극의 크기를 나타낸다. 두 값은
-            one-hot 위치 입력과 rate encoding으로 서로 다르게 표현된다.
+            BallControl 과제의 입력은 실제 보드 위에서 연속적으로 변하는 위치와
+            무게이지만, 디지털 회로는 이를 유한한 비트와 clock 단위로 처리해야 한다.
+            이 설계에서는 위치를 99개 격자 중 하나를 가리키는 one-hot 신호로,
+            무게를 일정한 시간 창에서 발생하는 spike의 빈도로 바꾼다. 이 문서는
+            물리 조건이 어떤 회로 신호로 바뀌며, 그 단순화가 어떤 의미와 한계를
+            갖는지를 입력부터 출력까지 순서대로 설명한다.
           </p>
 
           <section class="case-summary" aria-labelledby="ai1-summary-title">
             <div>
               <h2 id="ai1-summary-title">입력·출력 사양</h2>
               <p>
-                30×30cm 보드의 위치는 99개 입력 뉴런으로 표현된다. 1~30g 무게는
-                시간축 spike 수에 반영되며, 출력 계층은 네 방향 제어 신호를 제공한다.
+                30×30cm 보드는 X축 11개, Y축 9개의 이산 좌표로 나뉘며 각 위치가
+                하나의 입력 뉴런에 대응한다. 공의 무게는 별도 위치를 차지하는 값이
+                아니라, 선택된 위치 뉴런이 시간에 따라 얼마나 자주 발화하는지를
+                조절한다. 출력은 연속적인 모터 전압이 아니라 +X·−X·+Y·−Y 네 방향의
+                spike 이벤트이다.
               </p>
             </div>
             <dl class="case-facts">
@@ -60,6 +66,14 @@
               격자로 모델링된다. 11×9 격자는 99개 입력 뉴런에 대응한다. 중앙 반경
               1cm는 제어 목표의 물리 기준으로 사용된다.
             </p>
+            <p>
+              이산 좌표 모델을 사용하는 이유는 제어 문제와 센서 문제를 분리하기
+              위해서다. 실제 시스템에서는 카메라나 압력 센서가 공의 위치를 연속값으로
+              추정하고, 그 값을 회로 입력 형식으로 양자화해야 한다. 최종 실험에서는
+              이 앞단이 이미 좌표를 제공한다고 가정하고, 좌표가 주어진 이후의 SNN
+              반응을 검증한다. 따라서 30cm를 11칸과 9칸으로 나눈 값이 실제 센서의
+              분해능을 의미하지는 않는다.
+            </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
                 <thead>
@@ -68,16 +82,16 @@
                 <tbody>
                   <tr><td>30×30cm 보드</td><td>11×9 위치 격자</td><td>연속 좌표를 99개 이산 위치로 단순화</td></tr>
                   <tr><td>중앙 목표</td><td>(0, 0)</td><td>부호가 방향, 절댓값이 중앙과의 거리</td></tr>
-                  <tr><td>중앙 반경 1cm</td><td>출력 종료 조건의 물리 기준</td><td>실물 센서 오차까지 포함한 검증은 별도 필요</td></tr>
+                  <tr><td>중앙 반경 1cm</td><td>출력 종료 조건의 물리 기준</td><td>실물 센서 오차를 포함한 검증은 별도 범위</td></tr>
                   <tr><td>공 무게 1~30g</td><td>digital weight와 spike rate</td><td>무거운 공에 더 큰 시간축 자극 부여</td></tr>
                   <tr><td>보드 기울임</td><td>네 방향 출력 뉴런</td><td>+X·−X·+Y·−Y 제어 이벤트로 분리</td></tr>
                 </tbody>
               </table>
             </div>
             <p class="evidence-note">
-              좌표 격자와 무게 입력은 제어 문제를 시험하기 위한 모델이다. 카메라가
-              실제 좌표를 어떻게 추정하는지, 센서 노이즈를 어떻게 보정하는지는 이번
-              회로의 입력 앞단에 놓이는 별도 문제입니다.
+              좌표 격자와 무게 입력은 제어 문제를 시험하기 위한 모델이다. 카메라의
+              실제 좌표 추정, 센서 노이즈 보정, 좌표의 연속성은 회로 입력 앞단의
+              별도 문제이다.
             </p>
           </section>
 
@@ -87,6 +101,14 @@
               X축 11개와 Y축 9개의 조합은 99개 위치를 만든다. 현재 좌표에 해당하는
               입력 뉴런 하나만 활성화되며, 네트워크는 활성 위치를 one-hot 벡터로
               수신한다. 위치별 흥분·억제 가중치는 이 입력 벡터에 연결된다.
+            </p>
+            <p>
+              one-hot 표현은 숫자 좌표를 이진수로 직접 넣는 방식보다 입력선 수가
+              많지만, 각 위치와 가중치 행을 일대일로 연결할 수 있다는 장점이 있다.
+              예를 들어 같은 X값을 가진 좌표라도 Y값이 다르면 서로 다른 입력 뉴런이
+              선택되므로, 위치별로 다른 흥분성·억제성 연결을 줄 수 있다. 반대로 격자
+              해상도를 높일수록 입력 뉴런과 weight 저장량이 빠르게 증가한다는 점은
+              이 표현의 구조적 비용이다.
             </p>
             <div class="case-flow" style="--flow-count: 4" aria-label="위치 one-hot encoding 과정">
               <div class="case-flow-step">
@@ -113,7 +135,9 @@
             <p>
               예를 들어 공이 (+3, +4)에 있으면 해당 위치 뉴런이 활성화된다.
               중앙 방향에 해당하는 −X와 −Y 경로는 출력 뉴런의 막전위 누적에
-              기여한다. spike 출력은 모터 구동 파형이 아니라 방향 이벤트이다.
+              기여한다. 이때 입력의 1은 “모터를 즉시 켠다”는 명령이 아니라,
+              hidden layer와 output layer가 처리할 spike 자극을 의미한다. 최종
+              spike 출력 역시 모터 구동 전압이나 PWM이 아니라 방향 이벤트이다.
             </p>
           </section>
 
@@ -124,21 +148,44 @@
               <code>counter &lt; weight</code>일 때 spike를 발생시키는 rate encoding으로
               표현된다. digital weight가 클수록 입력 이벤트 수가 증가한다.
             </p>
+            <p>
+              첫 번째 실험의 <code>Input_Neuron_SingleShot</code>은 enable 시점에 한 번의
+              spike를 내보낸다. 이 구조에서는 같은 위치라면 공이 가볍든 무겁든
+              네트워크가 받는 입력이 같다. 두 번째 실험의
+              <code>Input_Neuron_RateEncoder</code>는 <code>ball_weight</code>를 입력으로
+              받고, 시간 창 안에서 digital weight만큼 반복 spike를 만든다. 위치는
+              어느 weight 행을 읽을지 결정하고, 무게는 그 행이 시간축에서 얼마나
+              강하게 자극되는지를 결정하는 식으로 두 정보의 역할이 분리된다.
+            </p>
             <div class="case-grid">
               <article class="case-card">
                 <span>위치 입력</span>
-                <h3>공간 정보를 표현</h3>
-                <p>99개 중 하나가 활성화되어 현재 공이 어느 격자에 있는지를 나타냅니다.</p>
+                <h3>현재 위치의 공간 표현</h3>
+                <p>99개 중 하나가 활성화되어 현재 공이 어느 격자에 있는지를 나타낸다.</p>
               </article>
               <article class="case-card">
                 <span>무게 입력</span>
-                <h3>시간축 자극의 양을 조절</h3>
+                <h3>무게에 따른 시간축 자극</h3>
                 <p>15g에는 digital weight 123, 30g에는 255를 적용한다.</p>
               </article>
             </div>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>구분</th><th>실험 1</th><th>실험 2</th></tr></thead>
+                <tbody>
+                  <tr><td>입력 뉴런</td><td><code>Input_Neuron_SingleShot</code></td><td><code>Input_Neuron_RateEncoder</code></td></tr>
+                  <tr><td>Top 입력</td><td><code>ball_x</code>, <code>ball_y</code>, <code>start</code></td><td>기존 입력 + <code>ball_weight</code></td></tr>
+                  <tr><td>무게 반영</td><td>없음</td><td>시간 창의 spike rate로 반영</td></tr>
+                  <tr><td>뉴런 설정</td><td>THRESHOLD 40 · LEAK_SHIFT 4</td><td>THRESHOLD 300 · LEAK_SHIFT 6</td></tr>
+                  <tr><td>검증 목적</td><td>좌표–방향 연결 확인</td><td>위치와 무게를 함께 넣은 반응 비교</td></tr>
+                </tbody>
+              </table>
+            </div>
             <p class="evidence-note warning">
               123과 255는 센서 교정식이 아닌 시뮬레이션 입력값이다. 중간 무게에
-              대한 선형성이나 실제 구동력은 이 값만으로 정의되지 않는다.
+              대한 선형성이나 실제 구동력은 이 값만으로 정의되지 않는다. 또한
+              실험 1과 실험 2는 입력 방식뿐 아니라 threshold와 leak 설정도 다르므로,
+              두 결과의 차이를 무게 하나의 효과로만 해석할 수 없다.
             </p>
           </section>
 
@@ -149,6 +196,14 @@
               방향별 spike 수를 집계하고, 서로 반대인 채널의 차이를 X축과 Y축
               제어량으로 변환한다. 파형에서는 출력 채널과 제어 방향의 대응을
               직접 확인할 수 있다.
+            </p>
+            <p>
+              중앙이 (0, 0)이므로 현재 X가 양수이면 −X 채널이, 현재 X가 음수이면
+              +X 채널이 중앙 복귀 방향이 된다. Y축도 같은 원리로 동작한다. 방향별
+              spike 수를 이동 칸 수로 해석하면, 예를 들어 (+3, +4)에서는 −X와 −Y
+              출력이 각각 중앙까지 필요한 이동량을 표현한다. 다만 이 해석은 한
+              spike가 한 칸의 이동으로 이어진다는 시뮬레이션 규칙이며, 실제 보드의
+              기울기·마찰·속도까지 포함한 물리 법칙은 아니다.
             </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
@@ -162,8 +217,10 @@
               </table>
             </div>
             <p>
-              다음 글에서는 이 입력이 LIF 막전위, 실행 FSM과 네 방향 출력
-              Verilog로 어떻게 이어지는지 살펴봅니다.
+              이렇게 정의된 입력과 출력 사이에는 hidden/output LIF 뉴런의 막전위
+              누적과 시간 단계 제어가 놓인다. 다음 문서는 한 번의 입력 spike가
+              가중합, leak, threshold, reset을 거쳐 네 방향 출력으로 변환되는 RTL
+              구조를 다룬다.
             </p>
           </section>
 

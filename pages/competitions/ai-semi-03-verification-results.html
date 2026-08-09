@@ -32,9 +32,12 @@
 
           <h1>3. 입력 조건별 시뮬레이션과 구현 결과</h1>
           <p class="lead">
-            검증 자료는 입력 표현, 방향별 spike 반응, 합성 자원, 전력 추정으로
-            구성된다. one-shot 입력과 무게 rate encoding은 서로 다른 파라미터에서
-            실행되며, 기능 시뮬레이션과 Vivado 보고서는 별도 근거로 해석한다.
+            이 프로젝트의 결과는 하나의 “성공 화면”이 아니라 네 종류의 근거로
+            나뉜다. Verilog simulation은 입력과 방향 출력의 기능을 확인하고, 위치별
+            spike count는 제어 모델의 반응을 보여준다. 합성 표는 회로가 어떤 FPGA
+            자원을 사용하는지 나타내며, 전력 보고서는 구현 조건에 따른 추정치를
+            제공한다. 각 자료가 증명하는 범위가 다르므로, 기능 simulation을 실제
+            보드 제어 결과나 전력 실측으로 확대해 해석하지 않는다.
           </p>
 
           <section class="case-summary" aria-labelledby="ai3-summary-title">
@@ -44,7 +47,9 @@
                 파형과 로그는 방향 연결과 막전위 반응을 나타낸다. 15g와 30g
                 입력은 spike 수와 최종 좌표를 비교하는 조건이다. Vivado 보고서는
                 논리 자원과 전력 추정치를 제공한다. 물리 보드의 폐루프 제어는
-                검증 범위에 포함되지 않는다.
+                검증 범위에 포함되지 않는다. 최종 실험 zip에는 one-shot 버전과
+                무게 rate-encoding 버전의 RTL, testbench, weight 파일이 별도로
+                보관되어 있어 두 실험의 차이를 코드 수준에서 확인할 수 있다.
               </p>
             </div>
             <dl class="case-facts">
@@ -57,6 +62,13 @@
 
           <section class="doc-section searchable-section" id="experiment-design" data-search-title="입력 실험">
             <h2>입력 조건</h2>
+            <p>
+              검증은 먼저 좌표와 네 방향 출력의 기본 연결을 확인한 뒤, 무게 정보를
+              입력에 추가하는 순서로 진행된다. 실험 1은 현재 좌표를 한 번의 spike로
+              전달해 weight 연결과 출력 방향을 확인하는 기준점이다. 실험 2는 같은
+              위치 표현에 <code>ball_weight</code>를 추가하고, 입력 spike의 개수를
+              무게에 따라 바꾸어 시간축 자극에 대한 반응을 비교한다.
+            </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
                 <thead><tr><th>실험</th><th>입력 표현</th><th>확인한 질문</th><th>주요 파라미터</th></tr></thead>
@@ -81,6 +93,17 @@
               무게 입력 하나의 영향으로 분해되지 않으며, rate encoding 경로의
               기능 동작을 보여주는 자료이다.
             </p>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>검증 자료</th><th>확인 대상</th><th>판단 가능한 범위</th></tr></thead>
+                <tbody>
+                  <tr><td>Testbench 입력</td><td>좌표, start, digital weight</td><td>의도한 조건이 RTL에 전달되는지 확인</td></tr>
+                  <tr><td>내부 파형</td><td>input spike, membrane, threshold, output spike</td><td>time step과 뉴런 상태 변화 확인</td></tr>
+                  <tr><td>방향별 count</td><td>+X·−X·+Y·−Y 누적값</td><td>중앙 방향과 반대 방향의 반응 비교</td></tr>
+                  <tr><td>좌표 갱신 모델</td><td>spike count를 이동 칸 수로 적용</td><td>디지털 제어 규칙 안의 최종 위치 계산</td></tr>
+                </tbody>
+              </table>
+            </div>
           </section>
 
           <section class="doc-section searchable-section" id="weight-results" data-search-title="15g 30g 결과">
@@ -90,6 +113,13 @@
               발표자료의 열 개 결과를 제시한다. 15g 조건은 다섯 초기 위치 중
               세 경우에서 (0,0)에 도달하며, 30g 조건은 더 많은 spike와 함께
               overshoot를 보인다.
+            </p>
+            <p>
+              표의 오차는 최종 좌표의 <code>|x|+|y|</code>로 읽을 수 있다. 값이 0이면
+              이산 좌표 모델에서 중앙에 도달한 것이고, 값이 클수록 중앙에서 더 멀리
+              남아 있다. 따라서 방향이 맞게 나온 것과 정확히 중앙에서 멈춘 것은
+              별개의 평가 항목이다. 예를 들어 15g의 (3,3) 입력은 −X와 −Y 방향을
+              올바르게 선택하지만 각 축에서 한 칸만 이동해 (2,2)에 남는다.
             </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
@@ -121,6 +151,19 @@
                 감쇠와 출력 scaling을 함께 다뤄야 하는 조건을 보여준다.
               </figcaption>
             </figure>
+            <p>
+              30g 조건은 입력 rate가 커지면 출력 반응도 커진다는 사실을 보여주지만,
+              중앙 수렴 성능은 오히려 낮아진다. (−3,−3)과 (−2,−2)에서는 각 축의
+              +방향 spike가 필요한 거리보다 많아 (1,1)로 넘어가고, 중앙 (0,0)에서도
+              +Y spike가 발생해 (0,1)로 이동한다. 이는 무게 정보를 입력에 포함하는
+              것만으로 안정적인 제어가 완성되지 않으며, 위치에 가까워질수록 gain을
+              줄이는 규칙이나 출력 feedback이 추가되어야 함을 보여준다.
+            </p>
+            <p class="evidence-note warning">
+              열 개 결과는 모든 1~30g 무게와 99개 위치를 전수 조사한 정확도 지표가
+              아니다. 두 대표 무게와 일부 초기 좌표에서 rate-encoding 반응을 확인한
+              기능 실험으로 해석한다.
+            </p>
           </section>
 
           <section class="doc-section searchable-section" id="synthesis" data-search-title="합성 자원">
@@ -129,6 +172,13 @@
               최종 발표자료의 합성 표에는 LUT 10개, FF 41개, BRAM과 DSP 0개가
               기록된다. I/O는 83개이며 장치의 I/O 자원 대부분을 사용한다. 논리
               자원과 I/O 사용량은 서로 다른 항목으로 표시한다.
+            </p>
+            <p>
+              LUT와 FF는 입력 부호 분리, LIF 상태, spike count와 제어 레지스터에
+              사용된다. BRAM과 DSP가 0인 이유는 이 공개 범위의 상태가 작은 register로
+              구성되고 전용 곱셈 배열을 사용하지 않기 때문이다. 반면 top-level에
+              위치·속도·방향 신호를 넓게 노출해 I/O 사용량은 높다. 계산 로직이 작다는
+              사실과 장치 핀 사용률이 높다는 사실은 동시에 성립한다.
             </p>
             <div class="result-band" aria-label="AI 반도체 프로젝트 합성 자원">
               <article><strong>10</strong><span>LUT · 0.05%</span></article>
@@ -153,6 +203,12 @@
               clock constraint는 확인되지 않았다. 따라서 특정 보드의 timing
               closure나 bitstream 동작 결과로 해석하지 않는다.
             </p>
+            <p class="evidence-note">
+              발표 본문에는 “약 20.78% 자원”이라는 요약 문장도 존재하지만, 세부
+              utilization 표의 LUT·FF·I/O 비율과 동일한 기준으로 재현되지 않는다.
+              이 문서에서는 항목별 표에 직접 적힌 수치를 사용하고, 서로 성격이 다른
+              logic 자원과 I/O 비율을 하나의 사용률로 합치지 않는다.
+            </p>
           </section>
 
           <section class="doc-section searchable-section" id="power" data-search-title="전력 추정">
@@ -161,6 +217,13 @@
               총 전력은 2.302W, dynamic power는 2.165W, static power는
               0.137W이다. dynamic power 중 I/O는 1.968W를 차지한다. 수치는
               보드 실측이 아닌 입력 activity와 구현 조건에 따른 Vivado 추정값이다.
+            </p>
+            <p>
+              dynamic 94%라는 비율만 보면 뉴런 계산이 많은 전력을 사용한 것처럼
+              보일 수 있으나, 세부 항목에서는 I/O가 dynamic power의 약 90%를
+              차지한다. 즉 이 결과는 LIF 산술 자체보다 넓은 top-level 신호의 toggle
+              가정에 크게 영향을 받는다. 따라서 2.302W를 SNN core의 고유 소비전력이나
+              event-driven 구조의 에너지 효율로 사용하는 것은 적절하지 않다.
             </p>
             <div class="result-band" aria-label="AI 반도체 프로젝트 전력 추정">
               <article><strong>2.302W</strong><span>총 전력 추정</span></article>
@@ -179,6 +242,33 @@
                 해석하지 않는다.
               </figcaption>
             </figure>
+            <p class="evidence-note">
+              전력 비교를 위해서는 동일한 보드·clock·I/O constraint·toggle activity를
+              사용한 기준 설계가 필요하다. 현재 자료는 구현 결과의 전력 분포를 읽는
+              근거이며, 다른 제어기보다 절대적으로 저전력이라는 비교 근거는 아니다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="verification-boundary" data-search-title="검증 단계와 결론">
+            <h2>검증 단계와 결론</h2>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>단계</th><th>현재 확보된 근거</th><th>아직 확인하지 않은 항목</th></tr></thead>
+                <tbody>
+                  <tr><td>입력 부호화</td><td>one-shot·rate encoder RTL과 testbench</td><td>실제 무게 센서의 교정 곡선</td></tr>
+                  <tr><td>뉴런 연산</td><td>100 time-step 기능 simulation</td><td>모든 좌표·무게 조합의 전수 검증</td></tr>
+                  <tr><td>출력 해석</td><td>방향별 spike count와 좌표 갱신</td><td>PWM·motor driver·기구부 응답</td></tr>
+                  <tr><td>FPGA 구현</td><td>합성 자원표와 Vivado 전력 추정</td><td>확정 board part의 timing·bitstream·실측 전력</td></tr>
+                  <tr><td>폐루프 제어</td><td>디지털 이동 모델</td><td>카메라 feedback과 실제 공의 중앙 유지</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              현재 결과가 지지하는 결론은 위치와 무게를 spike 입력으로 표현하고,
+              LIF 네트워크가 네 방향 제어 이벤트를 생성하며, 대표 조건에서 weight에
+              따른 반응 차이가 나타난다는 것이다. 실제 Ball Balancing 장치가 중앙
+              반경 1cm 안에서 안정화되었다는 결론은 이 자료로 뒷받침되지 않는다.
+            </p>
           </section>
 
           <section class="doc-section searchable-section" id="lessons" data-search-title="한계와 개선 방향">
@@ -187,24 +277,30 @@
               <article class="case-card">
                 <span>Gain과 감쇠</span>
             <h3>무거운 공의 overshoot</h3>
-                <p>무게별 rate, threshold, leak, 출력 scaling은 후속 제어 변수이다.</p>
+                <p>무게별 rate, threshold, leak, 출력 scaling을 공동 탐색하고 중앙 근처에서는 출력 gain을 줄이는 조건을 검증한다.</p>
               </article>
               <article class="case-card">
                 <span>센서 입력</span>
             <h3>좌표 추정 오차</h3>
-                <p>카메라 지연·노이즈와 목표 반경 1cm 조건은 폐루프 검증 항목이다.</p>
+                <p>좌표 오차와 frame 지연을 입력해, 목표 반경 1cm 안에서 방향 출력이 진동하지 않는지 확인한다.</p>
               </article>
               <article class="case-card">
                 <span>모터 인터페이스</span>
             <h3>spike와 실제 구동량</h3>
-                <p>1-bit 방향 이벤트를 PWM·pulse width로 변환하는 출력 계층이 추가된다.</p>
+                <p>1-bit 방향 이벤트를 PWM·pulse width로 변환하고 반대 축 actuator의 복원 동작을 정의한다.</p>
               </article>
               <article class="case-card">
                 <span>검증</span>
             <h3>모델·RTL·보드 결과 비교</h3>
-                <p>bit-accurate reference와 물리 로그는 최초 차이 지점의 추적 자료이다.</p>
+                <p>동일한 입력을 software model, RTL simulation, FPGA, 실제 장치에 넣고 최초 차이 지점을 단계별로 기록한다.</p>
               </article>
             </div>
+            <p>
+              가장 먼저 필요한 후속 실험은 99개 위치와 여러 무게를 자동으로 순회하는
+              regression test이다. 그다음 센서 모델과 actuator 모델을 붙여 closed-loop
+              simulation을 만들고, 마지막에 실제 보드에서 같은 평가 지표를 사용해야
+              입력 부호화의 장점과 제어 안정성을 분리해 판단할 수 있다.
+            </p>
           </section>
 
           <footer class="page-footer">

@@ -32,10 +32,13 @@
 
           <h1>2. SNN 제어 회로와 RTL 구성</h1>
           <p class="lead">
-            SNN은 막전위를 상태로 보관하고 입력 spike와 가중치를 시간축에서
-            누적한다. 누설과 임계값 판정은 각 time step에서 반복되며, 실행 FSM은
-            상태 갱신 순서를 제어한다. 네 출력 뉴런의 spike는 X·Y 방향 신호로
-            변환된다.
+            SNN은 입력을 한 번의 숫자로 계산하는 대신, 여러 time step에 걸친
+            spike와 뉴런 내부 상태로 처리한다. 각 LIF 뉴런은 입력 가중합을 막전위에
+            더하고, 시간이 지나면 일부를 누설시키며, 임계값을 넘으면 spike를 낸다.
+            따라서 RTL에는 곱셈·덧셈뿐 아니라 막전위 레지스터, time-step counter,
+            발화와 reset의 순서를 관리하는 제어가 함께 들어간다. 이 문서는 최종
+            실험의 99→32→4 네트워크와 공개된 네 방향 output-layer RTL을 구분해
+            설명한다.
           </p>
 
           <section class="case-summary" aria-labelledby="ai2-summary-title">
@@ -45,7 +48,9 @@
                 최종 발표의 실험 네트워크는 99→32→4 구조이다. 저장소의 세 Verilog
                 파일은 signed 위치 오차를 네 방향으로 나누고 LIF 출력에 연결하는
                 경로를 다룬다. 전체 실험망과 출력 계층 RTL은 서로 다른 범위의
-                자료로 표기한다.
+                자료이다. 실험망은 weight 파일과 100개 time step을 포함한 계층형
+                계산을 설명하고, 공개 RTL은 위치 오차가 네 방향 이벤트로 나가는
+                인터페이스를 코드 수준에서 보여준다.
               </p>
             </div>
             <dl class="case-facts">
@@ -62,6 +67,15 @@
               Baby Neuron datapath는 입력 spike의 가중합, 막전위 누적, 누설,
               임계값 판정, reset으로 구성된다. 누설은 오른쪽 shift로 구현되며,
               나눗셈기 없이 시간에 따른 막전위 감소를 나타낸다.
+            </p>
+            <p>
+              막전위 <code>U</code>는 뉴런이 이전 time step까지 받은 자극을 저장하는
+              상태값이다. 흥분성 weight는 <code>U</code>를 증가시키고, 억제성 weight는
+              감소시킨다. leak는 입력이 없을 때도 상태가 무한히 남지 않도록 줄이며,
+              threshold는 누적된 자극을 1-bit spike로 바꾸는 경계이다. 발화 후에는
+              막전위를 0으로 초기화하거나 임계값만큼 빼는 방식이 사용될 수 있으며,
+              최종 발표의 Baby Neuron은 reset-to-zero와 shift 기반 leak를 중심으로
+              설명한다.
             </p>
             <div class="case-flow" style="--flow-count: 5" aria-label="LIF 뉴런 데이터 경로">
               <div class="case-flow-step">
@@ -102,6 +116,23 @@
                 동일한 값으로 해석하지 않는다.
               </figcaption>
             </figure>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>항목</th><th>전체 실험망의 Baby Neuron</th><th>공개 <code>lif_neuron.v</code></th></tr></thead>
+                <tbody>
+                  <tr><td>누설</td><td>막전위 오른쪽 shift 기반</td><td>기본값 <code>LEAK=10</code>을 매 clock 차감</td></tr>
+                  <tr><td>임계값</td><td>실험 1: 40 · 실험 2: 300</td><td>기본값 <code>U_THR=2000</code></td></tr>
+                  <tr><td>입력</td><td>pre-synaptic spike와 weight</td><td>방향 magnitude <code>X_in</code>과 속도항 <code>v_abs</code></td></tr>
+                  <tr><td>발화 후 상태</td><td>발표자료의 reset-to-zero</td><td>임계값만큼 차감하는 subtractive reset</td></tr>
+                  <tr><td>용도</td><td>99→32→4 실험 네트워크</td><td>4방향 출력 제어 경로 설명</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="evidence-note">
+              두 자료는 같은 LIF 개념을 사용하지만 동일한 모듈이나 동일한 파라미터가
+              아니다. 공개 코드의 기본값을 전체 네트워크의 학습·실험 조건으로 대입하지
+              않는 것이 구현 범위를 정확히 읽는 방법이다.
+            </p>
           </section>
 
           <section class="doc-section searchable-section" id="fsm" data-search-title="시간 단계 FSM">
@@ -110,6 +141,14 @@
               FSM은 초기화, 입력 처리, 누적 계산, 결과 산출, 표시 상태로 구성된다.
               각 상태는 입력 생성과 막전위 갱신의 순서를 고정하며, 실험은 100개의
               time step을 순차적으로 실행한다.
+            </p>
+            <p>
+              software에서는 반복문 하나로 100번 계산할 수 있지만, RTL에서는 어느
+              clock에 입력 spike가 유효하고 어느 clock에 막전위가 갱신되며 언제
+              출력 count를 읽을지 명시해야 한다. 특히 rate encoder의 counter와 LIF의
+              상태 레지스터가 같은 시간 기준을 공유하지 않으면, 의도한 spike 수와
+              실제 누적 횟수가 달라진다. FSM은 이 시간 경계를 고정하고 <code>done</code>
+              시점에서 방향별 count가 완성되도록 한다.
             </p>
             <div class="case-flow" style="--flow-count: 5" aria-label="SNN 실행 FSM">
               <div class="case-flow-step">
@@ -140,7 +179,9 @@
             </div>
             <p>
               FSM은 time step별 입력과 상태 갱신의 경계를 제공한다. 병렬 뉴런 수와
-              cycle 수는 별도의 구현·합성 조건으로 해석한다.
+              cycle 수는 별도의 구현·합성 조건으로 해석한다. 100 time step은 생물학적
+              시간 100ms를 의미하는 값이 아니라, 입력 rate와 막전위 반응을 관찰하기
+              위해 정한 디지털 시뮬레이션 창이다.
             </p>
           </section>
 
@@ -151,6 +192,14 @@
               위치별 흥분·억제 연결을 시간에 따라 통합하며, 출력 계층은 네 방향을
               제공한다. 반대 방향의 spike 수 차이는 X축과 Y축의 순 제어량으로
               변환된다.
+            </p>
+            <p>
+              입력 뉴런은 현재 좌표에 해당하는 weight 행을 선택하는 역할을 한다.
+              은닉층은 여러 흥분성·억제성 연결을 합쳐 좌표별 반응을 만들고, 출력층은
+              이를 네 방향으로 모은다. weight는 RTL 안의 상수 몇 개로만 표현되는 것이
+              아니라 실험 zip의 <code>hidden_*.hex</code>와 <code>output_*.hex</code>로
+              분리되어 있다. 이 구조는 네트워크 연결과 뉴런 계산을 분리하므로 같은
+              뉴런 datapath를 유지하면서 weight 조합을 바꿀 수 있다.
             </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
@@ -163,6 +212,11 @@
                 </tbody>
               </table>
             </div>
+            <p class="evidence-note warning">
+              발표자료의 99→32→4는 최종 실험 기준이다. 개발 메모에는 40 hidden이나
+              더 큰 네트워크 수치도 남아 있으나, 이 문서에서는 최종 발표와 결과 zip에
+              공통으로 확인되는 32 hidden 기준만 사용한다.
+            </p>
           </section>
 
           <section class="doc-section searchable-section" id="rtl" data-search-title="Verilog 출력 경로">
@@ -173,6 +227,15 @@
               <code>lif_neuron</code> 네 개를 배치하고 각 spike를 방향 신호에
               연결한다. 세 모듈은 전체 99→32→4 실험망이 아닌 출력 계층의
               인터페이스와 상태 갱신을 다루는 참고 코드이다.
+            </p>
+            <p>
+              <code>error_encoder</code>는 중앙 목표가 0이라는 조건을 이용해
+              <code>ex=-x</code>, <code>ey=-y</code>를 만든다. 양수 오차는 pull 채널,
+              음수 오차는 push 채널로 보내고 반대 채널은 0으로 둔다. 이 때문에 한
+              축에서는 정상적으로 한 방향만 자극된다. <code>controller_top</code>은
+              X축 두 채널에 <code>v_abs_x</code>, Y축 두 채널에 <code>v_abs_y</code>를
+              연결하고, 네 LIF의 1-bit <code>spike</code>를 각각 motor pull/push
+              출력에 직접 대응시킨다.
             </p>
             <div class="case-flow" style="--flow-count: 4" aria-label="선별 Verilog의 출력 경로">
               <div class="case-flow-step">
@@ -196,6 +259,23 @@
                 <small>방향별 1-bit 이벤트</small>
               </div>
             </div>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>모듈</th><th>입력</th><th>내부 동작</th><th>출력</th></tr></thead>
+                <tbody>
+                  <tr><td><code>error_encoder</code></td><td>signed <code>x</code>, <code>y</code></td><td>중앙 오차의 부호와 크기를 네 채널로 분리</td><td>X/Y pull·push magnitude</td></tr>
+                  <tr><td><code>lif_neuron</code></td><td><code>X_in</code>, <code>v_abs</code></td><td>leak, 입력 gain, 속도항, threshold, reset</td><td>1-bit spike</td></tr>
+                  <tr><td><code>controller_top</code></td><td>위치와 축별 속도항</td><td>encoder 1개와 LIF 4개 연결</td><td>4방향 motor event</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              공개 <code>lif_neuron</code>의 sequential block에서는 nonblocking
+              assignment를 사용한다. 따라서 현재 clock의 <code>spike</code> 판정은
+              갱신 전 막전위 <code>U</code>를 기준으로 하고, 같은 edge에서 다음
+              <code>U</code>가 계산된다. 파형을 읽을 때 입력 변화와 spike 사이에 clock
+              경계가 존재하는 이유가 여기에 있다.
+            </p>
             <div class="code-links" aria-label="AI 반도체 경진대회 Verilog 파일">
               <a href="../../code/competitions/ai-semi/error_encoder.v">error_encoder.v</a>
               <a href="../../code/competitions/ai-semi/lif_neuron.v">lif_neuron.v</a>
@@ -214,7 +294,7 @@
                 <span>상태와 인터페이스</span>
                 <h3>뉴런 출력과 모터 구동 신호</h3>
                 <p>
-                  출력 spike는 제어 의도를 나타내는 이벤트입니다. 실제 모터의
+                  출력 spike는 제어 의도를 나타내는 이벤트이다. 실제 모터의
                   PWM, pulse width, 기구부 응답은 별도 변환 계층의 범위이다.
                 </p>
               </article>
@@ -226,7 +306,31 @@
                   파형에서 최초 오차가 발생한 지점의 추적 기준이 된다.
                 </p>
               </article>
+              <article class="case-card">
+                <span>입력 경계</span>
+                <h3>좌표와 속도항</h3>
+                <p>
+                  RTL은 위치와 축별 속도항이 이미 디지털 값으로 제공된다고 가정한다.
+                  센서 취득과 좌표 추정은 모듈 바깥의 기능이다.
+                </p>
+              </article>
+              <article class="case-card">
+                <span>파라미터 경계</span>
+                <h3>leak·threshold·gain</h3>
+                <p>
+                  파라미터는 발화 빈도와 안정성에 직접 영향을 준다. 합성 가능한 값과
+                  물리 제어에 적합한 값은 별도의 tuning과 폐루프 검증이 필요하다.
+                </p>
+              </article>
             </div>
+            <p>
+              이 코드에서 직접 확인되는 결과는 signed 위치 오차가 네 방향으로
+              분리되고, 각 방향 LIF가 clock에 맞춰 상태를 갱신하며, spike가 1-bit
+              출력으로 전달되는 과정이다. 실제 공의 좌표를 다시 측정해 오차를 갱신하는
+              sensor feedback loop, 모터 driver, 보드 기울기와 공의 운동은 포함되지
+              않는다. 따라서 구현은 SNN 기반 제어 파이프라인의 output layer로
+              정의하는 것이 정확하다.
+            </p>
           </section>
 
           <footer class="page-footer">

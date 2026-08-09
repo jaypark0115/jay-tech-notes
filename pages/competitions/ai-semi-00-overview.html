@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="BallControl 문제를 99→32→4 SNN 구조와 네 방향 제어 이벤트로 해석한 AI 반도체 회로 설계 프로젝트 소개."
+      content="30×30cm 보드의 공을 중앙으로 이동시키는 BallControl 문제를 99→32→4 SNN과 네 방향 제어 이벤트로 변환한 과정, RTL 구현 범위, 시뮬레이션 및 합성 결과를 설명한다."
     />
     <title>AI 반도체 경진대회 - SNN BallControl 프로젝트 소개</title>
     <link rel="stylesheet" href="../../styles.css?v=20260729-competition-redesign" />
@@ -32,10 +32,13 @@
 
           <h1>SNN 기반 BallControl 제어 회로</h1>
           <p class="lead">
-            BallControl 과제는 30×30cm 보드 위 공을 중앙 반경 1cm 안으로 이동시키는
-            제어 문제이다. 공의 위치와 무게는 spike 입력으로 표현되며, LIF 뉴런은
-            시간에 따른 상태 누적을 통해 X·Y 네 방향의 제어 이벤트를 생성한다.
-            문서는 물리 조건, 신호 표현, SNN 구조, 시뮬레이션 및 합성 결과를 다룬다.
+            이 프로젝트의 출발점은 기울어지는 30×30cm 보드 위에서 무게가 다른 공을
+            중앙 반경 1cm의 목표 영역으로 이동시키는 BallControl 과제이다. 연속적으로
+            변하는 위치와 무게를 디지털 회로가 처리할 수 있는 spike 열로 바꾸고, LIF
+            뉴런의 시간 상태를 이용해 +X·−X·+Y·−Y 네 방향의 제어 이벤트를 생성했다.
+            이 글 묶음은 SNN을 제어 문제에 연결한 이유부터 Verilog 구조, 기능
+            시뮬레이션, 합성 및 전력 추정치의 의미와 검증되지 않은 범위까지 순서대로
+            설명한다.
           </p>
 
           <section class="case-summary" aria-labelledby="ai-summary-title">
@@ -46,7 +49,9 @@
                 출력 뉴런으로 구성된다. 위치는 좌표 하나만 활성화하는 one-hot
                 방식으로, 공의 무게는 일정 시간 동안 발생하는 spike rate로
                 표현된다. 네 출력의 spike 수는 +X, −X, +Y, −Y 방향의 제어량으로
-                변환된다.
+                변환된다. 여기서 SNN은 공의 실제 운동을 그대로 재현하는 물리 모델이
+                아니라, 센서에서 얻었다고 가정한 상태를 방향 이벤트로 바꾸는 디지털
+                제어 모델이다.
               </p>
             </div>
             <dl class="case-facts">
@@ -57,12 +62,49 @@
             </dl>
           </section>
 
+          <section class="doc-section searchable-section" id="background" data-search-title="과제 배경과 문제 전환">
+            <h2>과제 배경과 문제 전환</h2>
+            <p>
+              경진대회의 1차 과제는 스파이킹 뉴럴 네트워크의 기본 원리와 하드웨어 구현
+              사례를 조사하는 단계였다. LIF 뉴런의 막전위 갱신, 시간 다중화 방식,
+              spike 부호화와 같은 개념을 정리한 뒤, 2차 BallControl 과제에서는 그
+              개념을 실제 제어 신호 생성 문제에 적용했다. 따라서 이 프로젝트의 핵심은
+              학습 모델의 정확도 경쟁이 아니라, 연속적인 물리 상태를 유한한 비트와
+              클록으로 표현하고 그 결과를 모터 방향 신호에 대응시키는 회로 설계에 있다.
+            </p>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>단계</th><th>다룬 내용</th><th>BallControl 설계와의 연결</th></tr></thead>
+                <tbody>
+                  <tr><td>1차 조사</td><td>SNN, LIF 뉴런, spike의 시간 표현, 하드웨어 사례</td><td>상태를 시간에 따라 누적하는 제어 소자의 기반</td></tr>
+                  <tr><td>2차 과제 해석</td><td>보드 크기, 공의 무게, 목표 영역, 초기 위치</td><td>입력 범위와 출력 방향의 디지털 사양 정의</td></tr>
+                  <tr><td>회로 모델</td><td>99개 위치 입력, 32개 은닉 뉴런, 4개 출력 뉴런</td><td>위치와 무게를 방향별 spike 수로 변환</td></tr>
+                  <tr><td>검증</td><td>Verilog 시뮬레이션, 합성, Vivado 전력 추정</td><td>기능과 구현 가능성을 회로 수준에서 확인</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              일반적인 인공신경망이 한 번의 행렬 연산으로 출력을 계산하는 것과 달리,
+              SNN은 여러 시간 단계에 걸쳐 들어오는 spike와 뉴런 내부 상태를 함께
+              사용한다. LIF 뉴런은 입력이 들어올 때마다 막전위를 누적하고, 시간이
+              지나면 일부를 누설하며, 임계값을 넘으면 spike를 발생시킨다. 이 특성은
+              위치 오차가 계속 존재할 때 반복적인 방향 이벤트를 만들고, 오차가 작아질수록
+              이벤트를 줄이는 제어 표현으로 해석할 수 있다. 다만 이러한 가능성이 실제
+              기구부의 안정성을 자동으로 보장하는 것은 아니며, 기계 시스템에는 별도의
+              센서 피드백과 동역학 검증이 필요하다.
+            </p>
+          </section>
+
           <section class="doc-section searchable-section" id="architecture" data-search-title="프로젝트 구조">
             <h2>시스템 구성</h2>
             <p>
               위치와 무게는 서로 다른 입력 속성을 가진다. 위치는 활성화된 좌표를
               나타내며, 무게는 시간축의 spike 발생 빈도를 조절한다. 전체 경로는
-              입력 표현, 계층별 상태 계산, 방향별 출력 해석으로 구성된다.
+              입력 표현, 계층별 상태 계산, 방향별 출력 해석으로 구성된다. 좌표는
+              X축 −5부터 +5까지의 11개 값과 Y축 −4부터 +4까지의 9개 값을 조합해
+              99개 위치로 이산화했다. 실제 보드의 연속 좌표를 그대로 쓰지 않고 격자
+              하나를 하나의 입력 뉴런에 대응시킨 이유는 현재 위치가 회로 내부에서
+              모호하지 않게 표현되도록 하기 위해서다.
             </p>
             <div class="case-flow" style="--flow-count: 5" aria-label="BallControl SNN 데이터 흐름">
               <div class="case-flow-step">
@@ -96,6 +138,14 @@
               세 파일은 전체 실험망이 아닌 네 방향 출력 제어 인터페이스를 다루는
               참고 모듈이다.
             </p>
+            <p>
+              99개 입력의 값은 32개 은닉 뉴런으로 전달되고, 은닉층의 spike는 네 개
+              출력 뉴런에 연결된다. 출력 채널은 양의 X축과 음의 X축, 양의 Y축과 음의
+              Y축을 각각 담당한다. 예를 들어 공이 오른쪽에 있어 중심으로 이동하려면
+              음의 X축 채널이 활성화되어야 한다. 시뮬레이션에서는 채널별 spike 수를
+              이동 단계로 해석했지만, 실제 시스템에서는 spike를 모터의 회전 방향,
+              구동 시간 또는 PWM 명령으로 바꾸는 후단 회로가 추가되어야 한다.
+            </p>
           </section>
 
           <section class="doc-section searchable-section" id="scope" data-search-title="구현과 검증 범위">
@@ -106,7 +156,8 @@
                 <h3>99→32→4 SNN과 시간 단계 제어</h3>
                 <p>
                   위치 one-hot 입력, 32개 은닉 뉴런, 4개 방향 출력, spike count
-                  decoding과 실행 FSM을 포함한다.
+                  decoding과 실행 FSM을 포함한다. 실험망은 100개의 시간 단계를
+                  진행하며 각 단계의 입력 spike, 막전위, 출력 spike를 계산한다.
                 </p>
               </article>
               <article class="case-card">
@@ -115,7 +166,9 @@
                 <p>
                   <code>error_encoder</code>, <code>lif_neuron</code>,
                   <code>controller_top</code>은 signed X·Y 오차가 네 방향 1-bit
-                  이벤트가 되는 경로를 보여준다.
+                  이벤트가 되는 경로를 보여준다. 이 세 파일은 최종 제출 전체를
+                  재현하는 독립 빌드가 아니라 출력층 제어 원리를 설명하는 공개
+                  스냅샷이다.
                 </p>
               </article>
               <article class="case-card">
@@ -123,7 +176,9 @@
                 <h3>무게에 따른 rate encoding 변화</h3>
                 <p>
                   15g와 30g을 서로 다른 digital weight로 바꾸고, 다섯 개 초기
-                  위치별 spike 수와 위치 변화를 기록한다.
+                  위치별 spike 수와 위치 변화를 기록한다. 첫 실험의 one-shot 입력과
+                  두 번째 실험의 rate encoding은 뉴런 임계값과 누설 계수도 다르므로,
+                  결과 차이를 무게 입력 하나의 효과로만 해석하지 않는다.
                 </p>
               </article>
               <article class="case-card">
@@ -140,10 +195,23 @@
               시뮬레이션 결과이다. 실제 공이 보드 위에서 같은 경로로 움직였다는
               물리 실험 결과는 포함하지 않는다.
             </p>
+            <p>
+              이 구분은 결과를 축소하기 위한 것이 아니라 증거 수준을 명확히 하기
+              위한 것이다. 확보된 자료는 SNN 구조, 모듈 간 신호, 시뮬레이션 결과,
+              합성 보고서와 전력 추정치를 설명할 수 있다. 반면 카메라가 공의 위치를
+              읽는 과정, 모터 드라이버의 전기적 인터페이스, 보드의 기울기와 공의
+              마찰을 포함한 폐루프 동작은 별도의 실험 자료가 필요하다.
+            </p>
           </section>
 
           <section class="doc-section searchable-section" id="work" data-search-title="담당 범위">
             <h2>담당 범위</h2>
+            <p>
+              팀 프로젝트에서 확인되는 기여는 문제 조건을 회로 사양으로 바꾸는 과정,
+              SNN과 LIF 구조 조사, 입력·뉴런·출력 모듈의 통합, 시뮬레이션 결과 정리와
+              발표 자료 구성이다. 공개된 모듈의 존재만으로 특정 파일 전체를 한 사람이
+              단독 작성했다고 단정하지 않으며, 팀 결과와 개인의 기여 범위를 구분한다.
+            </p>
             <div class="case-grid">
               <article class="case-card">
                 <span>요구사항 해석</span>
@@ -205,6 +273,15 @@
                 이동 단계의 변화를 제시한 발표자료이다.
               </figcaption>
             </figure>
+            <p>
+              기능 시뮬레이션에서는 15g과 30g 조건을 각각 다섯 개 초기 위치에 적용했다.
+              일부 조건은 중앙 좌표에 도달했지만, 무거운 공을 나타낸 조건에서는 목표를
+              지나치거나 중심 근처에서 한 축이 남는 결과도 나타났다. 이는 무게를 더
+              높은 spike 빈도로 바꾸는 것만으로 정밀 제어가 완성되지 않음을 보여준다.
+              실제 폐루프 제어로 확장하려면 현재 위치를 매 제어 주기마다 다시 측정하고,
+              출력 spike를 모터 구동량으로 변환한 뒤, overshoot와 진동을 기준으로
+              임계값·누설·가중치를 재조정해야 한다.
+            </p>
           </section>
 
           <section class="doc-section searchable-section" id="read-next" data-search-title="세부 문서">

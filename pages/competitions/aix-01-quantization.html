@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="32장 calibration, detector mAP, YOLOv2 layer별 scale, INT8 저장, INT32 누산, requantization 데이터 경로."
+      content="32장 calibration과 detector mAP로 YOLOv2 layer별 scale을 정하고, INT8 저장·INT32 누산·requantization으로 FPGA 정수 데이터 경로를 구성한 과정을 설명한다."
     />
     <title>AIX 2026 1 - YOLOv2 정수 양자화</title>
     <link rel="stylesheet" href="../../styles.css?v=20260729-competition-redesign" />
@@ -32,9 +32,12 @@
 
           <h1>1. YOLOv2 정수 양자화</h1>
           <p class="lead">
-            양자화는 두 detection head의 box와 class 출력을 유지하는 정수 데이터
-            경로이다. 대표 이미지에서 layer별 값의 범위를 수집하고, detector mAP로
-            scale 후보를 평가한다.
+            학습된 YOLOv2의 실수 값을 그대로 FPGA에서 계산하면 곱셈기와 메모리 사용량이
+            커진다. 이 프로젝트는 feature map과 weight를 8-bit 정수로 저장하고,
+            convolution의 합을 32-bit로 누적한 뒤 다시 8-bit로 바꾸는 정수 경로를
+            구성했다. 양자화의 목표는 비트 수를 줄이는 데서 끝나지 않는다. 두 detection
+            head의 경계 상자와 클래스 출력이 유지되도록 대표 이미지에서 layer별 범위를
+            관찰하고, 후보 scale을 실제 detector mAP로 평가했다.
           </p>
 
           <section class="case-summary" aria-labelledby="aix1-summary-title">
@@ -44,7 +47,8 @@
                 고정 seed 20260213으로 중복 없이 선택한 32장을 사용한다. 가까운
                 장면 16장과 먼 장면 16장은 두 detection head의 물체 크기 범위를
                 함께 포함한다. scale은 convolution layer별로 적용하며 channel별
-                양자화는 사용하지 않는다.
+                양자화는 사용하지 않는다. 동일한 seed와 목록을 사용하면 scale을 다시
+                계산하거나 후보를 비교할 때 입력 표본이 달라지는 문제를 막을 수 있다.
               </p>
             </div>
             <dl class="case-facts">
@@ -55,13 +59,45 @@
             </dl>
           </section>
 
+          <section class="doc-section searchable-section" id="quantization-basics" data-search-title="양자화의 기본 원리">
+            <h2>실수 값을 8-bit 정수로 바꾸는 원리</h2>
+            <p>
+              양자화는 연속적인 실수 범위를 제한된 정수 칸에 대응시키는 과정이다. 예를
+              들어 어떤 layer의 activation이 0부터 4까지 분포한다면, 이 범위를 0부터
+              255까지의 unsigned 8-bit 값에 대응시킬 수 있다. 값 하나가 어느 정수 칸에
+              들어가는지는 scale이 결정하며, 나중에 정수 곱셈 결과를 다음 layer의
+              scale로 바꾸려면 multiplier와 shift가 필요하다.
+            </p>
+            <p>
+              표현 범위를 너무 넓게 잡으면 대부분의 값이 몇 개 정수에 몰려 작은 차이가
+              사라진다. 반대로 범위를 너무 좁게 잡으면 큰 값이 −128·127 또는 0·255의
+              경계에 잘리는 saturation이 늘어난다. 드물게 나타나는 극단값을 모두
+              보존할지, 일부를 clipping하고 자주 나타나는 값의 해상도를 높일지가
+              calibration의 핵심 절충이다. 단순한 최대 절댓값만으로 scale을 정하지 않고
+              최종 검출 정확도를 함께 본 이유가 여기에 있다.
+            </p>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>단계</th><th>질문</th><th>확인 방법</th></tr></thead>
+                <tbody>
+                  <tr><td>범위 관찰</td><td>각 layer의 값이 주로 어디에 분포하는가</td><td>Calibration 32장의 activation과 weight 통계</td></tr>
+                  <tr><td>Scale 후보</td><td>정수 칸을 어느 범위에 배분할 것인가</td><td>Multiplier 후보와 clipping 범위 생성</td></tr>
+                  <tr><td>오차 위치</td><td>어느 layer부터 software 정수 결과가 달라지는가</td><td>Layer tensor와 mismatch 비율 비교</td></tr>
+                  <tr><td>최종 판단</td><td>차이가 실제 검출 결과에 얼마나 영향을 주는가</td><td>두 detection head의 decode·NMS·mAP 평가</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
           <section class="doc-section searchable-section" id="calibration" data-search-title="Calibration과 후보 선택">
             <h2>Calibration과 scale 탐색</h2>
             <p>
               calibration 이미지를 정수 모델에 통과시키며 layer별 activation과
               weight 분포를 수집한다. 극단값 보존 범위와 saturation 범위는 정수
               표현의 해상도에 영향을 준다. 분포는 scale 후보의 근거이며, detector
-              mAP가 후보 평가 기준이다.
+              mAP가 후보 평가 기준이다. 가까운 장면과 먼 장면을 절반씩 포함한 것은
+              16×16 head와 8×8 head가 서로 다른 물체 크기에 반응하기 때문에 한쪽
+              장면만으로 범위를 정하는 편향을 줄이기 위한 구성이다.
             </p>
             <div class="case-flow" style="--flow-count: 5" aria-label="YOLOv2 양자화 탐색 과정">
               <div class="case-flow-step">
@@ -113,9 +149,26 @@
               </table>
             </div>
             <p class="evidence-note">
-              위 값은 최종 scale 파일의 대표 layer입니다. 전체 layer에 하나의
+              위 값은 최종 scale 파일의 대표 layer이다. 전체 layer에 하나의
               전역 scale을 사용하지 않으며, multiplier 크기만으로 정확도를 판단하지
               않는다.
+            </p>
+            <h3>mAP를 이용한 후보 탐색</h3>
+            <p>
+              실험 스크립트는 layer별 multiplier 후보를 파일로 저장하고, 환경 변수
+              <code>AIX_QUANT_MULTIPLIER_FILE</code>을 통해 정수 software 실행에
+              적용한다. 후보를 실행할 때마다 detector mAP를 계산해 현재 값과 비교하고,
+              이미 시도한 조합이나 악화 경향을 기록한다. 탐색 순서는 이전 결과를 이용해
+              다음 layer 후보를 정하도록 구성되어 있다. 따라서 최종 scale은 분포 그림을
+              눈으로 보고 한 번에 정한 값이 아니라, 재현 가능한 calibration 표본과
+              검출 결과의 반복 비교를 거친 값이다.
+            </p>
+            <p>
+              Layer tensor mismatch는 하드웨어와 software의 첫 차이를 찾는 데 유용하지만,
+              모든 mismatch가 검출 실패로 이어지는 것은 아니다. 반대로 tensor의 평균
+              오차가 작아도 경계 상자 confidence나 class 순위가 바뀌면 mAP가 떨어질 수
+              있다. 중간 tensor는 원인 추적 지표, detector mAP는 최종 선택 지표로 역할을
+              나눴다.
             </p>
           </section>
 
@@ -125,6 +178,9 @@
               feature map과 weight는 8-bit로 저장하고, 여러 곱셈 결과가 더해지는
               convolution accumulator는 32-bit를 사용한다. layer 출력은 bias와
               활성화 뒤 고정소수점 multiplier와 shift를 거쳐 8-bit 범위로 변환된다.
+              INT8 두 값을 곱한 결과는 그보다 넓으며, 3×3 kernel과 여러 입력 channel의
+              결과가 계속 더해지므로 저장 비트폭과 누산 비트폭을 동일하게 둘 수 없다.
+              32-bit 누산기는 중간 합의 overflow 여유를 확보한다.
             </p>
             <div class="case-flow" style="--flow-count: 5" aria-label="INT8 YOLOv2 연산 경로">
               <div class="case-flow-step">
@@ -157,12 +213,12 @@
               <article class="case-card">
                 <span>Backbone</span>
                 <h3>ReLU 뒤 unsigned 8-bit</h3>
-                <p>음수가 사라지는 backbone layer는 0~255 범위를 사용한다.</p>
+                <p>ReLU를 통과해 음수가 사라지는 backbone layer는 0~255 범위를 사용해 양수 해상도를 확보한다.</p>
               </article>
               <article class="case-card">
                 <span>Detection head</span>
                 <h3>Signed 8-bit 출력</h3>
-                <p>box와 class logit의 음수 값을 보존하기 위해 ReLU를 우회하고 −128~127 범위를 사용한다.</p>
+                <p>box와 class logit의 음수 값을 보존하기 위해 ReLU를 우회하고 −128~127 범위를 사용한다. 음수를 0으로 만들면 decode 이전에 정보가 손실된다.</p>
               </article>
             </div>
           </section>
@@ -174,13 +230,20 @@
               signed·unsigned clamp를 거쳐 8-bit feature map으로 변환된다. 이 규칙은
               DDR 저장 형식과 다음 layer 입력 형식을 유지한다.
             </p>
+            <p>
+              Requantization은 단순히 상위 비트를 버리는 과정이 아니다. 현재 layer의
+              입력 scale과 weight scale이 곱해진 누산값을 다음 activation scale에 맞춰야
+              한다. 실수 비율을 회로에서 직접 곱하지 않도록 정수 multiplier와 2의 거듭제곱
+              shift로 근사하고, 필요한 경우 반올림 offset을 더한다. 마지막 clamp는 결과가
+              8-bit 범위를 벗어났을 때 최대 또는 최소값으로 제한한다.
+            </p>
             <div class="case-grid">
               <article class="case-card">
                 <span>예: CONV00</span>
                 <h3>CONV00 requantization 예시</h3>
                 <p>
                   최종 계수는 <code>mul=1,006,507</code>,
-                  <code>shift=28</code>, <code>round=0</code>입니다.
+                  <code>shift=28</code>, <code>round=0</code>이다.
                   18,432×1,006,507을 28-bit 오른쪽 shift하면 69가 되고,
                   unsigned clamp 뒤에도 69가 유지된다.
                 </p>
@@ -197,6 +260,12 @@
             <div class="code-links" aria-label="AIX requantization Verilog 파일">
               <a href="../../code/competitions/aix/fastv2_postproc_requant_pipe.v">fastv2_postproc_requant_pipe.v</a>
             </div>
+            <p class="evidence-note">
+              공개 RTL 스냅샷은 bias, 선택적 ReLU, multiplier, shift, rounding,
+              signed·unsigned clamp가 pipeline으로 이어지는 구조를 보여준다. 이 파일은
+              팀 프로젝트 전체를 독립적으로 빌드하는 패키지가 아니며, 정수 후처리의
+              구현 방식을 확인하기 위한 코드 근거이다.
+            </p>
           </section>
 
           <section class="doc-section searchable-section" id="accuracy" data-search-title="양자화 정확도">
@@ -213,8 +282,13 @@
               <article><strong>78.60%</strong><span>FPGA detector mAP</span></article>
             </div>
             <p>
-              다음 문서는 정수 연산 규칙과 22개 descriptor, DDR workspace,
-              144-lane MAC의 연결을 다룬다.
+              Software 정수 모델은 scale과 정수 연산 규칙이 검출 성능을 얼마나 보존하는지
+              확인하는 기준선이다. FPGA 결과가 이 기준선보다 약 5.00%p 낮다는 사실은
+              하드웨어 경로에 추가 차이가 남아 있음을 뜻하지만, 그 원인을 양자화 하나로
+              단정할 수는 없다. Byte packing, signedness, descriptor 주소, head별 scale,
+              requantization 순서와 host 후처리 경계가 모두 비교 대상이다. 다음 문서는 이
+              정수 규칙을 22개 descriptor, DDR workspace, 144-lane MAC에 연결한 구조를
+              다룬다.
             </p>
           </section>
 

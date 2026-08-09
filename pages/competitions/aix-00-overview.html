@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="양자화된 YOLOv2의 22개 처리 단계를 Nexys 4 DDR FPGA에서 실행하고 229장으로 검증한 full-graph 가속기 프로젝트 소개."
+      content="양자화된 YOLOv2의 Conv·Pool·Route·Upsample과 두 detection head를 Nexys 4 DDR FPGA에서 실행하고 229장으로 검증한 full-graph 가속기 프로젝트를 설명한다."
     />
     <title>AIX 2026 - YOLOv2 Full-Graph FPGA 가속기 소개</title>
     <link rel="stylesheet" href="../../styles.css?v=20260729-competition-redesign" />
@@ -32,10 +32,12 @@
 
           <h1>YOLOv2 Full-Graph FPGA 가속기</h1>
           <p class="lead">
-            256×256 RGB 입력에서 60개 클래스를 검출하는 YOLOv2의 정수 실행 경로이다.
-            Conv·Pool·Route·Upsample과 8×8·16×16 두 detection head를 포함한
-            전체 그래프를 Nexys 4 DDR에서 실행하며, 정확도·처리 속도·timing·자원은
-            같은 최종 bitstream 기준으로 평가한다.
+            이 프로젝트는 256×256 RGB 이미지에서 60개 상품 클래스를 검출하는
+            YOLOv2를 Nexys 4 DDR FPGA에서 실행한 정수 추론 시스템이다. 단일
+            convolution 블록만 빠르게 계산한 것이 아니라 Conv·Pool·Route·Upsample과
+            8×8·16×16 두 detection head를 포함한 전체 네트워크를 하나의 데이터
+            경로로 연결했다. 정확도, 계산 속도, timing, 자원 사용량은 모두 같은 최종
+            bitstream과 229장 평가 세트를 기준으로 정리한다.
           </p>
 
           <section class="case-summary" aria-labelledby="aix-summary-title">
@@ -46,7 +48,9 @@
                 scheduler가 22개 처리 단계를 순서대로 실행한다. 144개 packed
                 MAC lane이 convolution을 수행하며 Pool·Route·Upsample을 거쳐
                 두 detection head를 DDR에 저장한다. host는 결과를 읽어 detector
-                후처리와 mAP 평가를 수행한다.
+                후처리와 mAP 평가를 수행한다. 모델의 중간값은 INT8로 저장하고 곱셈의
+                합은 INT32로 누적한 뒤, 다음 layer가 다시 INT8을 받을 수 있도록
+                requantization을 거친다.
               </p>
             </div>
             <dl class="case-facts">
@@ -57,40 +61,81 @@
             </dl>
           </section>
 
+          <section class="doc-section searchable-section" id="background" data-search-title="객체 검출과 FPGA 가속">
+            <h2>객체 검출과 FPGA 가속</h2>
+            <p>
+              객체 검출 모델은 이미지에 어떤 물체가 있는지만 분류하지 않는다. 물체의
+              위치를 나타내는 경계 상자와 클래스 확률을 동시에 계산해야 한다. YOLOv2는
+              입력 이미지에서 단계적으로 특징을 추출하고, 서로 다른 크기의 feature map을
+              결합한 뒤, 두 detection head에서 작은 물체와 큰 물체에 대응하는 후보를
+              만든다. 마지막 decode와 NMS는 겹치는 후보를 정리해 최종 검출 상자를 남긴다.
+            </p>
+            <p>
+              FPGA에서는 많은 곱셈을 병렬화할 수 있지만, 연산기 수만 늘린다고 전체
+              모델이 자동으로 빨라지지는 않는다. 매 layer의 입력과 weight를 DDR에서
+              읽고, 중간 feature map을 정해진 주소에 저장하며, Route가 과거 결과를 다시
+              읽도록 관리해야 한다. 정수 scale이나 주소가 한 layer에서만 어긋나도 뒤의
+              모든 출력이 달라진다. 이 때문에 이 프로젝트는 MAC 배열뿐 아니라 메모리
+              배치, layer 제어, 정수 후처리, 보드 readback을 하나의 시스템으로 다룬다.
+            </p>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>용어</th><th>이 프로젝트에서의 의미</th></tr></thead>
+                <tbody>
+                  <tr><td>Feature map</td><td>각 convolution이 만든 중간 특징값 배열이며 DDR과 내부 buffer에 저장된다.</td></tr>
+                  <tr><td>Weight</td><td>학습으로 얻은 convolution 계수이며 INT8 형식으로 FPGA에 공급된다.</td></tr>
+                  <tr><td>Descriptor</td><td>연산 종류, tensor 크기, DDR 주소, scale을 한 단계씩 지정하는 제어 정보이다.</td></tr>
+                  <tr><td>Detection head</td><td>경계 상자, 물체 존재 확률, 클래스 점수를 담는 최종 tensor를 만든다.</td></tr>
+                  <tr><td>mAP</td><td>여러 클래스의 검출 정확도를 한 값으로 요약한 지표이며 단순 tensor 일치율과 다르다.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
           <section class="doc-section searchable-section" id="problem" data-search-title="문제와 설계 목표">
             <h2>설계 대상</h2>
             <p>
               YOLOv2는 convolution뿐 아니라 서로 다른 해상도의 feature map을
               다시 읽는 Route, 2배 해상도를 만드는 Upsample, 두 크기의 detection
               head를 포함한다. DDR 주소, layer별 scale, head readback은 detector
-              결과와 직접 연결되는 데이터 경로 요소이다.
+              결과와 직접 연결되는 데이터 경로 요소이다. 최종 그래프에는 22개의
+              descriptor가 있으며, 초반 backbone이 시각 특징을 만들고 후반의 분기와
+              결합이 두 해상도의 검출 출력을 만든다.
             </p>
             <div class="case-grid">
               <article class="case-card">
                 <span>정수 표현</span>
                 <h3>INT8 scale</h3>
-                <p>대표 이미지 calibration과 229장 detector mAP를 사용해 layer별 scale을 설정한다.</p>
+                <p>대표 이미지 32장으로 activation 범위를 관찰하고, 후보 scale은 detector mAP를 비교해 설정한다.</p>
               </article>
               <article class="case-card">
                 <span>Full graph</span>
                 <h3>Layer 연결</h3>
-                <p>descriptor, DDR workspace, requantization 규칙이 다음 layer의 입력 형식과 연결된다.</p>
+                <p>descriptor, DDR workspace, requantization 규칙을 맞춰 각 출력이 다음 layer의 올바른 입력이 되도록 연결한다.</p>
               </article>
               <article class="case-card">
                 <span>데이터 경로</span>
                 <h3>처리 병목</h3>
-                <p>weight cache, BRAM route, DDR read/write, 두 head 저장을 포함한 cycle을 처리 단위로 사용한다.</p>
+                <p>weight cache, BRAM 배치, DDR read/write, 두 head 저장 때문에 생기는 대기까지 포함해 전체 cycle을 계산한다.</p>
               </article>
               <article class="case-card">
                 <span>검증</span>
                 <h3>229장 detector 평가</h3>
-                <p>단일 이미지 점검 뒤 229장 전체를 같은 bitstream으로 실행하고 detector mAP를 계산한다.</p>
+                <p>단일 이미지로 주소와 출력을 점검한 뒤 229장 전체를 같은 bitstream으로 실행하고 최종 검출 mAP를 계산한다.</p>
               </article>
             </div>
           </section>
 
           <section class="doc-section searchable-section" id="system" data-search-title="전체 실행 경로">
             <h2>Host–FPGA 데이터 경로</h2>
+            <p>
+              시스템은 준비와 평가를 담당하는 host, 대용량 tensor를 보관하는 DDR,
+              정수 네트워크를 실행하는 FPGA로 나뉜다. host는 원본 이미지를 256×256
+              RGB로 변환하고 입력과 weight를 JTAG-to-AXI 경로로 DDR에 적재한다.
+              FPGA가 시작 신호를 받으면 scheduler는 descriptor ROM을 0번부터 21번까지
+              읽으며 연산 종류와 주소를 설정한다. 마지막 두 head가 저장되면 done 신호가
+              발생하고, host가 tensor를 읽어 decode, NMS, mAP 계산을 수행한다.
+            </p>
             <div class="case-flow" style="--flow-count: 5" aria-label="AIX YOLOv2 전체 실행 경로">
               <div class="case-flow-step">
                 <span>01 · Host</span>
@@ -130,6 +175,14 @@
                 JTAG 전체 세션 시간을 해석하는 기준이다.
               </figcaption>
             </figure>
+            <p>
+              32-bit DDR word에는 HWC 순서의 INT8 channel 네 개가 들어간다. 이 packing은
+              버스 폭을 활용하는 동시에 소프트웨어와 RTL이 byte 순서와 signedness를
+              정확히 공유해야 한다는 제약을 만든다. 입력은 unsigned RGB이지만 detection
+              head의 logit에는 음수가 필요하므로, backbone의 ReLU 출력과 head 출력을
+              같은 부호 규칙으로 처리할 수 없다. 이러한 차이는 descriptor와
+              requantization 설정에 명시된다.
+            </p>
           </section>
 
           <section class="doc-section searchable-section" id="final-basis" data-search-title="최종 구현 기준">
@@ -138,7 +191,8 @@
               발표 앞부분에는 개발 중간 구조인 19개 연산 단계와 192 MAC/cycle이
               남아 있다. 후반의 최종 구현 섹션, 보관된 XPR과 RTL에서는 22개
               descriptor와 144개 packed lane이 확인된다. 구조·성능 수치는 최종
-              구현 값을 기준으로 기록한다.
+              구현 값을 기준으로 기록한다. 이는 서로 모순되는 최종 사양이 아니라,
+              개발 과정에서 병렬도와 그래프 제어가 변경된 흔적이다.
             </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
@@ -156,10 +210,24 @@
               구조적으로 한 accepted cycle에 288개의 scalar product가 가능하지만,
               이를 전체 그래프의 지속 처리량과 같은 값으로 표현하지 않는다.
             </p>
+            <p>
+              packed MAC의 288 scalar product는 계산 배열이 입력을 받아들인 한
+              cycle의 구조적 연산량이다. 네트워크 전체에는 DDR 대기, descriptor 전환,
+              Pool·Route·Upsample, 결과 저장 시간이 함께 존재하므로 288에 100MHz를
+              곱한 값을 곧바로 실제 처리량으로 사용할 수 없다. 대표 속도는 최종
+              bitstream에서 측정한 평균 cycle 수로 계산한다.
+            </p>
           </section>
 
           <section class="doc-section searchable-section" id="work" data-search-title="프로젝트 기여">
             <h2>담당 범위</h2>
+            <p>
+              확인 가능한 프로젝트 기여는 calibration과 scale 탐색을 포함한 양자화,
+              정수 데이터 형식과 RTL 전체 경로의 통합·최적화, Nexys 4 DDR 보드에서의
+              반복 검증, 최종 실행 패키지 정리이다. 팀 프로젝트이므로 공개된 개별 RTL
+              파일을 특정 개인이 단독 작성했다고 표현하지 않으며, 동작하는 full graph를
+              만들기 위해 연결하고 검증한 범위를 중심으로 기술한다.
+            </p>
             <div class="case-grid">
               <article class="case-card">
                 <span>양자화</span>
@@ -214,6 +282,14 @@
               전력 1.842W는 Vivado routed design 추정값이며 confidence는
               <strong>Low</strong>이다. 보드 전력 실측이나 확정적인 에너지 효율
               수치가 아니다.
+            </p>
+            <p>
+              최종 자원 사용률은 LUT 71.63%, FF 36.28%, BRAM 84.81%, DSP
+              85.42%이다. 100MHz에서 setup WNS는 +0.111ns, hold WHS는
+              +0.017ns로 timing을 만족한다. BRAM과 DSP가 모두 80%를 넘기 때문에
+              연산기를 더 추가하거나 buffer를 크게 만드는 방식은 배치와 배선 여유를
+              빠르게 줄인다. 따라서 이 결과는 정확도와 속도뿐 아니라 제한된 FPGA 안에서
+              전체 그래프가 실제로 배치·배선된 구현 결과로 해석해야 한다.
             </p>
           </section>
 
