@@ -1792,9 +1792,19 @@ p {
   font-weight: 800;
   letter-spacing: 0.06em;
 }
+.entry-card-kicker {
+  display: block;
+  margin: 0 0 12px;
+  color: var(--accent, #e4003a);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
 .sitemap-card h2 {
-  margin: 0 0 16px;
-  font-size: 1.35rem;
+  margin: 0 0 14px;
+  font-size: 1.28rem;
   line-height: 1.35;
 }
 .sitemap-card h2::before {
@@ -1803,6 +1813,7 @@ p {
 .sitemap-card p {
   margin: 0;
   color: var(--muted, #64748b);
+  font-size: 0.96rem;
   line-height: 1.75;
 }
 .repository-note {
@@ -4293,7 +4304,7 @@ body.troubleshooting-page .reference-section a {
   box-shadow: 0 24px 52px rgb(15 23 42 / 11%);
 }
 
-.competition-card > span {
+.competition-card .sitemap-number {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -4310,17 +4321,21 @@ body.troubleshooting-page .reference-section a {
   letter-spacing: 0.05em;
 }
 
+.competition-card .entry-card-kicker {
+  color: var(--project-accent);
+}
+
 .competition-card h4 {
-  margin: 0 0 1rem;
-  font-size: 1.15rem;
-  line-height: 1.4;
+  margin: 0 0 14px;
+  font-size: 1.28rem;
+  line-height: 1.35;
 }
 
 .competition-card p {
   margin: 0;
   color: #5b6573;
-  font-size: 0.9rem;
-  line-height: 1.65;
+  font-size: 0.96rem;
+  line-height: 1.75;
   word-break: keep-all;
 }
 
@@ -4366,50 +4381,57 @@ body.competition-page .home-link {
 }
 
 body.competition-page .chapter-switcher {
-  margin: 0 0 3rem;
-  padding: 0;
-  border: 0;
-  border-top: 1px solid #cbd5e1;
-  border-bottom: 1px solid #cbd5e1;
-  background: transparent;
+  margin: 0 0 2rem;
+  padding: 1rem;
+  border: 1px solid #cbd5e1;
+  background: #fff;
 }
 
 body.competition-page .chapter-switcher-label {
   display: block;
-  padding: 0.85rem 0 0;
-  color: #0f766e;
-  font-size: 0.76rem;
+  margin-bottom: 0.85rem;
+  padding: 0;
+  color: var(--competition-accent);
+  font-size: 0.72rem;
   font-weight: 800;
-  letter-spacing: 0;
-  text-transform: none;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 body.competition-page .chapter-switcher div {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 0;
-  padding: 0.55rem 0 0.8rem;
-  background: transparent;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0;
 }
 
 body.competition-page .chapter-switcher a {
-  margin-right: 1.25rem;
-  padding: 0.25rem 0;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: transparent;
+  display: block;
+  margin: 0;
+  padding: 0.82rem 0.95rem;
+  border: 1px solid #dbe3e8;
+  border-left: 4px solid transparent;
+  background: #f8fafc;
   color: #64748b;
-  font-size: 0.84rem;
+  font-size: 0.95rem;
   line-height: 1.45;
 }
 
-body.competition-page .chapter-switcher a:hover,
+body.competition-page .chapter-switcher a:hover {
+  border-color: color-mix(in srgb, var(--competition-accent) 34%, white);
+  background: #fff;
+  color: var(--competition-accent-dark);
+}
+
 body.competition-page .chapter-switcher a.current {
-  border: 0;
-  border-bottom: 2px solid #0f766e;
-  background: transparent;
-  color: #0b5f59;
+  border-color: #dbe3e8;
+  border-left-color: var(--competition-accent);
+  background: var(--competition-accent-soft);
+  color: var(--competition-accent-dark);
+}
+
+body.competition-page .chapter-switcher-bottom {
+  margin: 2.3rem 0 1.1rem;
 }
 
 body.competition-page h1 {
@@ -4446,19 +4468,21 @@ body.competition-page .doc-section > h2 {
 }
 
 body.competition-page .doc-section > h2::before {
-  display: none;
+  display: block;
+  background: var(--competition-accent);
 }
 
 body.competition-page .doc-section h3 {
-  margin: 2.1rem 0 0.75rem;
-  padding: 0;
-  border: 0;
-  font-size: 1.08rem;
-  line-height: 1.5;
+  margin: 2.6rem 0 1.1rem;
+  padding-top: 1.15rem;
+  border-top: 1px solid #cbd5e1;
+  font-size: clamp(1.15rem, 1.6vw, 1.4rem);
+  line-height: 1.35;
 }
 
 body.competition-page .doc-section h3::before {
-  display: none;
+  display: block;
+  background: var(--competition-accent);
 }
 
 body.competition-page p,
@@ -4578,7 +4602,13 @@ body.competition-page td {
 
 .case-card h3 {
   margin: 0.45rem 0 0.5rem !important;
+  padding: 0 !important;
+  border: 0 !important;
   font-size: 1.02rem !important;
+}
+
+.case-card h3::before {
+  display: none !important;
 }
 
 .case-card p,

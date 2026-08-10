@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="연구·개발 계획, SNN 연구, NRV DVS 캘리브레이션, SoC/FPGA 학습 노트와 경진대회 기술 노트 모음." />
     <title>Jay Tech Notes</title>
-    <link rel="stylesheet" href="styles.css?v=20260729-full-width-card-previews" />
+    <link rel="stylesheet" href="styles.css?v=20260810-entry-card-navigation" />
     <script src="script.js" defer></script>
   </head>
   <body class="home-page">
@@ -81,7 +81,7 @@
             </a>
             <a class="home-panel" href="#competition-case-studies">
               <span>경진대회 노트 묶음</span>
-              <h2>경진대회 기술 노트 (작성중)</h2>
+              <h2>경진대회 기술 노트</h2>
               <p>
                 제가 참여한 두 경진대회에서 진행한 SNN 제어 회로와 YOLOv2 FPGA
                 가속기의 설계·구현·검증 내용을 대회별 기술 문서로 정리했습니다.
@@ -298,7 +298,8 @@
                   loading="lazy"
                 />
                 <span class="sitemap-number">01</span>
-                <h2>1. 카메라 캘리브레이션이란?</h2>
+                <small class="entry-card-kicker">CAMERA CALIBRATION</small>
+                <h2>카메라 캘리브레이션이란?</h2>
                 <p>카메라 캘리브레이션의 기본 개념, 필요한 이유, 추정되는 파라미터와 모노·스테레오 NRV DVS 적용 방식을 설명합니다.</p>
               </a>
               <a class="sitemap-card calibration-preview-card" href="pages/calibration/02-dvs-calibration-method.html">
@@ -309,7 +310,8 @@
                   loading="lazy"
                 />
                 <span class="sitemap-number">02</span>
-                <h2>2. NRV DVS 캘리브레이션 방법</h2>
+                <small class="entry-card-kicker">DVS CALIBRATION METHOD</small>
+                <h2>NRV DVS 캘리브레이션 방법</h2>
                 <p>NRV DVS 캘리브레이션에서 밝기 변화와 blinking asymmetric circle grid가 필요한 이유를 설명합니다.</p>
               </a>
               <a class="sitemap-card calibration-preview-card" href="pages/calibration/03-capture-preparation.html">
@@ -320,7 +322,8 @@
                   loading="lazy"
                 />
                 <span class="sitemap-number">03</span>
-                <h2>3. 촬영 환경과 준비</h2>
+                <small class="entry-card-kicker">CAPTURE PREPARATION</small>
+                <h2>촬영 환경과 준비</h2>
                 <p>필요한 장비와 모니터 설정, 원 간격 측정, 카메라 고정과 권장 촬영 조건을 설명합니다.</p>
               </a>
               <a class="sitemap-card calibration-preview-card" href="pages/calibration/04-calibration-workflow.html">
@@ -331,7 +334,8 @@
                   loading="lazy"
                 />
                 <span class="sitemap-number">04</span>
-                <h2>4. 캘리브레이션 촬영 및 처리 절차</h2>
+                <small class="entry-card-kicker">CAPTURE &amp; PROCESSING</small>
+                <h2>캘리브레이션 촬영 및 처리 절차</h2>
                 <p>직접 구현한 DVS Calibration 앱에서 촬영, 후보 선별, Coverage 확인, 계산과 결과 보관까지 진행하는 방법을 설명합니다.</p>
               </a>
             </div>
@@ -419,21 +423,25 @@
             <div class="sitemap-grid hardware-card-grid">
               <a class="sitemap-card" href="pages/soc/04-apb-bus.html">
                 <span class="sitemap-number">01</span>
+                <small class="entry-card-kicker">APB PROTOCOL</small>
                 <h2>APB Control Bus</h2>
                 <p>Lab2~4에서 진행한 APB register, SRAM, interrupt 실습과 setup-enable timing을 설명합니다.</p>
               </a>
               <a class="sitemap-card" href="pages/soc/05-ahb-bus.html">
                 <span class="sitemap-number">02</span>
+                <small class="entry-card-kicker">AHB PIPELINE</small>
                 <h2>AHB Pipelined Bus</h2>
                 <p>Lab5~6의 AHB register/SRAM 실습을 바탕으로 address/data phase와 HREADY timing을 정리합니다.</p>
               </a>
               <a class="sitemap-card" href="pages/soc/06-axi-bus.html">
                 <span class="sitemap-number">03</span>
+                <small class="entry-card-kicker">AXI CHANNELS</small>
                 <h2>AXI Channel Bus</h2>
                 <p>Lab7 AXI slave 실습을 기준으로 AW/W/B, AR/R channel과 VALID/READY handshake를 설명합니다.</p>
               </a>
               <a class="sitemap-card" href="pages/soc/07-axi-to-apb-bridge.html">
                 <span class="sitemap-number">04</span>
+                <small class="entry-card-kicker">BUS BRIDGE</small>
                 <h2>AXI-to-APB Bridge</h2>
                 <p>최종 프로젝트의 AXI-to-APB protocol conversion, Verilog FSM, testbench, PASS 로그를 정리합니다.</p>
               </a>
@@ -442,7 +450,7 @@
 
           <section class="doc-section visible competition-home" id="competition-case-studies">
             <div class="competition-home-heading">
-              <h2>경진대회 기술 노트 (작성중)</h2>
+              <h2>경진대회 기술 노트</h2>
               <p>
                 제가 참여한 두 경진대회의 문제 정의, 입력 표현, 하드웨어 구조와
                 검증 결과를 프로젝트별 네 편으로 나누어 설명합니다.
@@ -471,22 +479,26 @@
                 </header>
                 <div class="competition-card-grid">
                   <a class="competition-card" href="pages/competitions/ai-semi-00-overview.html">
-                    <span>AI-00</span>
+                    <span class="sitemap-number">01</span>
+                    <small class="entry-card-kicker">PROJECT OVERVIEW</small>
                     <h4>프로젝트 개요</h4>
                     <p>대회 문제, 99→32→4 구조, 구현 범위와 검증 경계를 요약합니다.</p>
                   </a>
                   <a class="competition-card" href="pages/competitions/ai-semi-01-problem-and-design.html">
-                    <span>AI-01</span>
+                    <span class="sitemap-number">02</span>
+                    <small class="entry-card-kicker">INPUT &amp; OUTPUT</small>
                     <h4>입력 표현과 출력 정의</h4>
                     <p>보드 좌표와 공의 무게를 one-hot·rate encoding 입력으로 정의하는 방법을 설명합니다.</p>
                   </a>
                   <a class="competition-card" href="pages/competitions/ai-semi-02-snn-control-rtl.html">
-                    <span>AI-02</span>
+                    <span class="sitemap-number">03</span>
+                    <small class="entry-card-kicker">SNN RTL DESIGN</small>
                     <h4>SNN 제어 회로와 RTL</h4>
                     <p>LIF 막전위 갱신, FSM, 4채널 출력과 Verilog 모듈의 관계를 설명합니다.</p>
                   </a>
                   <a class="competition-card" href="pages/competitions/ai-semi-03-verification-results.html">
-                    <span>AI-03</span>
+                    <span class="sitemap-number">04</span>
+                    <small class="entry-card-kicker">SIMULATION &amp; VERIFICATION</small>
                     <h4>시뮬레이션과 구현 결과</h4>
                     <p>one-shot과 무게 반영 입력, 합성·전력 결과와 검증 한계를 제시합니다.</p>
                   </a>
@@ -513,22 +525,26 @@
                 </header>
                 <div class="competition-card-grid">
                   <a class="competition-card" href="pages/competitions/aix-00-overview.html">
-                    <span>AIX-00</span>
+                    <span class="sitemap-number">01</span>
+                    <small class="entry-card-kicker">PROJECT OVERVIEW</small>
                     <h4>프로젝트 개요</h4>
                     <p>정수 모델, FPGA 두 검출 경로, 최종 수치와 담당 범위를 요약합니다.</p>
                   </a>
                   <a class="competition-card" href="pages/competitions/aix-01-quantization.html">
-                    <span>AIX-01</span>
+                    <span class="sitemap-number">02</span>
+                    <small class="entry-card-kicker">INTEGER QUANTIZATION</small>
                     <h4>정수 양자화 설계</h4>
                     <p>32장 calibration과 mAP 평가를 사용한 INT8·INT32·requantization 조건을 설명합니다.</p>
                   </a>
                   <a class="competition-card" href="pages/competitions/aix-02-fpga-architecture.html">
-                    <span>AIX-02</span>
+                    <span class="sitemap-number">03</span>
+                    <small class="entry-card-kicker">FPGA ARCHITECTURE</small>
                     <h4>Full-graph 구조</h4>
                     <p>22개 descriptor, DDR 데이터 배치, 144-lane MAC과 두 detection head의 연결을 설명합니다.</p>
                   </a>
                   <a class="competition-card" href="pages/competitions/aix-03-board-verification.html">
-                    <span>AIX-03</span>
+                    <span class="sitemap-number">04</span>
+                    <small class="entry-card-kicker">BOARD VERIFICATION</small>
                     <h4>229장 보드 검증</h4>
                     <p>단일 이미지 점검, 229장 평가, mAP·속도·timing·자원 결과를 제시합니다.</p>
                   </a>
@@ -545,7 +561,7 @@
           <a href="#nrv-fpga-troubleshooting">NRV FPGA 트러블슈팅 노트</a>
           <a href="#github-projects">GitHub 프로젝트 링크</a>
           <a href="#hardware-notes">SoC/FPGA 학습 노트</a>
-          <a href="#competition-case-studies">경진대회 기술 노트 (작성중)</a>
+          <a href="#competition-case-studies">경진대회 기술 노트</a>
         </aside>
       </main>
     </div>
