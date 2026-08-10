@@ -2806,6 +2806,48 @@ body.planned-detail-page .thesis-schedule-table tbody tr:last-child td {
   line-height: 1.6;
 }
 
+/* Keep the DVS, SoC and competition entry cards at the compact troubleshooting scale. */
+#nrv-dvs-calibration .sitemap-card,
+#hardware-notes .sitemap-card {
+  min-height: 0;
+  padding: 0 0 20px;
+  overflow: hidden;
+}
+
+#nrv-dvs-calibration .calibration-card-thumb {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+}
+
+#nrv-dvs-calibration .sitemap-number,
+#hardware-notes .sitemap-number {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  margin: 18px 20px 12px;
+  font-size: 0.82rem;
+}
+
+#nrv-dvs-calibration .entry-card-kicker,
+#hardware-notes .entry-card-kicker {
+  margin: 0 20px 8px;
+  font-size: 0.66rem;
+}
+
+#nrv-dvs-calibration .sitemap-card h2,
+#hardware-notes .sitemap-card h2 {
+  margin: 0 20px 10px;
+  font-size: 1.05rem;
+}
+
+#nrv-dvs-calibration .sitemap-card p,
+#hardware-notes .sitemap-card p {
+  margin: 0 20px;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
 body.troubleshooting-page .troubleshooting-summary {
   display: grid;
   margin: 1.6rem 0 1.2rem;
@@ -4337,6 +4379,36 @@ body.troubleshooting-page .reference-section a {
   font-size: 0.96rem;
   line-height: 1.75;
   word-break: keep-all;
+}
+
+.competition-card {
+  min-height: 0;
+  padding: 0 0 20px;
+  overflow: hidden;
+}
+
+.competition-card .sitemap-number {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  margin: 18px 20px 12px;
+  font-size: 0.82rem;
+}
+
+.competition-card .entry-card-kicker {
+  margin: 0 20px 8px;
+  font-size: 0.66rem;
+}
+
+.competition-card h4 {
+  margin: 0 20px 10px;
+  font-size: 1.05rem;
+}
+
+.competition-card p {
+  margin: 0 20px;
+  font-size: 0.92rem;
+  line-height: 1.6;
 }
 
 body.competition-page {
