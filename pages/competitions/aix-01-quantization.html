@@ -46,12 +46,12 @@
             <div>
               <h2 id="aix1-summary-title">Calibration 구성</h2>
               <p>
-                Calibration 표본은 고정 seed 20260213으로 중복 없이 선택한 32장입니다.
+                Calibration 표본은 고정 seed 20260213으로 중복 없이 선택한 32장이다.
                 가까운 장면 16장과 먼 장면 16장을 같은 수로 포함해 16×16 head와 8×8
-                head가 다루는 물체 크기를 함께 반영했습니다. Scale은 channel별이 아니라
-                convolution layer별로 적용했습니다. 표본 목록과 seed를 고정한 이유는
+                head가 다루는 물체 크기를 함께 반영했다. Scale은 channel별이 아니라
+                convolution layer별로 적용했다. 표본 목록과 seed를 고정한 이유는
                 multiplier 후보를 바꿀 때 입력 이미지까지 달라져 결과 해석이 섞이는 일을
-                막기 위해서입니다.
+                막기 위해서다.
               </p>
             </div>
             <dl class="case-facts">
@@ -73,18 +73,11 @@
             </p>
             <p>
               표현 범위를 너무 넓게 잡으면 대부분의 값이 몇 개 정수에 몰려 작은 차이가
-              사라집니다. 반대로 범위를 너무 좁게 잡으면 큰 값이 −128~127 또는 0~255의
-              경계에서 잘리는 saturation이 늘어납니다. 드물게 나타나는 극단값을 모두
+              사라진다. 반대로 범위를 너무 좁게 잡으면 큰 값이 −128~127 또는 0~255의
+              경계에서 잘리는 saturation이 늘어난다. 드물게 나타나는 극단값을 모두
               보존할지, 일부를 clipping하고 자주 나타나는 값의 해상도를 높일지가
-              calibration의 핵심 절충입니다. 단순한 최대 절댓값만으로 scale을 정하지 않고
-              최종 검출 정확도를 함께 본 이유가 여기에 있습니다.
-            </p>
-            <p class="evidence-note">
-              정수 추론에서 activation과 weight를 낮은 비트폭으로 저장하고, 누산 결과를
-              다음 layer의 정수 범위로 다시 맞추는 흐름은 integer-only quantization의
-              일반적인 구조다. 이 프로젝트에서는 그 구조를 layer별 multiplier와 shift,
-              signed·unsigned clamp 규칙으로 구체화했다.
-              <a href="https://openaccess.thecvf.com/content_cvpr_2018/html/Jacob_Quantization_and_Training_CVPR_2018_paper.html" target="_blank" rel="noreferrer">CVPR 2018 정수 양자화 논문</a>
+              calibration의 핵심 절충이다. 단순한 최대 절댓값만으로 scale을 정하지 않고
+              최종 검출 정확도를 함께 본 이유가 여기에 있다.
             </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
@@ -103,11 +96,11 @@
             <h2>Calibration과 scale 탐색</h2>
             <p>
               calibration 이미지를 정수 모델에 통과시키며 layer별 activation과
-              weight 분포를 수집합니다. 극단값 보존 범위와 saturation 범위는 정수
-              표현의 해상도에 영향을 줍니다. 분포는 scale 후보의 근거이고, detector
-              mAP는 후보를 평가하는 기준입니다. 가까운 장면과 먼 장면을 절반씩 포함한 것은
+              weight 분포를 수집한다. 극단값 보존 범위와 saturation 범위는 정수
+              표현의 해상도에 영향을 준다. 분포는 scale 후보의 근거이고, detector
+              mAP는 후보를 평가하는 기준이다. 가까운 장면과 먼 장면을 절반씩 포함한 것은
               16×16 head와 8×8 head가 서로 다른 물체 크기에 반응하므로, 한쪽
-              장면만으로 범위를 정할 때 생기는 편향을 줄이기 위한 구성입니다.
+              장면만으로 범위를 정할 때 생기는 편향을 줄이기 위한 구성이다.
             </p>
             <div class="case-flow" style="--flow-count: 5" aria-label="YOLOv2 양자화 탐색 과정">
               <div class="case-flow-step">
@@ -176,11 +169,11 @@
             <p>
               실험 스크립트는 layer별 multiplier 후보를 파일로 저장하고, 환경 변수
               <code>AIX_QUANT_MULTIPLIER_FILE</code>을 통해 정수 software 실행에
-              적용합니다. 후보를 실행할 때마다 detector mAP를 계산해 현재 값과 비교하고,
-              이미 시도한 조합이나 악화 경향을 기록합니다. 탐색 순서는 이전 결과를 이용해
-              다음 layer 후보를 정하도록 구성되어 있습니다. 따라서 최종 scale은 분포 그림을
+              적용한다. 후보를 실행할 때마다 detector mAP를 계산해 현재 값과 비교하고,
+              이미 시도한 조합이나 악화 경향을 기록한다. 탐색 순서는 이전 결과를 이용해
+              다음 layer 후보를 정하도록 구성되어 있다. 따라서 최종 scale은 분포 그림을
               보고 한 번에 정한 값이 아니라, 재현 가능한 calibration 표본과
-              검출 결과를 반복 비교해 얻은 값입니다.
+              검출 결과를 반복 비교해 얻은 값이다.
             </p>
             <p>
               Layer tensor mismatch는 하드웨어와 software의 첫 차이를 찾는 데 유용하지만,
@@ -250,11 +243,11 @@
               DDR 저장 형식과 다음 layer 입력 형식을 유지한다.
             </p>
             <p>
-              Requantization은 단순히 상위 비트를 버리는 과정이 아닙니다. 현재 layer의
+              Requantization은 단순히 상위 비트를 버리는 과정이 아니다. 현재 layer의
               입력 scale과 weight scale이 곱해진 누산값을 다음 activation scale에 맞춰야
-              합니다. 실수 비율을 회로에서 직접 곱하지 않도록 정수 multiplier와 2의 거듭제곱
-              shift로 근사하고, 필요한 경우 반올림 offset을 더합니다. 마지막 clamp는 결과가
-              8-bit 범위를 벗어났을 때 최대값 또는 최소값으로 제한합니다.
+              한다. 실수 비율을 회로에서 직접 곱하지 않도록 정수 multiplier와 2의 거듭제곱
+              shift로 근사하고, 필요한 경우 반올림 offset을 더한다. 마지막 clamp는 결과가
+              8-bit 범위를 벗어났을 때 최대값 또는 최소값으로 제한한다.
             </p>
             <div class="case-grid">
               <article class="case-card">
@@ -271,7 +264,7 @@
                 <span>Rounding 규칙</span>
                 <h3>Layer별 rounding</h3>
                 <p>
-                  CONV00은 round offset이 0이라 양수는 shift 과정에서 잘립니다.
+                  CONV00은 round offset이 0이라 양수는 shift 과정에서 잘린다.
                   signed 음수는 절댓값을 shift한 뒤 부호를 복원하고 최종 범위로 제한한다.
                 </p>
               </article>
@@ -291,8 +284,8 @@
             <h2>정수 software reference 정확도</h2>
             <p>
               83.60%는 최종 정수 계수를 사용하는 software reference의 detector
-              mAP입니다. FPGA detector mAP 78.60%는 별도 실행 결과이며, float 모델과
-              정수 모델의 차이, 그리고 정수 모델과 FPGA 실행의 차이를 구분하는 기준입니다.
+              mAP이다. FPGA detector mAP 78.60%는 별도 실행 결과이며, float 모델과
+              정수 모델의 차이, 그리고 정수 모델과 FPGA 실행의 차이를 구분하는 기준이다.
             </p>
             <div class="result-band" aria-label="양자화 검증 기준">
               <article><strong>32</strong><span>Calibration images</span></article>
@@ -314,12 +307,12 @@
             </figure>
             <p>
               Software 정수 모델은 scale과 정수 연산 규칙이 검출 성능을 얼마나 보존하는지
-              확인하는 기준선입니다. FPGA 결과가 이 기준선보다 약 5.00%p 낮다는 사실은
+              확인하는 기준선이다. FPGA 결과가 이 기준선보다 약 5.00%p 낮다는 사실은
               하드웨어 경로에 추가 차이가 남아 있음을 뜻하지만, 그 원인을 양자화 하나로
-              단정할 수는 없습니다. Byte packing, signedness, descriptor 주소, head별 scale,
-              requantization 순서와 host 후처리 경계가 모두 비교 대상입니다. 다음 글에서는 이
+              단정할 수는 없다. Byte packing, signedness, descriptor 주소, head별 scale,
+              requantization 순서와 host 후처리 경계가 모두 비교 대상이다. 다음 글에서는 이
               정수 규칙을 22개 descriptor, DDR workspace, 144-lane MAC에 연결한 구조를
-              다룹니다.
+              다룬다.
             </p>
           </section>
 

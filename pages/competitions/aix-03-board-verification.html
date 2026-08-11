@@ -48,11 +48,11 @@
               <h2 id="aix3-summary-title">검증의 기준</h2>
               <p>
                 각 이미지마다 start/done, cycle 수, CONV14·CONV20 readback과 후처리
-                결과를 기록했습니다. 대표 성능에는 최종 229장 실행의 평균값만 사용하며,
-                CONV14 branch가 빠졌던 중간 속도 실험은 포함하지 않습니다. 229/229
+                결과를 기록했다. 대표 성능에는 최종 229장 실행의 평균값만 사용하며,
+                CONV14 branch가 빠졌던 중간 속도 실험은 포함하지 않는다. 229/229
                 PASS는 모든 이미지에서 FPGA 실행과 두 head readback, 결과 파일 생성이
-                완료됐다는 뜻입니다. Software와 모든 tensor byte가 완전히 같다는
-                뜻은 아니며, 정확도는 별도의 detector mAP로 판단합니다.
+                완료됐다는 뜻이다. Software와 모든 tensor byte가 완전히 같다는
+                뜻은 아니며, 정확도는 별도의 detector mAP로 판단한다.
               </p>
             </div>
             <dl class="case-facts">
@@ -66,11 +66,11 @@
           <section class="doc-section searchable-section" id="verification-levels" data-search-title="검증 수준과 질문">
             <h2>검증 수준과 확인 질문</h2>
             <p>
-              Full-graph 가속기에서는 여러 종류의 문제가 한 번에 겹칠 수 있습니다. 주소가 틀리면
+              Full-graph 가속기에서는 여러 종류의 문제가 한 번에 겹칠 수 있다. 주소가 틀리면
               올바른 계산값도 다른 위치에 저장될 수 있고, signedness가 다르면 같은 byte를
-              전혀 다른 수로 해석할 수 있습니다. Tensor가 대체로 비슷해도 detection head의
-              confidence 순서가 바뀌면 최종 NMS 결과가 달라질 수 있습니다. 그래서 검증은
-              작은 단위에서 시작해 전체 데이터셋까지 단계적으로 확장했습니다.
+              전혀 다른 수로 해석할 수 있다. Tensor가 대체로 비슷해도 detection head의
+              confidence 순서가 바뀌면 최종 NMS 결과가 달라질 수 있다. 그래서 검증은
+              작은 단위에서 시작해 전체 데이터셋까지 단계적으로 확장했다.
             </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
@@ -132,11 +132,11 @@
               </article>
             </div>
             <p>
-              Reference와 보드 결과를 비교하는 순서도 중요합니다. 먼저 layer의 byte 수와 DDR
-              주소가 맞는지 확인하고, 그다음 byte packing과 signed·unsigned 해석을 맞춥니다.
+              Reference와 보드 결과를 비교하는 순서도 중요하다. 먼저 layer의 byte 수와 DDR
+              주소가 맞는지 확인하고, 그다음 byte packing과 signed·unsigned 해석을 맞춘다.
               이후 bias, activation, requantization을 layer 단위로 비교한 뒤 마지막에
-              detector 결과를 확인합니다. 최종 상자만 보고 원인을 추측하기보다 첫
-              mismatch가 나타나는 layer를 찾는 편이 문제 범위를 빠르게 줄입니다.
+              detector 결과를 확인한다. 최종 상자만 보고 원인을 추측하기보다 첫
+              mismatch가 나타나는 layer를 찾는 편이 문제 범위를 빠르게 줄인다.
             </p>
           </section>
 
@@ -163,11 +163,11 @@
             </div>
             <p>
               중간 구현에서는 빠른 연산 경로와 tensor 비교를 먼저 안정화했지만,
-              최종 detector는 8×8 CONV14 branch와 16×16 CONV20을 함께 사용합니다.
-              Branch를 복구하면 cycle과 buffer 비용이 늘어납니다. 최종본은 최고 FPS
+              최종 detector는 8×8 CONV14 branch와 16×16 CONV20을 함께 사용한다.
+              Branch를 복구하면 cycle과 buffer 비용이 늘어난다. 최종본은 최고 FPS
               상한보다 두 head를 모두 읽어 실제 mAP를 계산할 수 있는 구조를 기준으로
-              고정했습니다. 따라서 대표 수치는 최종 11.420687 FPS와 78.60% mAP를
-              함께 사용합니다.
+              고정했다. 따라서 대표 수치는 최종 11.420687 FPS와 78.60% mAP를
+              함께 사용한다.
             </p>
           </section>
 
@@ -209,12 +209,6 @@
               정리하는 기준이다. 표의 precision과 recall은 score 0.24 지점에서 표시된
               값이다. 따라서 이 수치들을 다른 threshold나 AP 계산법을 쓴 결과와 직접
               비교할 때는 평가 조건도 함께 확인해야 한다.
-            </p>
-            <p class="evidence-note">
-              PASCAL VOC 2007 detector 평가는 precision–recall curve와 AP를 사용하며,
-              정답 box와의 overlap으로 true positive를 판정한다. 이 프로젝트의 11-point AP,
-              IoU 0.50, class-wise 평가 조건도 결과와 함께 고정해 재현 가능성을 남겼다.
-              <a href="https://www.robots.ox.ac.uk/~vgg/projects/pascal/VOC/voc2007/htmldoc/" target="_blank" rel="noreferrer">VOC2007 Development Kit 평가 설명</a>
             </p>
           </section>
 
@@ -271,11 +265,11 @@
             </figure>
             <p>
               시각 비교 이미지는 두 경로가 같은 물체를 대체로 찾는지, 한쪽에서 상자가
-              사라지거나 중복되는지를 빠르게 확인하는 정성 자료입니다. 보기 좋은 사례 한
+              사라지거나 중복되는지를 빠르게 확인하는 정성 자료이다. 보기 좋은 사례 한
               장만으로 전체 정확도를 대표하지 않기 때문에 대표 성과에는 229장 mAP만
-              사용합니다. Software 정수 기준 83.60%와 FPGA 78.60% 사이에는 약 5.00%p의
+              사용한다. Software 정수 기준 83.60%와 FPGA 78.60% 사이에는 약 5.00%p의
               차이가 남아 있으며, 양자화·packing·signedness·head scale·후처리 경계를
-              나누어 추적해야 합니다.
+              나누어 추적해야 한다.
             </p>
           </section>
 
@@ -299,10 +293,10 @@
             </div>
             <p>
               229장 JTAG 세션의 1,807.586초에는 프로그램, weight와 입력 전송,
-              readback, Python 평가, 고정 대기 시간이 포함됩니다. 이는 자동화된 보드
+              readback, Python 평가, 고정 대기 시간이 포함된다. 이는 자동화된 보드
               검증 한 회차의 소요 시간일 뿐, 제품형 입출력 구조의 end-to-end latency는
-              아닙니다. 실제 카메라 시스템의 처리율을 평가하려면 DMA 또는 스트리밍 입력,
-              host 후처리, 프레임 간 pipeline까지 포함해 다시 측정해야 합니다.
+              아니다. 실제 카메라 시스템의 처리율을 평가하려면 DMA 또는 스트리밍 입력,
+              host 후처리, 프레임 간 pipeline까지 포함해 다시 측정해야 한다.
             </p>
           </section>
 
@@ -353,13 +347,13 @@
             </p>
             <p>
               LUT는 제어와 주소 계산, packing, reduction에 쓰이고 FF는 pipeline과
-              상태 저장에 쓰입니다. BRAM은 weight cache와 feature buffer, DSP는 packed
-              INT8 MAC과 requantization에 집중됩니다. BRAM 84.81%와 DSP 85.42%가
+              상태 저장에 쓰인다. BRAM은 weight cache와 feature buffer, DSP는 packed
+              INT8 MAC과 requantization에 집중된다. BRAM 84.81%와 DSP 85.42%가
               자원 여유를 제한하므로 병렬도를 추가할 때는 계산 증가뿐 아니라 buffer와
-              배선 증가도 함께 고려해야 합니다. 전력 1.842W는 배치·배선된 설계의 Vivado
-              추정값이며 confidence가 Low입니다. 실제 switching activity 파일이나 보드
+              배선 증가도 함께 고려해야 한다. 전력 1.842W는 배치·배선된 설계의 Vivado
+              추정값이며 confidence가 Low이다. 실제 switching activity 파일이나 보드
               계측을 사용한 값이 아니므로 실측 전력 또는 확정적인 효율 지표로 해석하지
-              않습니다.
+              않는다.
             </p>
           </section>
 

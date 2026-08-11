@@ -47,12 +47,12 @@
               <h2 id="aix2-summary-title">최종 구현 사양</h2>
               <p>
                 Nexys 4 DDR의 Artix-7은 100MHz로 동작하며, JTAG-to-AXI가 host의
-                검증 스크립트와 DDR을 연결합니다. FPGA 내부에는 22단계 descriptor ROM,
+                검증 스크립트와 DDR을 연결한다. FPGA 내부에는 22단계 descriptor ROM,
                 graph scheduler, op dispatcher, 144개 packed MAC lane, weight cache,
-                feature·accumulator buffer, requantization과 write-back 경로가 있습니다.
+                feature·accumulator buffer, requantization과 write-back 경로가 있다.
                 입력과 weight는 실행 전에 DDR에 적재하고, 네트워크가 끝나면 CONV14와
-                CONV20 두 head를 다시 읽습니다. Host는 layer마다 명령하지 않고 start와
-                done만 관리하며, 그래프 진행은 RTL scheduler가 담당합니다.
+                CONV20 두 head를 다시 읽는다. Host는 layer마다 명령하지 않고 start와
+                done만 관리하며, 그래프 진행은 RTL scheduler가 담당한다.
               </p>
             </div>
             <dl class="case-facts">
@@ -74,19 +74,12 @@
               60개 클래스 점수를 출력한다.
             </p>
             <p>
-              연산 종류마다 메모리 접근 방식이 다릅니다. Convolution은 많은 weight와
-              입력 window를 반복 사용하므로 cache와 재사용 구조가 중요합니다. Pool과
+              연산 종류마다 메모리 접근 방식이 다르다. Convolution은 많은 weight와
+              입력 window를 반복 사용하므로 cache와 재사용 구조가 중요하다. Pool과
               Upsample은 곱셈이 거의 없지만 큰 feature map을 읽고 쓰기 때문에 DDR
-              traffic이 병목이 될 수 있습니다. Route는 오래된 feature map이 덮어쓰이지
-              않도록 주소를 보존해야 합니다. 하나의 연산기만 최적화하지 않고 그래프 전체를
-              descriptor와 workspace로 관리한 이유가 여기에 있습니다.
-            </p>
-            <p class="evidence-note">
-              YOLOv2가 한 번의 network evaluation으로 detection을 수행한다는 전체 개념은
-              원 논문을 따른다. 이 글의 세부 layer 수, tensor 크기, descriptor 순서와
-              메모리 주소는 논문 수치가 아니라 최종 프로젝트 RTL과 host package를 기준으로
-              정리했다.
-              <a href="https://arxiv.org/abs/1612.08242" target="_blank" rel="noreferrer">YOLO9000: Better, Faster, Stronger</a>
+              traffic이 병목이 될 수 있다. Route는 오래된 feature map이 덮어쓰이지
+              않도록 주소를 보존해야 한다. 하나의 연산기만 최적화하지 않고 그래프 전체를
+              descriptor와 workspace로 관리한 이유가 여기에 있다.
             </p>
           </section>
 
@@ -94,12 +87,12 @@
             <h2>Host–FPGA 역할</h2>
             <p>
               host는 bitstream program, 입력 전처리, weight·input DDR preload,
-              시작 명령, 완료 polling을 수행합니다. FPGA scheduler는 layer descriptor를
-              따라 22개 단계를 실행하고 두 detection head를 DDR에 기록합니다. host는
-              두 출력을 읽어 box decode, class score, NMS를 수행합니다. 여기서
+              시작 명령, 완료 polling을 수행한다. FPGA scheduler는 layer descriptor를
+              따라 22개 단계를 실행하고 두 detection head를 DDR에 기록한다. host는
+              두 출력을 읽어 box decode, class score, NMS를 수행한다. 여기서
               full graph는 학습이나 최종 NMS까지 모두 FPGA에서 처리한다는 뜻이 아니라,
               두 detection head를 만드는 신경망 연산 그래프 전체가 FPGA에서 실행된다는
-              뜻입니다.
+              뜻이다.
             </p>
             <figure class="doc-figure">
               <div class="figure-label">Host·DDR·FPGA의 역할 분리</div>
@@ -141,12 +134,12 @@
               </div>
             </div>
             <p>
-              Host와 FPGA의 역할을 나눈 구조는 개발 과정에서 관찰할 수 있는 범위를 넓힙니다.
+              Host와 FPGA의 역할을 나눈 구조는 개발 과정에서 관찰할 수 있는 범위를 넓힌다.
               Host는 특정 DDR 주소에 입력과 weight를 넣고, 실행 후 원하는 layer나 head를
-              읽어 software reference와 비교할 수 있습니다. 반면 JTAG-to-AXI는 검증을 위한
-              편리한 통로일 뿐, 실시간 카메라 입력 인터페이스는 아닙니다. 따라서 보드 검증의
+              읽어 software reference와 비교할 수 있다. 반면 JTAG-to-AXI는 검증을 위한
+              편리한 통로일 뿐, 실시간 카메라 입력 인터페이스는 아니다. 따라서 보드 검증의
               JTAG 전체 소요 시간과 FPGA 내부 cycle counter로 계산한 추론 시간은 서로
-              다른 지표로 구분합니다.
+              다른 지표로 구분한다.
             </p>
           </section>
 
@@ -219,10 +212,10 @@
             <h2>22개 layer descriptor</h2>
             <p>
               descriptor ROM에는 각 단계의 연산 종류, 입력·출력 shape, DDR 주소,
-              kernel·stride·activation·requantization 조건이 저장됩니다. scheduler는
-              같은 compute block을 재사용하며 descriptor에 따라 전체 그래프를 진행합니다.
+              kernel·stride·activation·requantization 조건이 저장된다. scheduler는
+              같은 compute block을 재사용하며 descriptor에 따라 전체 그래프를 진행한다.
               소프트웨어의 함수 호출 목록에 해당하는 정보를 하드웨어의 고정된 제어 표로
-              옮긴 구조라고 볼 수 있습니다.
+              옮긴 구조라고 볼 수 있다.
             </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
@@ -297,12 +290,12 @@
               </table>
             </div>
             <p>
-              병목 개선은 MAC 사용률만 높이는 문제가 아닙니다. 입력 window와 weight가
+              병목 개선은 MAC 사용률만 높이는 문제가 아니다. 입력 window와 weight가
               준비되기 전에는 MAC을 시작할 수 없고, 출력 FIFO나 AXI write가 막히면 계산도
-              멈춥니다. 초반 layer는 feature map이 커서 메모리 이동 비중이 높고, 후반
-              layer는 channel 수가 많아 누산량과 weight 공급 부담이 커집니다. 구간마다
+              멈춘다. 초반 layer는 feature map이 커서 메모리 이동 비중이 높고, 후반
+              layer는 channel 수가 많아 누산량과 weight 공급 부담이 크다. 구간마다
               병목 형태가 달라 line reuse, weight prefetch, burst 길이, pipeline 위치를
-              함께 조정했습니다.
+              함께 조정했다.
             </p>
             <p>
               최종 timing의 critical route는 MAC 곱셈 자체가 아니라 weight cache의
