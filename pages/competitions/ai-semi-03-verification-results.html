@@ -32,27 +32,27 @@
 
           <h1>3. 입력 조건별 시뮬레이션과 구현 결과</h1>
           <p class="lead">
-            제어 회로의 검증은 “파형이 나왔다”에서 끝나지 않는다. 입력 spike가 의도한
+            제어 회로의 검증은 “파형이 나왔다”는 사실만으로 끝나지 않습니다. 입력 spike가 의도한
             횟수로 생성되는지, LIF 상태가 clock 순서에 맞게 갱신되는지, 네 방향 출력이
-            중앙 방향을 가리키는지, 그 반응량이 목표를 지나치지는 않는지를 분리해 봐야
-            한다. 프로젝트에서는 위치만 전달하는 one-shot 실험을 기준점으로 만든 뒤,
-            무게를 spike rate에 반영한 두 번째 실험을 추가했다. 이어서 대표 좌표의
-            방향별 spike 수, 합성 자원, Vivado 전력 추정치를 정리했다. 이 글은 각
-            결과가 실제로 증명하는 범위와, 아직 물리 장치에서 확인하지 않은 범위를
-            함께 기록한다.
+            중앙 방향을 가리키는지, 반응량이 목표를 지나치지는 않는지를 나누어 살펴봐야
+            합니다. 프로젝트에서는 위치만 전달하는 one-shot 실험을 기준점으로 삼은 뒤,
+            무게를 spike rate에 반영한 두 번째 실험을 추가했습니다. 이어서 대표 좌표의
+            방향별 spike 수, 합성 자원, Vivado 전력 추정치를 정리했습니다. 이 글에서는 각
+            결과가 실제로 뒷받침하는 범위와 아직 물리 장치에서 확인하지 않은 범위를
+            함께 기록합니다.
           </p>
 
           <section class="case-summary" aria-labelledby="ai3-summary-title">
             <div>
               <h2 id="ai3-summary-title">검증 구성</h2>
               <p>
-                검증 자료는 네 층으로 나뉜다. Testbench는 좌표와 digital weight가
+                검증 자료는 네 층으로 나뉩니다. Testbench는 좌표와 digital weight가
                 회로에 들어가는 조건을 고정하고, 파형은 입력·막전위·출력 spike의
-                시간 순서를 보여준다. 방향별 count와 최종 좌표 표는 제어 모델의
-                반응을 요약하고, Vivado 보고서는 합성된 논리와 추정 전력의 구성을
-                보여준다. 최종 실험 묶음에는 one-shot 버전과 rate-encoding 버전의
-                RTL·testbench·weight가 구분돼 있어 입력 방식이 바뀐 지점을 추적할 수
-                있다. 물리 보드의 폐루프 제어는 이 검증 범위에 포함되지 않는다.
+                시간 순서를 보여줍니다. 방향별 count와 최종 좌표 표는 제어 모델의
+                반응을 요약하며, Vivado 보고서는 합성된 논리와 추정 전력의 구성을
+                보여줍니다. 최종 실험 묶음에는 one-shot 버전과 rate-encoding 버전의
+                RTL·testbench·weight가 구분되어 있어 입력 방식이 바뀐 지점을 추적할 수
+                있습니다. 물리 보드의 폐루프 제어는 이 검증 범위에 포함되지 않습니다.
               </p>
             </div>
             <dl class="case-facts">
@@ -66,11 +66,11 @@
           <section class="doc-section searchable-section" id="experiment-design" data-search-title="입력 실험">
             <h2>입력 조건</h2>
             <p>
-              검증은 먼저 좌표와 네 방향 출력의 기본 연결을 확인한 뒤, 무게 정보를
-              입력에 추가하는 순서로 진행된다. 실험 1은 현재 좌표를 한 번의 spike로
-              전달해 weight 연결과 출력 방향을 확인하는 기준점이다. 실험 2는 같은
+              검증은 먼저 좌표와 네 방향 출력의 기본 연결을 확인하고, 이후 무게 정보를
+              입력에 추가하는 순서로 진행했습니다. 실험 1은 현재 좌표를 한 번의 spike로
+              전달해 weight 연결과 출력 방향을 확인하는 기준점입니다. 실험 2는 같은
               위치 표현에 <code>ball_weight</code>를 추가하고, 입력 spike의 개수를
-              무게에 따라 바꾸어 시간축 자극에 대한 반응을 비교한다.
+              무게에 따라 바꿔 시간축 자극에 대한 반응을 비교합니다.
             </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
@@ -113,12 +113,12 @@
             <h2>학습 결과를 RTL 입력으로 옮기는 과정</h2>
             <p>
               계층형 99→32→4 실험망의 연결 가중치는 software에서 학습한 뒤 정수
-              <code>.hex</code> 파일로 변환했다. 은닉층과 출력층의 최대 절댓값을
+              <code>.hex</code> 파일로 변환했습니다. 은닉층과 출력층의 최대 절댓값을
               확인해 정수 범위에 맞는 scale factor를 적용하고, one-shot 실험과
-              rate-encoding 실험의 weight 묶음은 별도로 구성했다. RTL testbench는 이 파일을
-              읽어 동일한 입력 좌표에서 가중합과 spike count를 계산한다. 즉 학습과
+              rate-encoding 실험의 weight 묶음은 별도로 구성했습니다. RTL testbench는 이 파일을
+              읽어 동일한 입력 좌표에서 가중합과 spike count를 계산합니다. 즉 학습과
               회로 실행이 동시에 일어나는 online-learning 구조가 아니라, 학습된
-              파라미터를 고정해 사용하는 offline inference 구조이다.
+              파라미터를 고정해 사용하는 offline inference 구조입니다.
             </p>
             <figure class="doc-figure">
               <div class="figure-label">Rate-encoding 실험용 weight 파일 생성 기록</div>
@@ -196,12 +196,12 @@
               </figcaption>
             </figure>
             <p>
-              30g 조건은 입력 rate가 커지면 출력 반응도 커진다는 사실을 보여주지만,
-              중앙 수렴 성능은 오히려 낮아진다. (−3,−3)과 (−2,−2)에서는 각 축의
+              30g 조건은 입력 rate가 커지면 출력 반응도 커진다는 점을 보여주지만,
+              중앙 수렴 성능은 오히려 낮아집니다. (−3,−3)과 (−2,−2)에서는 각 축의
               +방향 spike가 필요한 거리보다 많아 (1,1)로 넘어가고, 중앙 (0,0)에서도
-              +Y spike가 발생해 (0,1)로 이동한다. 이는 무게 정보를 입력에 포함하는
-              것만으로 안정적인 제어가 완성되지 않으며, 위치에 가까워질수록 gain을
-              줄이는 규칙이나 출력 feedback이 추가되어야 함을 보여준다.
+              +Y spike가 발생해 (0,1)로 이동합니다. 이는 무게 정보를 입력에 포함하는
+              것만으로 안정적인 제어가 완성되지는 않으며, 위치에 가까워질수록 gain을
+              줄이는 규칙이나 출력 feedback을 추가해야 함을 보여줍니다.
             </p>
             <p class="evidence-note warning">
               열 개 결과는 모든 1~30g 무게와 99개 위치를 전수 조사한 정확도 지표가
@@ -219,10 +219,10 @@
             </p>
             <p>
               LUT와 FF는 입력 부호 분리, LIF 상태, spike count와 제어 레지스터에
-              사용된다. BRAM과 DSP가 0인 이유는 이 공개 범위의 상태가 작은 register로
-              구성되고 전용 곱셈 배열을 사용하지 않기 때문이다. 반면 top-level에
-              위치·속도·방향 신호를 넓게 노출해 I/O 사용량은 높다. 계산 로직이 작다는
-              사실과 장치 핀 사용률이 높다는 사실은 동시에 성립한다.
+              사용됩니다. BRAM과 DSP가 0인 이유는 이 공개 범위의 상태가 작은 register로
+              구성되고 전용 곱셈 배열을 사용하지 않기 때문입니다. 반면 top-level에
+              위치·속도·방향 신호를 넓게 노출해 I/O 사용량은 높습니다. 계산 로직이 작다는
+              사실과 장치 핀 사용률이 높다는 사실은 동시에 성립합니다.
             </p>
             <div class="result-band" aria-label="AI 반도체 프로젝트 합성 자원">
               <article><strong>10</strong><span>LUT · 0.05%</span></article>
@@ -258,10 +258,10 @@
             </p>
             <p>
               dynamic 94%라는 비율만 보면 뉴런 계산이 많은 전력을 사용한 것처럼
-              보일 수 있으나, 세부 항목에서는 I/O가 dynamic power의 약 90%를
-              차지한다. 즉 이 결과는 LIF 산술 자체보다 넓은 top-level 신호의 toggle
-              가정에 크게 영향을 받는다. 따라서 2.302W를 SNN core의 고유 소비전력이나
-              event-driven 구조의 에너지 효율로 사용하는 것은 적절하지 않다.
+              보일 수 있지만, 세부 항목에서는 I/O가 dynamic power의 약 90%를
+              차지합니다. 즉 이 결과는 LIF 산술 자체보다 넓은 top-level 신호의 toggle
+              가정에 크게 영향을 받습니다. 따라서 2.302W를 SNN core의 고유 소비전력이나
+              event-driven 구조의 에너지 효율로 해석하는 것은 적절하지 않습니다.
             </p>
             <div class="result-band" aria-label="AI 반도체 프로젝트 전력 추정">
               <article><strong>2.302W</strong><span>총 전력 추정</span></article>
@@ -302,10 +302,10 @@
               </table>
             </div>
             <p>
-              현재 결과가 지지하는 결론은 위치와 무게를 spike 입력으로 표현하고,
+              현재 결과가 뒷받침하는 결론은 위치와 무게를 spike 입력으로 표현하고,
               LIF 네트워크가 네 방향 제어 이벤트를 생성하며, 대표 조건에서 weight에
-              따른 반응 차이가 나타난다는 것이다. 실제 Ball Balancing 장치가 중앙
-              반경 1cm 안에서 안정화되었다는 결론은 이 자료로 뒷받침되지 않는다.
+              따른 반응 차이가 나타난다는 것입니다. 실제 Ball Balancing 장치가 중앙
+              반경 1cm 안에서 안정화되었다는 결론은 이 자료만으로 뒷받침되지 않습니다.
             </p>
           </section>
 

@@ -33,14 +33,13 @@
           <h1>YOLOv2 Full-Graph FPGA 가속기</h1>
           <p class="lead">
             AIX 2026의 과제는 학습된 딥러닝 모델을 실제 FPGA 가속기로 구현하는
-            것이었다. 프로젝트에서는 256×256 RGB 이미지에서 60개 상품 클래스를
-            검출하는 YOLOv2를 대상으로 삼았다. Convolution 하나의 데모를 만드는 데서
-            멈추지 않고, Pool·Route·Upsample과 8×8·16×16 두 detection head까지
-            이어지는 전체 추론 그래프를 Nexys 4 DDR에서 실행했다. Software에서
-            정한 INT8 양자화 조건, DDR 주소와 packing, descriptor 기반 scheduler,
-            packed MAC, 두 head readback과 detector 후처리가 하나의 실행 경로로
-            연결된다. 아래 수치와 결과 이미지는 모두 같은 최종 bitstream과 229장
-            평가 세트를 기준으로 한다.
+            것이었습니다. 프로젝트에서는 256×256 RGB 이미지에서 60개 상품 클래스를
+            검출하는 YOLOv2를 대상으로 삼았습니다. Convolution 하나의 데모에 그치지 않고,
+            Pool·Route·Upsample과 8×8·16×16 두 detection head까지 이어지는 전체 추론 그래프를
+            Nexys 4 DDR에서 실행했습니다. Software에서 정한 INT8 양자화 조건, DDR 주소와
+            packing, descriptor 기반 scheduler, packed MAC, 두 head readback과 detector 후처리는
+            하나의 실행 경로로 연결됩니다. 아래의 수치와 결과 이미지는 모두 같은 최종 bitstream과
+            229장 평가 세트를 기준으로 합니다.
           </p>
 
           <section class="case-summary" aria-labelledby="aix-summary-title">
@@ -49,12 +48,12 @@
               <p>
                 Python host가 입력 이미지와 양자화 weight를 DDR에 적재하고 시작
                 레지스터를 설정하면, FPGA의 descriptor scheduler가 22개 처리 단계를
-                순서대로 실행한다. 144개 packed MAC lane이 convolution을 계산하고,
-                전용 경로가 Pool·Route·Upsample을 처리한다. 마지막 CONV14와 CONV20
-                detection head는 DDR의 서로 다른 주소에 보존된다. Host는 두 tensor를
-                읽어 같은 decode와 NMS를 적용하고 detector mAP를 계산한다. 중간
+                순서대로 실행합니다. 144개 packed MAC lane이 convolution을 계산하고,
+                전용 경로가 Pool·Route·Upsample을 처리합니다. 마지막 CONV14와 CONV20
+                detection head는 DDR의 서로 다른 주소에 보존됩니다. Host는 두 tensor를
+                읽어 같은 decode와 NMS를 적용한 뒤 detector mAP를 계산합니다. 중간
                 feature와 weight는 8-bit로 저장하고, 곱셈의 합은 32-bit로 누적한 뒤
-                layer별 requantization을 거쳐 다시 8-bit로 저장한다.
+                layer별 requantization을 거쳐 다시 8-bit로 저장합니다.
               </p>
             </div>
             <dl class="case-facts">
@@ -69,13 +68,13 @@
             <h2>경진대회 과제와 구현 범위</h2>
             <p>
               객체 검출은 입력 이미지를 읽어 최종 상자를 그리는 하나의 함수처럼
-              보이지만, 하드웨어에서는 여러 시스템으로 나뉜다. 학습된 모델을 정수로
+              보이지만, 하드웨어에서는 여러 시스템으로 나뉩니다. 학습된 모델을 정수로
               바꾸는 software reference, 대용량 tensor를 저장하는 DDR, layer를
               순서대로 실행하는 RTL, 보드에 데이터를 넣고 결과를 회수하는 host,
-              raw detection tensor를 실제 상자로 바꾸는 후처리가 모두 맞아야 한다.
-              이 프로젝트의 FPGA 구현 범위는 입력 이후부터 CONV14·CONV20 두 head를
-              만드는 신경망 연산 그래프까지이다. 이미지 전처리, bitstream program,
-              DDR preload·readback, decode·NMS·mAP 평가는 host가 담당한다.
+              raw detection tensor를 실제 상자로 바꾸는 후처리가 모두 맞아야 합니다.
+              이 프로젝트에서 FPGA가 맡는 범위는 입력 이후부터 CONV14·CONV20 두 head를
+              만드는 신경망 연산 그래프까지입니다. 이미지 전처리, bitstream program,
+              DDR preload·readback, decode·NMS·mAP 평가는 host가 담당합니다.
             </p>
             <div class="case-flow" style="--flow-count: 5" aria-label="AIX 프로젝트의 다섯 구성 요소">
               <div class="case-flow-step">
@@ -105,10 +104,10 @@
               </div>
             </div>
             <p>
-              “Full graph”라는 표현도 이 경계를 따른다. 학습이나 NMS까지 FPGA에
+              “Full graph”라는 표현도 이 경계를 따릅니다. 이는 학습이나 NMS까지 FPGA에
               포함했다는 뜻이 아니라, YOLOv2가 두 detection head를 만들기까지 필요한
-              Conv·Pool·Route·Upsample 연산을 FPGA 내부 scheduler가 실행한다는 뜻이다.
-              정확도는 FPGA가 계산한 두 head를 host의 동일한 후처리에 넣어 평가했다.
+              Conv·Pool·Route·Upsample 연산을 FPGA 내부 scheduler가 실행한다는 뜻입니다.
+              정확도는 FPGA가 계산한 두 head를 host의 동일한 후처리에 넣어 평가했습니다.
             </p>
           </section>
 
@@ -123,11 +122,11 @@
             </p>
             <p>
               FPGA에서는 많은 곱셈을 병렬화할 수 있지만, 연산기 수만 늘린다고 전체
-              모델이 자동으로 빨라지지는 않는다. 매 layer의 입력과 weight를 DDR에서
+              모델이 자동으로 빨라지지는 않습니다. 매 layer의 입력과 weight를 DDR에서
               읽고, 중간 feature map을 정해진 주소에 저장하며, Route가 과거 결과를 다시
-              읽도록 관리해야 한다. 정수 scale이나 주소가 한 layer에서만 어긋나도 뒤의
-              모든 출력이 달라진다. 이 때문에 이 프로젝트는 MAC 배열뿐 아니라 메모리
-              배치, layer 제어, 정수 후처리, 보드 readback을 하나의 시스템으로 다룬다.
+              읽을 수 있도록 관리해야 합니다. 정수 scale이나 주소가 한 layer에서만 어긋나도
+              뒤의 모든 출력이 달라집니다. 그래서 이 프로젝트는 MAC 배열뿐 아니라 메모리
+              배치, layer 제어, 정수 후처리, 보드 readback을 하나의 시스템으로 다룹니다.
             </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
@@ -239,11 +238,11 @@
           <section class="doc-section searchable-section" id="final-basis" data-search-title="최종 구현 기준">
             <h2>최종 구현 기준</h2>
             <p>
-              개발 과정에는 병렬도와 그래프 범위가 서로 다른 여러 구현본이 남아 있다.
+              개발 과정에는 병렬도와 그래프 범위가 서로 다른 여러 구현본이 남아 있습니다.
               이 글에서는 최종 제출 패키지의 RTL, 보드 실행 결과, Vivado report가
-              서로 일치하는 값만 대표 사양으로 사용한다. 네트워크 제어는 descriptor
+              서로 일치하는 값만 대표 사양으로 사용합니다. 네트워크 제어는 descriptor
               ROM의 22개 항목, MAC 병렬도는 공개 RTL의 <code>NUM_MACS=144</code>,
-              정확도와 속도는 <code>FINAL_RESULT.txt</code>의 229장 결과가 기준이다.
+              정확도와 속도는 <code>FINAL_RESULT.txt</code>의 229장 결과를 기준으로 합니다.
             </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
@@ -274,12 +273,12 @@
             <h2>단일 연산 검증에서 detector 검증까지</h2>
             <p>
               개발 초반에는 보드에 명령을 보내고 DDR의 정해진 주소를 읽고 쓰는
-              bring-up이 선행된다. 그다음 convolution 경로와 layer scheduler를
-              연결하고, Pool·Route·Upsample을 추가해 full graph로 확장했다. 그래프가
+              bring-up을 먼저 진행했습니다. 그다음 convolution 경로와 layer scheduler를
+              연결하고, Pool·Route·Upsample을 추가해 full graph로 확장했습니다. 그래프가
               끝까지 실행된 뒤에는 HWC/CHW 배열 순서, 4-byte packing, detection head
-              stride와 signed scale을 맞추는 작업이 이어졌다. 마지막 단계에서는
-              중간 속도 실험에서 제외됐던 CONV14 branch를 복구하고 CONV14·CONV20을
-              모두 후처리에 사용하는 최종 검증 경로를 고정했다.
+              stride와 signed scale을 맞추는 작업을 이어갔습니다. 마지막 단계에서는
+              중간 속도 실험에서 제외했던 CONV14 branch를 복구하고 CONV14·CONV20을
+              모두 후처리에 사용하는 최종 검증 경로를 고정했습니다.
             </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
@@ -363,11 +362,11 @@
             </figure>
             <p>
               최종 자원 사용률은 LUT 71.63%, FF 36.28%, BRAM 84.81%, DSP
-              85.42%이다. 100MHz에서 setup WNS는 +0.111ns, hold WHS는
-              +0.017ns로 timing을 만족한다. BRAM과 DSP가 모두 80%를 넘기 때문에
+              85.42%입니다. 100MHz에서 setup WNS는 +0.111ns, hold WHS는
+              +0.017ns로 timing을 만족합니다. BRAM과 DSP가 모두 80%를 넘기 때문에
               연산기를 더 추가하거나 buffer를 크게 만드는 방식은 배치와 배선 여유를
-              빠르게 줄인다. 따라서 이 결과는 정확도와 속도뿐 아니라 제한된 FPGA 안에서
-              전체 그래프가 실제로 배치·배선된 구현 결과로 해석해야 한다.
+              빠르게 줄입니다. 따라서 이 결과는 정확도와 속도뿐 아니라, 제한된 FPGA 안에서
+              전체 그래프가 실제로 배치·배선된 구현 결과로 해석해야 합니다.
             </p>
           </section>
 
