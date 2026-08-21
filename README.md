@@ -15,7 +15,7 @@ https://jaypark0115.github.io/jay-tech-notes/
 
 드론의 LED를 여러 카메라로 추적해 비행경로를 제어하는 졸업논문 시스템과, 리니어 모터 스테이지를 이용한 경로 검증 환경을 함께 구축하고 있습니다.
 
-1. [**LED 모션캡처 기반 드론 비행경로 제어 시스템**](https://jaypark0115.github.io/jay-tech-notes/pages/planned/01-led-motion-capture-drone.html)
+1. [LED 모션캡처 기반 드론 비행경로 제어 시스템](https://jaypark0115.github.io/jay-tech-notes/pages/planned/01-led-motion-capture-drone.html)
    - 드론의 LED를 추적해 비행경로를 제어하고 휴대폰에서 목표·실시간 경로와 결과를 확인하는 졸업논문 시스템입니다.
    - 목표: 2026.10.10, 대한전자공학회 2026년도 추계학술대회 제출 예정
 2. **산업용 리니어 모터 스테이지 기반 경로 검증 환경**
