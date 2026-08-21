@@ -48,7 +48,7 @@ NRV 이벤트 카메라의 캘리브레이션 기능은 제가 직접 구현했�
 
 ### 4. NRV DVS Rectify 설명
 
-캘리브레이션 파라미터를 DVS 영상에 적용해 왜곡을 보정하고, 스테레오 좌우 영상의 대응점을 정렬하는 이유와 처리 방법을 정리했습니다.
+캘리브레이션 파라미터를 DVS 영상에 적용해 모노 카메라의 렌즈 왜곡을 보정(undistortion)하고, 스테레오 좌우 영상의 왜곡 보정과 대응점 정렬을 수행하는 이유와 처리 방법을 정리했습니다.
 
 1. [DVS 정렬이 필요한 이유](https://jaypark0115.github.io/jay-tech-notes/pages/rectify/01-why-rectification.html)
    - 렌즈 왜곡과 카메라 배치 차이를 보정하고 좌우 대응점을 같은 scanline에 놓아야 하는 이유를 설명합니다.

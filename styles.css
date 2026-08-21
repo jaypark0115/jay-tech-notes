@@ -1451,6 +1451,14 @@ body.rectify-doc-page .scope-note p {
   margin: 0;
 }
 
+body.rectify-doc-page .scope-note {
+  grid-template-columns: 140px minmax(0, 1fr);
+  padding: 1rem 0 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: transparent;
+}
+
 body.rectify-doc-page .doc-section,
 body.rectify-doc-page .rectify-topic {
   scroll-margin-top: 36px;
@@ -1458,14 +1466,16 @@ body.rectify-doc-page .rectify-topic {
 
 body.rectify-doc-page .doc-section > p,
 body.rectify-doc-page .rectify-topic > p {
-  max-width: 980px;
+  max-width: 1080px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 body.rectify-doc-page .rectify-topic {
   margin: 2rem 0 0;
-  padding: 1.5rem 0 0 1.25rem;
+  padding: 1.5rem 0 0;
   border-top: 1px solid var(--line);
-  border-left: 3px solid rgb(213 15 52 / 18%);
+  border-left: 0;
 }
 
 body.rectify-doc-page .rectify-topic h4 {
@@ -1478,6 +1488,13 @@ body.rectify-doc-page figure {
   margin: 1.65rem auto;
 }
 
+body.rectify-doc-page .doc-figure,
+body.rectify-doc-page .comparison-figure figure {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 body.rectify-doc-page figure img {
   width: 100%;
   height: auto;
@@ -1486,10 +1503,13 @@ body.rectify-doc-page figure img {
 }
 
 body.rectify-doc-page figcaption {
-  padding: 0.75rem 0.9rem;
+  margin: 0;
+  padding: 0.7rem 0 0;
+  border-top: 0;
   color: var(--muted);
   font-size: 0.9rem;
-  text-align: center;
+  line-height: 1.6;
+  text-align: left;
 }
 
 body.rectify-doc-page .rectify-figure {
@@ -1517,6 +1537,8 @@ body.rectify-doc-page .comparison-figure .figure-grid.two-up {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.1rem;
+  padding: 0;
+  background: transparent;
 }
 
 body.rectify-doc-page .comparison-figure figure {
@@ -1609,9 +1631,10 @@ body.rectify-doc-page .rectify-calc-steps math {
 body.rectify-doc-page .rectify-io-line,
 body.rectify-doc-page .rectify-key-statement,
 body.rectify-doc-page .source-note {
-  padding: 0.9rem 1rem;
-  border-left: 3px solid var(--nrv-red);
-  background: var(--panel);
+  padding: 0.9rem 0 0;
+  border-top: 1px solid var(--line);
+  border-left: 0;
+  background: transparent;
 }
 
 body.rectify-doc-page .source-note {
@@ -3087,12 +3110,18 @@ body.planned-detail-page .thesis-schedule-table tbody tr:last-child td {
 }
 
 #nrv-dvs-calibration .calibration-card-thumb,
-#nrv-dvs-rectify .calibration-card-thumb {
+#nrv-dvs-rectify .calibration-card-thumb,
+#event-stereo-depth .calibration-card-thumb {
   width: 100%;
   max-width: 100%;
   height: auto;
   aspect-ratio: 4 / 3;
   margin: 0;
+}
+
+#event-stereo-depth .depth-card-thumb-empty {
+  display: block;
+  background: #eef2f5;
 }
 
 #nrv-dvs-calibration .sitemap-number,

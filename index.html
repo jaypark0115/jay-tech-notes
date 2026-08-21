@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="드론 모션캡처, SNN 연구, NRV DVS 캘리브레이션·Rectify, 이벤트 비전 스테레오 Depth와 FPGA 기술 노트 모음." />
     <title>Jay Tech Notes</title>
-    <link rel="stylesheet" href="styles.css?v=20260821-rectify-depth-collections" />
+    <link rel="stylesheet" href="styles.css?v=20260821-rectify-depth-v2" />
     <script src="script.js" defer></script>
   </head>
   <body class="home-page">
@@ -108,9 +108,12 @@
           <section class="doc-section visible" id="drone-motion-capture">
             <h2>LED 모션캡처 기반 드론 비행경로 제어 시스템 (진행중)</h2>
             <p>
-              드론의 LED를 여러 카메라로 추적해 비행경로를 제어하는 졸업논문 시스템과,
-              리니어 모터 스테이지를 이용해 모션캡처 경로의 정확도를 확인하는 검증 환경을
-              함께 구축하고 있습니다.
+              드론의 LED 빛을 여러 카메라로 감지해 위치와 비행 경로를 추적하고, 그 결과로
+              목표 경로를 따라 비행하도록 제어하는 졸업논문 시스템입니다. 스마트폰 앱에서
+              목표·실제 경로와 비행 결과를 실시간으로 확인할 수 있도록 구성하며,
+              리니어 모터 스테이지로 모션캡처 경로의 정확도를 검증합니다. 중앙대학교
+              전자전기공학부 제어 및 로봇 SLAM 연구실을 운영하는 심덕선 교수님의 지도 아래
+              진행하고 있습니다.
             </p>
 
             <div class="project-grid planned-work-grid" aria-label="LED 모션캡처 드론 연구">
@@ -131,26 +134,19 @@
                   <time datetime="2026-10-10">목표 2026.10.10</time>
                 </div>
                 <p>
-                  드론의 LED 빛을 여러 카메라로 감지해 위치와 이동 경로를 추적하고,
-                  모션캡처 결과를 이용해 드론 비행경로를 제어하는 시스템을 구현하고
-                  있습니다. 휴대폰 앱에서 목표 경로를 입력하고, 실제 이동 경로와 비행
-                  결과를 실시간으로 확인할 수 있도록 구성합니다. 중앙대학교 전자전기공학부
-                  제어 및 로봇 SLAM 연구실을 운영하는 심덕선 교수님의 지도 아래 진행하고
-                  있습니다.
-                </p>
-                <p class="plan-progress">
-                  2026년 10월 10일까지 졸업논문을 완성하고 대한전자공학회 2026년도
-                  추계학술대회 제출을 목표로 합니다.
+                  다중 카메라로 드론 LED를 추적해 목표 비행경로를 따라가도록 제어하는
+                  졸업논문 시스템입니다.
                 </p>
                 <span class="plan-open-label">상세 계획 보기 →</span>
               </a>
 
               <article class="project-card plan-card">
-                <div
-                  class="project-thumb plan-thumb-empty"
-                  role="img"
-                  aria-label="산업용 리니어 모터 스테이지 검증 환경 미리보기 이미지 준비 중"
-                ></div>
+                <img
+                  class="project-thumb plan-thumb-image"
+                  src="assets/linear-motor-stage.png"
+                  alt="드론 모션캡처 경로 검증에 사용할 산업용 리니어 모터 스테이지"
+                  loading="lazy"
+                />
                 <span class="sitemap-number">02</span>
                 <small>Ground Truth · Linear Motor Stage</small>
                 <h2>산업용 리니어 모터 스테이지 기반 경로 검증 환경</h2>
@@ -159,14 +155,8 @@
                   <time datetime="2026-10-10">목표 2026.10.10</time>
                 </div>
                 <p>
-                  산업용 리니어 모터 스테이지에 LED 표적 또는 드론을 고정하고, 스테이지에
-                  입력한 기준 경로와 모션캡처가 검출한 경로를 비교하는 Ground Truth 환경을
-                  만들 계획입니다. 이를 위해 리니어 모터 스테이지의 운용법과 제어 방법을
-                  익히고 반복 위치 정밀도와 경로 검출 오차를 함께 확인합니다.
-                </p>
-                <p class="plan-progress">
-                  졸업논문 시스템과 같은 일정인 2026년 10월 10일까지 검증 환경 완성을
-                  목표로 합니다.
+                  리니어 모터 스테이지로 기준 경로를 재현하고, 모션캡처가 검출한 경로와
+                  비교하는 Ground Truth 검증 환경입니다.
                 </p>
               </article>
 
@@ -276,16 +266,17 @@
           <section class="doc-section visible" id="nrv-dvs-rectify">
             <h2>NRV DVS Rectify 설명</h2>
             <p>
-              캘리브레이션으로 구한 파라미터를 DVS 영상에 적용해 왜곡을 보정하고,
-              스테레오 영상의 대응점을 같은 높이로 정렬하는 이유와 처리 원리를 정리했습니다.
-              실제 Viewer에서 Rectify 기능을 사용하는 방법까지 세 편의 한글 문서로 설명합니다.
+              캘리브레이션으로 구한 파라미터를 DVS 영상에 적용해 모노 카메라의 렌즈 왜곡을
+              보정(undistortion)하고, 스테레오 영상에서는 왜곡 보정과 함께 좌우 대응점을
+              같은 높이로 정렬하는 이유와 처리 원리를 정리했습니다. 실제 Viewer에서 Rectify
+              기능을 사용하는 방법까지 세 편의 한글 문서로 설명합니다.
             </p>
             <div class="sitemap-grid">
               <a class="sitemap-card calibration-preview-card" href="pages/rectify/01-why-rectification.html">
                 <img
                   class="calibration-card-thumb"
-                  src="assets/rectify/line-before.png"
-                  alt="스테레오 정렬 전 좌우 영상의 대응점 높이 차이"
+                  src="assets/rectify/rectify-card-why.png"
+                  alt="스테레오 영상과 깊이 추정 결과 예시"
                   loading="lazy"
                 />
                 <span class="sitemap-number">01</span>
@@ -296,8 +287,8 @@
               <a class="sitemap-card calibration-preview-card" href="pages/rectify/02-rectification-principles.html">
                 <img
                   class="calibration-card-thumb"
-                  src="assets/rectify/nearest-dvs-pixel-selection.png"
-                  alt="DVS Rectify에서 출력 픽셀과 가장 가까운 원본 픽셀을 선택하는 원리"
+                  src="assets/rectify/rectify-card-principles.png"
+                  alt="DVS 이벤트 영상에서 보정 대상 영역을 표시한 화면"
                   loading="lazy"
                 />
                 <span class="sitemap-number">02</span>
@@ -308,8 +299,8 @@
               <a class="sitemap-card calibration-preview-card" href="pages/rectify/03-viewer-rectification.html">
                 <img
                   class="calibration-card-thumb"
-                  src="assets/rectify/viewer-rectify-button.png"
-                  alt="NRV DVS Viewer의 Rectify 기능 실행 화면"
+                  src="assets/rectify/rectify-card-viewer.png"
+                  alt="Rectify OFF와 ON 결과를 비교한 NRV DVS Viewer 화면"
                   loading="lazy"
                 />
                 <span class="sitemap-number">03</span>
@@ -323,12 +314,19 @@
           <section class="doc-section visible" id="event-stereo-depth">
             <h2>이벤트 비전 스테레오 Depth 카메라 (진행중)</h2>
             <p>
-              FPGA 실시간 스테레오 정렬·보정과 이벤트 카메라·LiDAR·RGB 융합 데이터셋을
-              하나의 개발 흐름으로 연결해, 이벤트 스테레오 Depth 카메라와 제로샷 위치 추정
-              기능을 구현하는 작업입니다.
+              이벤트 카메라 스테레오로 장면의 깊이를 추정하는 Depth 카메라를 개발하고 있습니다.
+              캘리브레이션 파라미터를 FPGA에 적용해 좌우 이벤트 영상을 실시간으로 정렬·보정하고,
+              주행·동적 장면의 이벤트 카메라·LiDAR·일반 RGB 데이터를 함께 기록해 융합 데이터셋을
+              구축합니다. 이 처리 흐름을 바탕으로 실시간 Depth와 제로샷 위치 추정 기능까지
+              연결하는 것이 목표입니다.
             </p>
             <div class="sitemap-grid">
               <article class="sitemap-card">
+                <div
+                  class="calibration-card-thumb depth-card-thumb-empty"
+                  role="img"
+                  aria-label="FPGA 실시간 스테레오 정렬·보정 대표 이미지 준비 중"
+                ></div>
                 <span class="sitemap-number">01</span>
                 <small class="entry-card-kicker">FPGA REAL-TIME RECTIFICATION</small>
                 <h2>FPGA 실시간 스테레오 정렬·보정</h2>
@@ -338,6 +336,11 @@
                 </p>
               </article>
               <article class="sitemap-card">
+                <div
+                  class="calibration-card-thumb depth-card-thumb-empty"
+                  role="img"
+                  aria-label="이벤트 카메라·LiDAR·RGB 융합 데이터셋 대표 이미지 준비 중"
+                ></div>
                 <span class="sitemap-number">02</span>
                 <small class="entry-card-kicker">EVENT · LIDAR · RGB DATASET</small>
                 <h2>이벤트 카메라·LiDAR·RGB 융합 데이터셋</h2>
@@ -353,6 +356,12 @@
                 target="_blank"
                 rel="noopener noreferrer"
               >
+                <img
+                  class="calibration-card-thumb"
+                  src="assets/event-stereo-depth-demo.png"
+                  alt="NRV 스테레오 이벤트 카메라로 추정한 사람의 Depth 데모 화면"
+                  loading="lazy"
+                />
                 <span class="sitemap-number">03</span>
                 <small class="entry-card-kicker">STEREO DEPTH DEMO</small>
                 <h2>NRV 이벤트 스테레오 Depth 데모</h2>
