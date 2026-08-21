@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="드론 모션캡처, SNN 연구, NRV DVS 캘리브레이션·Rectify, 이벤트 비전 스테레오 Depth와 FPGA 기술 노트 모음." />
     <title>Jay Tech Notes</title>
-    <link rel="stylesheet" href="styles.css?v=20260821-rectify-depth-v2" />
+    <link rel="stylesheet" href="styles.css?v=20260821-rectify-depth-v3" />
     <script src="script.js" defer></script>
   </head>
   <body class="home-page">
@@ -25,9 +25,7 @@
             제가 직접 정리한 기술 글, 실험 기록, 논문 메모를 모아두는 개인 페이지입니다.
             상세 페이지가 준비된 카드는 클릭해 각 글과 자료를 확인할 수 있으며,
             아직 정리 중인 일부 연구 카드는 현재 방향과 목표를 보여주는 진입점으로
-            구성했습니다. 드론 모션캡처, SNN 연구, NRV DVS 캘리브레이션과 Rectify,
-            이벤트 비전 스테레오 Depth, FPGA 트러블슈팅, SoC/FPGA 학습 및
-            두 경진대회의 설계·구현·검증 기록을 함께 공개하고 있습니다.
+            구성했습니다.
           </p>
 
           <div class="home-panels" aria-label="페이지 소개">
@@ -113,7 +111,8 @@
               목표·실제 경로와 비행 결과를 실시간으로 확인할 수 있도록 구성하며,
               리니어 모터 스테이지로 모션캡처 경로의 정확도를 검증합니다. 중앙대학교
               전자전기공학부 제어 및 로봇 SLAM 연구실을 운영하는 심덕선 교수님의 지도 아래
-              진행하고 있습니다.
+              진행하며, 2026년 10월 10일까지 졸업논문을 마무리해 대한전자공학회 2026년도
+              추계학술대회 제출을 목표로 작성하고 있습니다.
             </p>
 
             <div class="project-grid planned-work-grid" aria-label="LED 모션캡처 드론 연구">
@@ -137,7 +136,6 @@
                   다중 카메라로 드론 LED를 추적해 목표 비행경로를 따라가도록 제어하는
                   졸업논문 시스템입니다.
                 </p>
-                <span class="plan-open-label">상세 계획 보기 →</span>
               </a>
 
               <article class="project-card plan-card">
@@ -266,10 +264,11 @@
           <section class="doc-section visible" id="nrv-dvs-rectify">
             <h2>NRV DVS Rectify 설명</h2>
             <p>
-              캘리브레이션으로 구한 파라미터를 DVS 영상에 적용해 모노 카메라의 렌즈 왜곡을
-              보정(undistortion)하고, 스테레오 영상에서는 왜곡 보정과 함께 좌우 대응점을
-              같은 높이로 정렬하는 이유와 처리 원리를 정리했습니다. 실제 Viewer에서 Rectify
-              기능을 사용하는 방법까지 세 편의 한글 문서로 설명합니다.
+              NRV DVS 캘리브레이션에서 구현·정리한 흐름을 이어, 캘리브레이션으로 구한
+              파라미터를 DVS 영상에 적용해 모노 카메라의 렌즈 왜곡을 보정(undistortion)하고,
+              스테레오 영상에서는 왜곡 보정과 함께 좌우 대응점을 같은 높이로 정렬하는 이유와
+              처리 원리를 정리했습니다. 실제 Viewer에서 Rectify 기능을 사용하는 방법까지 세 편의
+              한글 문서로 설명합니다.
             </p>
             <div class="sitemap-grid">
               <a class="sitemap-card calibration-preview-card" href="pages/rectify/01-why-rectification.html">
@@ -597,7 +596,7 @@
           <a href="#snn-research">SNN 연구 노트</a>
           <a href="#nrv-dvs-calibration">NRV DVS 캘리브레이션 설명</a>
           <a href="#nrv-dvs-rectify">NRV DVS Rectify 설명</a>
-          <a href="#event-stereo-depth">이벤트 비전 스테레오 Depth (진행중)</a>
+          <a href="#event-stereo-depth">이벤트 비전 스테레오 Depth</a>
           <a href="#nrv-fpga-troubleshooting">NRV FPGA 트러블슈팅 노트</a>
           <a href="#side-projects">사이드 프로젝트 링크</a>
           <a href="#hardware-notes">SoC/FPGA 학습 노트</a>
