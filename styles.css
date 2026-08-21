@@ -1442,6 +1442,244 @@ p {
   cursor: default;
 }
 
+/* DVS Rectify guide */
+body.rectify-doc-page .content {
+  max-width: 1180px;
+}
+
+body.rectify-doc-page .scope-note p {
+  margin: 0;
+}
+
+body.rectify-doc-page .doc-section,
+body.rectify-doc-page .rectify-topic {
+  scroll-margin-top: 36px;
+}
+
+body.rectify-doc-page .doc-section > p,
+body.rectify-doc-page .rectify-topic > p {
+  max-width: 980px;
+}
+
+body.rectify-doc-page .rectify-topic {
+  margin: 2rem 0 0;
+  padding: 1.5rem 0 0 1.25rem;
+  border-top: 1px solid var(--line);
+  border-left: 3px solid rgb(213 15 52 / 18%);
+}
+
+body.rectify-doc-page .rectify-topic h4 {
+  margin: 0 0 0.7rem;
+  color: var(--ink);
+  font-size: clamp(1.08rem, 1.7vw, 1.3rem);
+}
+
+body.rectify-doc-page figure {
+  margin: 1.65rem auto;
+}
+
+body.rectify-doc-page figure img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+body.rectify-doc-page figcaption {
+  padding: 0.75rem 0.9rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+body.rectify-doc-page .rectify-figure {
+  width: min(100%, 700px);
+}
+
+body.rectify-doc-page #stereo-search .rectify-figure {
+  width: min(100%, 420px);
+}
+
+body.rectify-doc-page #feature-search .rectify-figure,
+body.rectify-doc-page #ai-depth .rectify-figure,
+body.rectify-doc-page #industry .rectify-figure,
+body.rectify-doc-page #lens .rectify-figure,
+body.rectify-doc-page #nearest .rectify-figure {
+  width: min(100%, 560px);
+}
+
+body.rectify-doc-page .comparison-figure {
+  width: min(100%, 900px);
+  margin: 1.8rem auto;
+}
+
+body.rectify-doc-page .comparison-figure .figure-grid.two-up {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.1rem;
+}
+
+body.rectify-doc-page .comparison-figure figure {
+  margin: 0;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+body.rectify-doc-page .comparison-figure img {
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  background: #16181d;
+}
+
+body.rectify-doc-page .rectify-flow-row {
+  display: grid;
+  grid-template-columns: repeat(7, max-content);
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+body.rectify-doc-page .rectify-flow-row > span,
+body.rectify-doc-page .rectify-flow-row > strong {
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #d9dfe7;
+  background: #fff;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+body.rectify-doc-page .rectify-flow-row > b {
+  color: var(--nrv-red);
+}
+
+body.rectify-doc-page .rectify-flow-set .rectify-flow-row {
+  grid-template-columns: 95px repeat(5, max-content);
+  margin: 0;
+  border-bottom: 0;
+}
+
+body.rectify-doc-page .rectify-flow-set .rectify-flow-row:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+body.rectify-doc-page .rectify-distortion-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.85fr) minmax(360px, 1.15fr);
+  gap: 1.4rem;
+  align-items: stretch;
+  margin: 1.5rem 0;
+}
+
+body.rectify-doc-page .rectify-distortion-row .rectify-figure {
+  width: 100%;
+  margin: 0;
+}
+
+body.rectify-doc-page .rectify-distortion-row .rectify-figure img {
+  height: 100%;
+  min-height: 260px;
+  object-fit: contain;
+}
+
+body.rectify-doc-page .rectify-math-panel,
+body.rectify-doc-page .rectify-calc-steps > div {
+  padding: 1.2rem 1.35rem;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  background: #fbfcfd;
+}
+
+body.rectify-doc-page .rectify-math-panel {
+  display: grid;
+  align-content: center;
+  gap: 0.8rem;
+}
+
+body.rectify-doc-page .rectify-math-panel math,
+body.rectify-doc-page .rectify-calc-steps math {
+  min-width: max-content;
+  font-size: 1.08rem;
+}
+
+body.rectify-doc-page .rectify-io-line,
+body.rectify-doc-page .rectify-key-statement,
+body.rectify-doc-page .source-note {
+  padding: 0.9rem 1rem;
+  border-left: 3px solid var(--nrv-red);
+  background: var(--panel);
+}
+
+body.rectify-doc-page .source-note {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+body.rectify-doc-page .rectify-calc-steps {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+body.rectify-doc-page .rectify-calc-steps > div > span {
+  color: var(--nrv-red-dark);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body.rectify-doc-page .rectify-calc-steps h4 {
+  margin: 0.35rem 0 0.5rem;
+  color: var(--ink);
+}
+
+body.rectify-doc-page .rectify-process-heading {
+  margin-top: 2.4rem;
+  color: var(--ink);
+}
+
+body.rectify-doc-page .rectify-process-copy {
+  margin-top: -0.35rem;
+}
+
+body.rectify-doc-page .rectify-process-figure,
+body.rectify-doc-page .workflow-figure,
+body.rectify-doc-page .rectify-overview {
+  width: min(100%, 720px);
+}
+
+body.rectify-doc-page .rectify-overview img {
+  padding: 1rem;
+}
+
+body.rectify-doc-page .rectify-requirements {
+  display: grid;
+  gap: 0.75rem;
+  padding-left: 1.3rem;
+}
+
+@media (max-width: 760px) {
+  body.rectify-doc-page .comparison-figure .figure-grid.two-up,
+  body.rectify-doc-page .rectify-distortion-row {
+    grid-template-columns: 1fr;
+  }
+
+  body.rectify-doc-page .rectify-flow-row,
+  body.rectify-doc-page .rectify-flow-set .rectify-flow-row {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  body.rectify-doc-page .rectify-flow-row > b {
+    transform: rotate(90deg);
+  }
+}
+
 .article-pager + .page-footer {
   margin-top: 0;
 }
@@ -2003,39 +2241,40 @@ body.home-page .sitemap-number {
 }
 
 /* Planned work stays on the homepage as non-clickable preview cards. */
-#planned-work .planned-work-grid {
+#drone-motion-capture .planned-work-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: start;
 }
 
-#planned-work .plan-card {
+#drone-motion-capture .plan-card {
   min-height: 0;
   cursor: default;
 }
 
-#planned-work .plan-card:hover {
+#drone-motion-capture .plan-card:hover {
   border-color: var(--border, #dfe4ea);
   transform: none;
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
 }
 
-#planned-work .plan-card-link {
+#drone-motion-capture .plan-card-link {
   cursor: pointer;
 }
 
-#planned-work .plan-card-link:hover,
-#planned-work .plan-card-link:focus-visible {
+#drone-motion-capture .plan-card-link:hover,
+#drone-motion-capture .plan-card-link:focus-visible {
   border-color: var(--accent, #0f766e);
   transform: translateY(-3px);
   box-shadow: 0 24px 52px rgba(15, 23, 42, 0.1);
 }
 
-#planned-work .plan-card-link:focus-visible {
+#drone-motion-capture .plan-card-link:focus-visible {
   outline: 3px solid rgb(15 118 110 / 24%);
   outline-offset: 3px;
 }
 
-#planned-work .plan-open-label {
+#drone-motion-capture .plan-open-label,
+#event-stereo-depth .plan-open-label {
   display: inline-flex;
   margin: 18px 30px 0;
   color: var(--accent, #0f766e);
@@ -2043,25 +2282,25 @@ body.home-page .sitemap-number {
   font-weight: 850;
 }
 
-#planned-work .plan-thumb-image {
+#drone-motion-capture .plan-thumb-image {
   object-fit: contain;
   background: #fff;
 }
 
-#planned-work .plan-thumb-empty {
+#drone-motion-capture .plan-thumb-empty {
   display: block;
   background: #eef2f5;
 }
 
-#planned-work .plan-meta {
+#drone-motion-capture .plan-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin: 0 30px 18px;
 }
 
-#planned-work .plan-meta span,
-#planned-work .plan-meta time {
+#drone-motion-capture .plan-meta span,
+#drone-motion-capture .plan-meta time {
   display: inline-flex;
   align-items: center;
   min-height: 30px;
@@ -2074,13 +2313,13 @@ body.home-page .sitemap-number {
   line-height: 1.2;
 }
 
-#planned-work .plan-meta span {
+#drone-motion-capture .plan-meta span {
   border-color: #99f6e4;
   background: var(--accent-soft, #ecfdf5);
   color: var(--accent, #0f766e);
 }
 
-#planned-work .plan-card .plan-progress {
+#drone-motion-capture .plan-card .plan-progress {
   margin-top: 14px;
   padding-top: 14px;
   border-top: 1px solid #e2e8f0;
@@ -2088,13 +2327,13 @@ body.home-page .sitemap-number {
 }
 
 @media (max-width: 980px) {
-  #planned-work .planned-work-grid {
+  #drone-motion-capture .planned-work-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 620px) {
-  #planned-work .planned-work-grid {
+  #drone-motion-capture .planned-work-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -2672,38 +2911,38 @@ body.planned-detail-page .thesis-schedule-table tbody tr:last-child td {
 }
 
 /* The personal GitHub-project collection stays compact on desktop. */
-#github-projects .project-grid {
+#side-projects .project-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 
-#github-projects .project-card {
+#side-projects .project-card {
   min-height: 0;
   padding-bottom: 20px;
 }
 
-#github-projects .project-thumb {
+#side-projects .project-thumb {
   aspect-ratio: 4 / 3;
 }
 
-#github-projects .project-card .sitemap-number {
+#side-projects .project-card .sitemap-number {
   width: 44px;
   height: 44px;
   margin: 18px 20px 12px;
   font-size: 0.82rem;
 }
 
-#github-projects .project-card small {
+#side-projects .project-card small {
   margin: 0 20px 8px;
   font-size: 0.66rem;
 }
 
-#github-projects .project-card h2 {
+#side-projects .project-card h2 {
   margin: 0 20px 10px;
   font-size: 1.05rem;
 }
 
-#github-projects .project-card p {
+#side-projects .project-card p {
   margin: 0 20px;
   font-size: 0.92rem;
   line-height: 1.6;
@@ -2763,13 +3002,13 @@ body.planned-detail-page .thesis-schedule-table tbody tr:last-child td {
 }
 
 @media (max-width: 1100px) {
-  #github-projects .project-grid {
+  #side-projects .project-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 680px) {
-  #github-projects .project-grid {
+  #side-projects .project-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -2839,13 +3078,16 @@ body.planned-detail-page .thesis-schedule-table tbody tr:last-child td {
 
 /* Keep the DVS, SoC and competition entry cards at the compact troubleshooting scale. */
 #nrv-dvs-calibration .sitemap-card,
+#nrv-dvs-rectify .sitemap-card,
+#event-stereo-depth .sitemap-card,
 #hardware-notes .sitemap-card {
   min-height: 0;
   padding: 0 0 20px;
   overflow: hidden;
 }
 
-#nrv-dvs-calibration .calibration-card-thumb {
+#nrv-dvs-calibration .calibration-card-thumb,
+#nrv-dvs-rectify .calibration-card-thumb {
   width: 100%;
   max-width: 100%;
   height: auto;
@@ -2854,6 +3096,8 @@ body.planned-detail-page .thesis-schedule-table tbody tr:last-child td {
 }
 
 #nrv-dvs-calibration .sitemap-number,
+#nrv-dvs-rectify .sitemap-number,
+#event-stereo-depth .sitemap-number,
 #hardware-notes .sitemap-number {
   width: 44px;
   min-width: 44px;
@@ -2863,18 +3107,24 @@ body.planned-detail-page .thesis-schedule-table tbody tr:last-child td {
 }
 
 #nrv-dvs-calibration .entry-card-kicker,
+#nrv-dvs-rectify .entry-card-kicker,
+#event-stereo-depth .entry-card-kicker,
 #hardware-notes .entry-card-kicker {
   margin: 0 20px 8px;
   font-size: 0.66rem;
 }
 
 #nrv-dvs-calibration .sitemap-card h2,
+#nrv-dvs-rectify .sitemap-card h2,
+#event-stereo-depth .sitemap-card h2,
 #hardware-notes .sitemap-card h2 {
   margin: 0 20px 10px;
   font-size: 1.05rem;
 }
 
 #nrv-dvs-calibration .sitemap-card p,
+#nrv-dvs-rectify .sitemap-card p,
+#event-stereo-depth .sitemap-card p,
 #hardware-notes .sitemap-card p {
   margin: 0 20px;
   font-size: 0.92rem;

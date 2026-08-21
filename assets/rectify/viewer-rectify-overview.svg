@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="592" viewBox="0 0 560 592" role="img" aria-labelledby="title desc">
+  <title id="title">DVS Rectify data flow</title>
+  <desc id="desc">DVS packets pass through Rectify before entering the Viewer system and its preview, save, and processing functions.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0 0v6l6-3z" fill="#5c6875"/></marker>
+    <style>
+      text{font-family:Arial,'Malgun Gothic',sans-serif;fill:#1c2937;text-anchor:middle}
+      .title{font-size:18px;font-weight:700}.copy{font-size:13px;fill:#667383}
+      .box{fill:#fff;stroke:#d9dfe7;stroke-width:1.5}.rectify{fill:#fff8f8;stroke:#d91c44;stroke-width:1.5}.rule{stroke:#d91c44;stroke-width:4}
+      .line{stroke:#5c6875;stroke-width:1.75;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="560" height="592" fill="#fff"/>
+  <rect class="box" x="74" y="24" width="412" height="66" rx="2"/>
+  <text class="title" x="280" y="54">DVS Packet Data</text>
+  <text class="copy" x="280" y="76">raw event packets from NRV DVS</text>
+  <line class="line" x1="280" y1="90" x2="280" y2="132"/>
+  <rect class="rectify" x="74" y="140" width="412" height="74" rx="2"/>
+  <line class="rule" x1="74" y1="141" x2="486" y2="141"/>
+  <text class="title" x="280" y="177">Rectify Module</text>
+  <text class="copy" x="280" y="199">corrects event coordinates with the prepared map</text>
+  <line class="line" x1="280" y1="214" x2="280" y2="256"/>
+  <rect class="box" x="74" y="264" width="412" height="66" rx="2"/>
+  <text class="title" x="280" y="294">Rectified DVS Packet Data</text>
+  <text class="copy" x="280" y="316">ordinary DVS packets with corrected coordinates</text>
+  <line class="line" x1="280" y1="330" x2="280" y2="372"/>
+  <rect class="box" x="74" y="380" width="412" height="74" rx="2"/>
+  <text class="title" x="280" y="417">Viewer System</text>
+  <text class="copy" x="280" y="439">normal Viewer functions receive the corrected packets</text>
+  <line class="line" x1="280" y1="454" x2="280" y2="496"/>
+  <rect class="box" x="74" y="504" width="412" height="62" rx="2"/>
+  <text class="title" x="280" y="541">Preview / Save / Processing</text>
+</svg>

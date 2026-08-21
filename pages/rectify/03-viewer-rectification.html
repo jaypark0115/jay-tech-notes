@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="NRV DVS Viewer 정렬 기능의 준비물과 사용 순서를 설명합니다." />
+    <title>정렬 준비와 Viewer 사용법 — Jay Tech Notes</title>
+    <link rel="stylesheet" href="../../styles.css?v=20260821-rectify" />
+    <script src="../../script.js" defer>
+</script>
+  </head>
+  <body class="rectify-doc-page">
+<div class="site-shell">
+<main class="content-wrap" id="top">
+<article class="content">
+        <div class="document-kicker">
+<span>정렬 가이드</span>
+<div class="kicker-actions">
+<span class="draft-label">사용</span>
+</div>
+</div>
+        <a class="home-link" href="../../index.html#nrv-dvs-rectify">← DVS Rectify 설명으로 돌아가기</a>
+<nav class="chapter-switcher" aria-label="Rectify 글 목록">
+<span class="chapter-switcher-label">Rectify 글 목록</span>
+<div>
+<a href="01-why-rectification.html">1. DVS 정렬이 필요한 이유</a>
+<a href="02-rectification-principles.html">2. 정렬 처리 원리</a>
+<a class="current" href="03-viewer-rectification.html">3. Viewer에서 정렬 사용하기</a>
+</div>
+</nav>
+        <h1>3. Viewer에서 정렬 사용하기</h1>
+        <p class="lead">이 장에서는 Viewer에서 Rectify를 실제로 사용하는 순서를 설명합니다. 사용할 카메라를 선택한 뒤 캘리브레이션 YAML을 불러오고, Setup 완료를 확인한 다음 Start Rectify를 활성화합니다. 마지막으로 Viewer의 라이브 스트림을 시작해 보정 결과를 확인합니다.</p>
+<aside class="scope-note">
+<strong>이 장에서 다루는 내용</strong>
+<p>카메라 선택, 캘리브레이션 YAML Setup, Rectify 활성화, 라이브 스트림 시작과 결과 확인 순서를 설명합니다.</p>
+</aside>
+
+        <section class="doc-section searchable-section" id="requirements">
+<h3>3.1 Rectify 사용 전 준비</h3>
+<ul class="rectify-requirements">
+<li>Rectify 메뉴가 포함된 <strong>NRV DVS Viewer</strong>
+</li>
+<li>Viewer에 연결되어 사용할 장치로 선택된 <strong>NRV DVS 카메라</strong>
+</li>
+<li>해당 카메라 구성에서 생성한 <strong>calibration.yaml</strong>
+</li>
+</ul>
+</section>
+
+<section class="doc-section searchable-section" id="open">
+<h3>3.2 사용할 카메라를 선택하고 Rectify를 엽니다</h3>
+<p>Viewer 상단에서 사용할 카메라를 먼저 선택한 다음 Rectify를 누릅니다. 이후 Setup에서는 현재 선택한 카메라와 같은 구성으로 생성한 캘리브레이션 파일을 사용합니다. 모노 카메라에는 모노 캘리브레이션 결과를, 스테레오 카메라에는 스테레오 캘리브레이션 결과를 선택합니다.</p>
+<figure class="doc-figure workflow-figure">
+<img src="../../assets/rectify/viewer-rectify-button.png" alt="Device 선택과 Rectify 메뉴가 보이는 Viewer 도구 모음" />
+<figcaption><strong>1.</strong> 사용할 카메라를 선택한 뒤 Rectify를 엽니다.</figcaption>
+</figure>
+</section>
+
+<section class="doc-section searchable-section" id="setup">
+<h3>3.3 캘리브레이션 YAML을 불러옵니다</h3>
+<p>Setup을 진행하기 전에 라이브 스트림, 파일 재생, 저장이 모두 중지되어 있는지 확인합니다. 실행 중인 기능이 있다면 먼저 중지한 뒤 Setup을 진행합니다.</p>
+<p><strong>1단계.</strong> Setup을 누른 뒤 현재 카메라에서 생성한 <strong>calibration.yaml</strong>을 선택합니다.</p>
+<figure class="doc-figure workflow-figure">
+<img src="../../assets/rectify/rectify-dialog-unconfigured.png" alt="YAML Setup 전 Rectify 패널" />
+<figcaption><strong>2.</strong> Setup에서 calibration.yaml을 선택합니다.</figcaption>
+</figure>
+<p><strong>2단계.</strong> 파일을 정상적으로 불러오면 Setup complete가 표시되고 Start Rectify 버튼이 활성화됩니다.</p>
+<figure class="doc-figure workflow-figure">
+<img src="../../assets/rectify/rectify-dialog-ready.png" alt="YAML Setup 완료 후 Rectify 패널" />
+<figcaption><strong>3.</strong> Setup complete 상태에서 Start Rectify 버튼이 활성화됩니다.</figcaption>
+</figure>
+<p>Setup complete가 표시되지 않으면 스트림을 시작하지 말고, 선택한 카메라와 캘리브레이션 파일이 일치하는지 다시 확인합니다.</p>
+</section>
+
+<section class="doc-section searchable-section" id="start">
+<h3>3.4 Rectify를 활성화하고 라이브 스트림을 시작합니다</h3>
+<p>Setup이 완료되면 <strong>Start Rectify</strong>를 누릅니다. 버튼이 <strong>Stop Rectify</strong>로 바뀌면 Rectify가 활성화된 상태입니다.</p>
+<figure class="doc-figure workflow-figure">
+<img src="../../assets/rectify/rectify-dialog-enabled.png" alt="Rectify가 활성화된 상태의 패널" />
+<figcaption><strong>4.</strong> Start Rectify를 누르면 Stop Rectify로 바뀌며 Rectify가 활성화됩니다.</figcaption>
+</figure>
+<p>이후 Viewer의 일반 <strong>Apply / Start</strong> 버튼으로 카메라 스트림을 시작합니다. Preview와 저장 기능에는 별도의 추가 설정 없이 보정된 DVS 데이터가 사용됩니다.</p>
+<p>Rectify를 중지할 때는 먼저 라이브 스트림과 저장을 중지한 뒤 <strong>Stop Rectify</strong>를 누릅니다.</p>
+</section>
+
+        <section class="doc-section searchable-section" id="verify">
+<h3>3.5 라이브 결과를 확인합니다</h3>
+<p>같은 카메라 위치에서 Rectify OFF와 ON 결과를 비교합니다. 아래 예시에서는 모니터에 표시된 직선이 Rectify OFF 상태에서는 렌즈 왜곡 때문에 휘어 보이고, Rectify ON 상태에서는 더 곧게 보입니다.</p>
+<p>스테레오 카메라에서는 좌·우 화면의 대응 구조가 같은 영상 행에 가까워졌는지도 함께 확인합니다.</p>
+<div class="comparison-figure">
+<div class="figure-grid two-up">
+<figure>
+<img src="../../assets/rectify/line-before.png" alt="Rectify OFF 상태의 점멸 선" />
+<figcaption>Rectify OFF</figcaption>
+</figure>
+<figure>
+<img src="../../assets/rectify/line-after.png" alt="Rectify ON 상태의 점멸 선" />
+<figcaption>Rectify ON</figcaption>
+</figure>
+</div>
+</div>
+</section>
+
+        <div class="transition-note" role="note">
+<p>현재 Rectify는 Viewer와 SDK의 소프트웨어 처리 경로에서 제공됩니다. 향후에는 카메라에서 직접 보정된 이벤트를 출력하는 방식도 지원할 계획입니다.</p>
+</div>
+        <p class="bottom-author">작성: 박재연</p>
+<nav class="chapter-switcher chapter-switcher-bottom" aria-label="Rectify 글 목록">
+<span class="chapter-switcher-label">Rectify 글 목록</span>
+<div>
+<a href="01-why-rectification.html">1. DVS 정렬이 필요한 이유</a>
+<a href="02-rectification-principles.html">2. 정렬 처리 원리</a>
+<a class="current" href="03-viewer-rectification.html">3. Viewer에서 정렬 사용하기</a>
+</div>
+</nav>
+<nav class="article-pager">
+<a class="pager-link pager-prev" href="02-rectification-principles.html">이전: 2. 정렬 처리 원리</a>
+<span class="pager-link pager-disabled" aria-disabled="true">다음 글 없음</span>
+</nav>
+<p class="search-empty" role="status" hidden>검색어와 일치하는 절 제목이 없습니다.</p>
+<footer class="page-footer">
+<span>Jay Tech Notes</span>
+<a href="#top">맨 위로 ↑</a>
+</footer>
+      </article>
+</main>
+    </div>
+  </body>
+</html>

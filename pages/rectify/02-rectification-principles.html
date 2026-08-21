@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="DVS 렌즈 왜곡, 역방향 좌표 계산, LUT와 Valid ROI를 설명합니다." />
+  <title>DVS 정렬 처리 원리 — Jay Tech Notes</title>
+  <link rel="stylesheet" href="../../styles.css?v=20260821-rectify" />
+  <script src="../../script.js" defer>
+</script>
+</head>
+<body class="rectify-doc-page">
+<div class="site-shell">
+<main class="content-wrap" id="top">
+<article class="content">
+      <div class="document-kicker">
+<span>정렬 가이드</span>
+<div class="kicker-actions">
+<span class="draft-label">처리 원리</span>
+</div>
+</div>
+      <a class="home-link" href="../../index.html#nrv-dvs-rectify">← DVS Rectify 설명으로 돌아가기</a>
+<nav class="chapter-switcher" aria-label="Rectify 글 목록 탐색">
+<span class="chapter-switcher-label">Rectify 글 목록</span>
+<div>
+<a href="01-why-rectification.html">1. DVS 정렬이 필요한 이유</a>
+<a class="current" href="02-rectification-principles.html">2. 정렬 처리 원리</a>
+<a href="03-viewer-rectification.html">3. Viewer 사용 방법</a>
+</div>
+</nav>
+      <h1>2. DVS 정렬 처리 원리</h1>
+      <p class="lead">이 장에서는 렌즈 왜곡이 이벤트 좌표에 어떻게 반영되고, 그 좌표를 실제로 어떻게 보정하는지 설명합니다. 먼저 렌즈 왜곡을 수식으로 표현한 뒤, 보정 화면의 한 위치에 대응하는 원본 센서 좌표를 계산합니다. DVS에서는 그 위치에서 가장 가까운 정수 픽셀을 선택하고, 이 대응 관계를 LUT로 미리 저장해 실시간 처리에 사용합니다.</p>
+      <aside class="scope-note">
+<strong>이 장에서 다루는 내용</strong>
+<p>렌즈 왜곡이 좌표에 어떻게 반영되는지부터, 보정 출력 좌표에 대응하는 원본 센서 위치를 계산하고 가장 가까운 DVS 픽셀을 선택해 LUT로 저장하는 과정까지 설명합니다.</p>
+</aside>
+
+      <section class="doc-section searchable-section" id="lens">
+<h3>2.1 실제 카메라에서는 이상적인 위치와 관측 위치가 달라질 수 있습니다</h3>
+<p>이상적인 카메라 모델에서는 장면의 한 점이 정해진 위치에 투영됩니다. 하지만 실제 카메라에서는 렌즈의 곡률과 조립 오차, 렌즈와 센서의 미세한 어긋남 때문에 같은 점이 이론적인 위치와 다른 픽셀에 기록될 수 있습니다.</p>
+<p>캘리브레이션은 이러한 차이를 수치로 구하고, Rectify는 그 값을 이용해 이벤트 좌표를 보정합니다.</p>
+<figure class="rectify-figure">
+<img src="../../assets/rectify/lens-sensor-decentring.png" alt="렌즈, 광학축, 센서 정렬 구조" />
+<figcaption>렌즈와 센서의 정렬 오차가 관측 좌표에 영향을 주는 예입니다.</figcaption>
+</figure>
+</section>
+
+      <section class="doc-section searchable-section" id="distortion">
+<h3>2.2 왜곡은 어떤 식으로 좌표를 바꾸는가</h3>
+<p>렌즈 왜곡은 몇 개의 계수로 표현할 수 있습니다. 아래에서는 화면 중심에서의 거리에 따라 나타나는 방사 왜곡과 렌즈·센서의 어긋남으로 생기는 접선 왜곡을 먼저 살펴보고, 필요한 경우 추가되는 Thin-prism 항까지 순서대로 설명합니다.</p>
+        <section class="rectify-topic" id="radial">
+<h4>2.2.1 방사 왜곡</h4>
+<p>방사 왜곡은 화면 중심에서 멀어질수록 크게 나타나는 왜곡입니다. 이 때문에 실제 직선이 바깥쪽으로 부풀거나 안쪽으로 휘어 보일 수 있습니다.</p>
+<p>아래 식에서는 중심에서의 거리 <em>r</em>을 기준으로 <em>x</em>, <em>y</em> 좌표가 얼마나 이동하는지를 계산합니다.</p>
+<div class="rectify-distortion-row">
+<figure class="rectify-figure">
+<img src="../../assets/rectify/paper-radial-distortion-types.png" alt="배럴 및 핀쿠션 방사 왜곡 그림" />
+<figcaption>방사 왜곡으로 격자가 바깥쪽 또는 안쪽으로 휘어진 예입니다.</figcaption>
+</figure>
+<div class="rectify-math-panel">
+<math display="block">
+<mrow>
+<msup>
+<mi>r</mi>
+<mn>2</mn>
+</msup>
+<mo>=</mo>
+<msup>
+<mi>x</mi>
+<mn>2</mn>
+</msup>
+<mo>+</mo>
+<msup>
+<mi>y</mi>
+<mn>2</mn>
+</msup>
+</mrow>
+</math>
+<math display="block">
+<mrow>
+<mi>L</mi>
+<mo>(</mo>
+<mi>r</mi>
+<mo>)</mo>
+<mo>=</mo>
+<mfrac>
+<mrow>
+<mn>1</mn>
+<mo>+</mo>
+<msub>
+<mi>k</mi>
+<mn>1</mn>
+</msub>
+<msup>
+<mi>r</mi>
+<mn>2</mn>
+</msup>
+<mo>+</mo>
+<msub>
+<mi>k</mi>
+<mn>2</mn>
+</msub>
+<msup>
+<mi>r</mi>
+<mn>4</mn>
+</msup>
+<mo>+</mo>
+<msub>
+<mi>k</mi>
+<mn>3</mn>
+</msub>
+<msup>
+<mi>r</mi>
+<mn>6</mn>
+</msup>
+</mrow>
+<mrow>
+<mn>1</mn>
+<mo>+</mo>
+<msub>
+<mi>k</mi>
+<mn>4</mn>
+</msub>
+<msup>
+<mi>r</mi>
+<mn>2</mn>
+</msup>
+<mo>+</mo>
+<msub>
+<mi>k</mi>
+<mn>5</mn>
+</msub>
+<msup>
+<mi>r</mi>
+<mn>4</mn>
+</msup>
+<mo>+</mo>
+<msub>
+<mi>k</mi>
+<mn>6</mn>
+</msub>
+<msup>
+<mi>r</mi>
+<mn>6</mn>
+</msup>
+</mrow>
+</mfrac>
+</mrow>
+</math>
+<math display="block">
+<mrow>
+<msub>
+<mi>x</mi>
+<mi>r</mi>
+</msub>
+<mo>=</mo>
+<mi>x</mi>
+<mi>L</mi>
+<mo>(</mo>
+<mi>r</mi>
+<mo>)</mo>
+<mo>,</mo>
+<mspace width="1em"/>
+<msub>
+<mi>y</mi>
+<mi>r</mi>
+</msub>
+<mo>=</mo>
+<mi>y</mi>
+<mi>L</mi>
+<mo>(</mo>
+<mi>r</mi>
+<mo>)</mo>
+</mrow>
+</math>
+</div>
+</div>
+</section>
+        <section class="rectify-topic" id="tangential">
+<h4>2.2.2 접선 왜곡</h4>
+<p>렌즈와 센서의 중심이 정확히 맞지 않거나 서로 조금 기울어져 있으면 왜곡이 한쪽으로 치우쳐 나타날 수 있습니다. <em>p₁</em>, <em>p₂</em>는 이러한 비대칭적인 좌표 이동을 표현합니다.</p>
+<div class="rectify-distortion-row">
+<figure class="rectify-figure">
+<img src="../../assets/rectify/tangential-distortion.png" alt="접선 왜곡이 적용된 체커보드" />
+<figcaption>접선 왜곡으로 격자가 한쪽 방향으로 비대칭하게 휘어진 예입니다.</figcaption>
+</figure>
+<div class="rectify-math-panel">
+<math display="block">
+<mrow>
+<mi>Δ</mi>
+<msub>
+<mi>x</mi>
+<mi>t</mi>
+</msub>
+<mo>=</mo>
+<mn>2</mn>
+<msub>
+<mi>p</mi>
+<mn>1</mn>
+</msub>
+<mi>x</mi>
+<mi>y</mi>
+<mo>+</mo>
+<msub>
+<mi>p</mi>
+<mn>2</mn>
+</msub>
+<mo>(</mo>
+<msup>
+<mi>r</mi>
+<mn>2</mn>
+</msup>
+<mo>+</mo>
+<mn>2</mn>
+<msup>
+<mi>x</mi>
+<mn>2</mn>
+</msup>
+<mo>)</mo>
+</mrow>
+</math>
+<math display="block">
+<mrow>
+<mi>Δ</mi>
+<msub>
+<mi>y</mi>
+<mi>t</mi>
+</msub>
+<mo>=</mo>
+<msub>
+<mi>p</mi>
+<mn>1</mn>
+</msub>
+<mo>(</mo>
+<msup>
+<mi>r</mi>
+<mn>2</mn>
+</msup>
+<mo>+</mo>
+<mn>2</mn>
+<msup>
+<mi>y</mi>
+<mn>2</mn>
+</msup>
+<mo>)</mo>
+<mo>+</mo>
+<mn>2</mn>
+<msub>
+<mi>p</mi>
+<mn>2</mn>
+</msub>
+<mi>x</mi>
+<mi>y</mi>
+</mrow>
+</math>
+</div>
+</div>
+</section>
+        <section class="rectify-topic" id="thin-prism">
+<h4>2.2.3 Thin-prism 항</h4>
+<p>사용하는 왜곡 모델에 따라 Thin-prism 항이 추가될 수 있습니다. 필요한 경우 이 항도 다른 왜곡 항과 함께 최종 좌표 계산에 반영됩니다.</p>
+<div class="rectify-distortion-row">
+<figure class="rectify-figure">
+<img src="../../assets/rectify/thin-prism-distortion.png" alt="얇은 프리즘 왜곡이 적용된 체커보드" />
+<figcaption>Thin-prism 왜곡이 반영된 격자의 예입니다.</figcaption>
+</figure>
+<div class="rectify-math-panel">
+<math display="block">
+<mrow>
+<mi>Δ</mi>
+<msub>
+<mi>x</mi>
+<mi>s</mi>
+</msub>
+<mo>=</mo>
+<msub>
+<mi>s</mi>
+<mn>1</mn>
+</msub>
+<msup>
+<mi>r</mi>
+<mn>2</mn>
+</msup>
+<mo>+</mo>
+<msub>
+<mi>s</mi>
+<mn>2</mn>
+</msub>
+<msup>
+<mi>r</mi>
+<mn>4</mn>
+</msup>
+</mrow>
+</math>
+<math display="block">
+<mrow>
+<mi>Δ</mi>
+<msub>
+<mi>y</mi>
+<mi>s</mi>
+</msub>
+<mo>=</mo>
+<msub>
+<mi>s</mi>
+<mn>3</mn>
+</msub>
+<msup>
+<mi>r</mi>
+<mn>2</mn>
+</msup>
+<mo>+</mo>
+<msub>
+<mi>s</mi>
+<mn>4</mn>
+</msub>
+<msup>
+<mi>r</mi>
+<mn>4</mn>
+</msup>
+</mrow>
+</math>
+</div>
+</div>
+</section>
+      </section>
+
+      <section class="doc-section searchable-section" id="source-coordinate">
+<h3>2.3 보정 출력 좌표에서 원본 센서 좌표를 계산합니다</h3>
+<p>Rectify는 보정된 화면의 각 위치를 기준으로, 그 위치를 채우기 위해 원본 센서의 어느 좌표를 참조해야 하는지 계산합니다. 아래 세 단계는 하나의 보정 출력 좌표 <em>(u, v)</em>가 원본 센서의 소스 좌표 <em>(uₛ, vₛ)</em>로 연결되는 과정을 보여줍니다.</p>
+<p class="rectify-io-line"><strong>입력:</strong> 보정 화면 좌표 <em>(u, v)</em> <b>→</b> <strong>출력:</strong> 원본 센서에서 참조할 좌표 <em>(uₛ, vₛ)</em></p>
+<div class="rectify-calc-steps">
+<div>
+<span>Step 1</span>
+<h4>출력 좌표를 정규화 좌표로 변환</h4>
+<p>초점거리와 주점을 기준으로 픽셀 좌표를 계산에 사용하기 쉬운 정규화 좌표로 바꿉니다.</p>
+<math display="block">
+<mrow>
+<mi>x</mi>
+<mo>=</mo>
+<mfrac>
+<mrow>
+<mi>u</mi>
+<mo>-</mo>
+<msub>
+<mi>c</mi>
+<mi>x</mi>
+</msub>
+</mrow>
+<msub>
+<mi>f</mi>
+<mi>x</mi>
+</msub>
+</mfrac>
+<mo>,</mo>
+<mspace width="1em"/>
+<mi>y</mi>
+<mo>=</mo>
+<mfrac>
+<mrow>
+<mi>v</mi>
+<mo>-</mo>
+<msub>
+<mi>c</mi>
+<mi>y</mi>
+</msub>
+</mrow>
+<msub>
+<mi>f</mi>
+<mi>y</mi>
+</msub>
+</mfrac>
+</mrow>
+</math>
+</div>
+<div>
+<span>Step 2</span>
+<h4>렌즈 왜곡 모델 적용</h4>
+<p>앞에서 구한 방사 왜곡과 접선 왜곡을 더하고, 필요한 경우 Thin-prism 항도 함께 반영합니다.</p>
+<math display="block">
+<mrow>
+<msub>
+<mi>x</mi>
+<mi>d</mi>
+</msub>
+<mo>=</mo>
+<mi>x</mi>
+<mi>L</mi>
+<mo>(</mo>
+<mi>r</mi>
+<mo>)</mo>
+<mo>+</mo>
+<mi>Δ</mi>
+<msub>
+<mi>x</mi>
+<mi>t</mi>
+</msub>
+<mo>+</mo>
+<mi>Δ</mi>
+<msub>
+<mi>x</mi>
+<mi>s</mi>
+</msub>
+</mrow>
+</math>
+<math display="block">
+<mrow>
+<msub>
+<mi>y</mi>
+<mi>d</mi>
+</msub>
+<mo>=</mo>
+<mi>y</mi>
+<mi>L</mi>
+<mo>(</mo>
+<mi>r</mi>
+<mo>)</mo>
+<mo>+</mo>
+<mi>Δ</mi>
+<msub>
+<mi>y</mi>
+<mi>t</mi>
+</msub>
+<mo>+</mo>
+<mi>Δ</mi>
+<msub>
+<mi>y</mi>
+<mi>s</mi>
+</msub>
+</mrow>
+</math>
+</div>
+<div>
+<span>Step 3</span>
+<h4>원본 센서의 픽셀 좌표 계산</h4>
+<p>다시 카메라 내부 파라미터를 적용해 원본 센서에서 참조할 위치 <em>(uₛ, vₛ)</em>를 구합니다.</p>
+<math display="block">
+<mrow>
+<msub>
+<mi>u</mi>
+<mi>s</mi>
+</msub>
+<mo>=</mo>
+<msub>
+<mi>f</mi>
+<mi>x</mi>
+</msub>
+<msub>
+<mi>x</mi>
+<mi>d</mi>
+</msub>
+<mo>+</mo>
+<msub>
+<mi>c</mi>
+<mi>x</mi>
+</msub>
+<mo>,</mo>
+<mspace width="1em"/>
+<msub>
+<mi>v</mi>
+<mi>s</mi>
+</msub>
+<mo>=</mo>
+<msub>
+<mi>f</mi>
+<mi>y</mi>
+</msub>
+<msub>
+<mi>y</mi>
+<mi>d</mi>
+</msub>
+<mo>+</mo>
+<msub>
+<mi>c</mi>
+<mi>y</mi>
+</msub>
+</mrow>
+</math>
+</div>
+</div>
+<p class="rectify-key-statement">이 과정을 거치면 보정 화면의 각 좌표마다 원본 센서에서 읽어야 할 위치 하나가 정해집니다.</p>
+<p>스테레오 카메라에서는 각 카메라의 렌즈 왜곡을 보정하는 것에 더해, 좌·우 카메라의 상대적인 위치와 방향을 이용한 Stereo Rectification도 함께 적용합니다. 이 과정은 같은 장면의 대응점이 좌·우 영상에서 가능한 한 같은 y 좌표, 즉 같은 epipolar line에 놓이도록 좌표를 맞춥니다. 이후 Stereo Matching에서는 주로 수평 방향으로 대응점을 탐색할 수 있습니다.</p>
+</section>
+
+      <section class="doc-section searchable-section" id="nearest">
+<h3>2.4 계산된 소스 좌표에서 가장 가까운 DVS 픽셀을 사용합니다</h3>
+<p>앞 단계에서 계산한 소스 좌표는 <em>(103.2, 198.7)</em>처럼 소수일 수 있습니다. 일반 밝기 영상에서는 주변 픽셀 값을 보간할 수 있지만, DVS 이벤트는 정수 픽셀 위치에서 ON 또는 OFF 상태로 기록됩니다.</p>
+<p>NRV Rectify는 계산된 위치에서 가장 가까운 정수 픽셀을 선택합니다. 위 예에서는 <em>(103, 199)</em>가 선택되며, 해당 이벤트의 ON/OFF 상태를 그대로 사용합니다.</p>
+<figure class="rectify-figure">
+<img src="../../assets/rectify/nearest-dvs-pixel-selection.png" alt="소수 소스 좌표에서 가장 가까운 정수 DVS 픽셀 선택" />
+<figcaption>계산된 위치에서 가장 가까운 정수 픽셀을 선택합니다.</figcaption>
+</figure>
+</section>
+
+      <section class="doc-section searchable-section" id="lut">
+<h3>2.5 미리 계산한 좌표 대응을 LUT로 저장합니다</h3>
+<p>앞에서 계산한 출력 좌표와 원본 센서 좌표의 대응 관계는 카메라 설정이 바뀌지 않는 동안 동일하게 사용할 수 있습니다. 따라서 Setup 단계에서 이 관계를 LUT로 미리 저장합니다.</p>
+<p>라이브 스트림에서는 복잡한 렌즈 왜곡 수식을 다시 계산하지 않고, LUT에서 대응 좌표를 조회해 이벤트 위치를 변환합니다.</p>
+<div class="rectify-flow-set" aria-label="정렬 Setup 및 Runtime 흐름">
+<div class="rectify-flow-row">
+<strong>Setup</strong>
+<span>calibration.yaml</span>
+<b>→</b>
+<span>좌표 계산</span>
+<b>→</b>
+<span>좌표 LUT 생성</span>
+</div>
+<div class="rectify-flow-row">
+<strong>Runtime</strong>
+<span>DVS Packet</span>
+<b>→</b>
+<span>LUT 조회</span>
+<b>→</b>
+<span>Rectified DVS Packet</span>
+</div>
+</div>
+</section>
+
+      <section class="doc-section searchable-section" id="roi">
+<h3>2.6 Valid ROI와 최종 DVS 출력</h3>
+<p>좌표를 보정하면 일부 위치는 원본 센서 범위 밖을 참조하게 됩니다. 이 위치에는 가져올 이벤트가 없기 때문에 최종 출력에서는 제외합니다.</p>
+<p>NRV Rectify는 실제 이벤트를 참조할 수 있는 Valid ROI만 남기며, 잘라낸 결과를 원본 해상도로 다시 확대하지 않습니다.</p>
+<h4 class="rectify-process-heading">① 원본 DVS 이벤트</h4>
+<p class="rectify-process-copy">렌즈 왜곡이 포함된 원본 이벤트입니다.</p>
+<figure class="rectify-figure rectify-process-figure">
+<img src="../../assets/rectify/process-original.png" alt="원본 DVS 이벤트" />
+<figcaption>원본 DVS 이벤트</figcaption>
+</figure>
+<h4 class="rectify-process-heading">② 좌표 보정 후</h4>
+<p class="rectify-process-copy">왜곡을 펴면 화면 가장자리에 원본 센서에서 값을 가져올 수 없는 영역이 생깁니다.</p>
+<figure class="rectify-figure rectify-process-figure">
+<img src="../../assets/rectify/process-undistorted.png" alt="좌표 보정 후 DVS 이벤트" />
+<figcaption>좌표 보정 후</figcaption>
+</figure>
+<h4 class="rectify-process-heading">③ Valid ROI 적용</h4>
+<p class="rectify-process-copy">실제 원본 이벤트를 참조할 수 있는 영역만 남깁니다. Crop된 결과는 다시 확대하지 않습니다.</p>
+<figure class="rectify-figure rectify-process-figure">
+<img src="../../assets/rectify/process-valid-roi.png" alt="최종 Valid ROI DVS 출력" />
+<figcaption>Valid ROI 출력</figcaption>
+</figure>
+</section>
+
+      <div class="transition-note" role="note">
+<p>
+<strong>다음:</strong> 3장에서는 캘리브레이션 YAML을 Viewer에 불러와 좌표 맵을 준비하고, Rectify를 활성화해 실제 라이브 DVS 스트림에 적용하는 방법을 설명합니다.</p>
+</div>
+      <p class="bottom-author">작성: 박재연</p>
+<nav class="chapter-switcher chapter-switcher-bottom">
+<span class="chapter-switcher-label">Rectify 글 목록</span>
+<div>
+<a href="01-why-rectification.html">1. DVS 정렬이 필요한 이유</a>
+<a class="current" href="02-rectification-principles.html">2. 정렬 처리 원리</a>
+<a href="03-viewer-rectification.html">3. Viewer 사용 방법</a>
+</div>
+</nav>
+<nav class="article-pager">
+<a class="pager-link pager-prev" href="01-why-rectification.html">이전: 1. DVS 정렬이 필요한 이유</a>
+<a class="pager-link pager-next" href="03-viewer-rectification.html">다음: 3. Viewer 사용 방법</a>
+</nav>
+<p class="search-empty" role="status" hidden>검색어와 일치하는 절 제목이 없습니다.</p>
+<footer class="page-footer">
+<span>Jay Tech Notes</span>
+<a href="#top">맨 위로 ↑</a>
+</footer>
+    </article>
+</main>
+  </div>
+</body>
+</html>

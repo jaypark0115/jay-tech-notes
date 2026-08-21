@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="연구·개발 계획, SNN 연구, NRV DVS 캘리브레이션, SoC/FPGA 학습 노트와 경진대회 기술 노트 모음." />
+    <meta name="description" content="드론 모션캡처, SNN 연구, NRV DVS 캘리브레이션·Rectify, 이벤트 비전 스테레오 Depth와 FPGA 기술 노트 모음." />
     <title>Jay Tech Notes</title>
-    <link rel="stylesheet" href="styles.css?v=20260810-snn-calibration-card-layout" />
+    <link rel="stylesheet" href="styles.css?v=20260821-rectify-depth-collections" />
     <script src="script.js" defer></script>
   </head>
   <body class="home-page">
@@ -23,20 +23,20 @@
 
           <p class="lead">
             제가 직접 정리한 기술 글, 실험 기록, 논문 메모를 모아두는 개인 페이지입니다.
-            진행 중인 연구·개발 카드 중 상세 페이지가 준비된 항목은 클릭할 수 있고,
-            아직 정리 중인 일부 카드는 클릭되지 않습니다. 그 외 공개 노트와 프로젝트
-            카드는 모두 클릭해 각 글과 자료를 확인할 수 있습니다.
-            SNN 연구, NRV DVS 캘리브레이션, FPGA 트러블슈팅, SoC/FPGA 학습과
+            상세 페이지가 준비된 카드는 클릭해 각 글과 자료를 확인할 수 있으며,
+            아직 정리 중인 일부 연구 카드는 현재 방향과 목표를 보여주는 진입점으로
+            구성했습니다. 드론 모션캡처, SNN 연구, NRV DVS 캘리브레이션과 Rectify,
+            이벤트 비전 스테레오 Depth, FPGA 트러블슈팅, SoC/FPGA 학습 및
             두 경진대회의 설계·구현·검증 기록을 함께 공개하고 있습니다.
           </p>
 
           <div class="home-panels" aria-label="페이지 소개">
-            <a class="home-panel" href="#planned-work">
-              <span>진행 계획 묶음</span>
-              <h2>진행 중인 연구·개발</h2>
+            <a class="home-panel" href="#drone-motion-capture">
+              <span>진행 중인 연구 묶음</span>
+              <h2>LED 모션캡처 드론 제어</h2>
               <p>
-                졸업논문, 실험 환경, 제품 설계, 센서 데이터셋과 FPGA 영상처리까지
-                현재 진행하거나 준비 중인 작업을 목표 일정과 함께 정리했습니다.
+                LED 기반 드론 비행경로 제어 시스템과 리니어 모터 스테이지를 이용한
+                경로 검증 환경을 함께 정리했습니다.
               </p>
             </a>
             <a class="home-panel" href="#snn-research">
@@ -55,6 +55,22 @@
                 개념, 패턴, 촬영 준비 순서로 정리했습니다.
               </p>
             </a>
+            <a class="home-panel" href="#nrv-dvs-rectify">
+              <span>공개 글 묶음</span>
+              <h2>NRV DVS Rectify</h2>
+              <p>
+                정렬이 필요한 이유부터 좌표 보정 원리, Viewer에서 사용하는 절차까지
+                세 편의 한글 문서로 정리했습니다.
+              </p>
+            </a>
+            <a class="home-panel" href="#event-stereo-depth">
+              <span>진행 중인 개발 묶음</span>
+              <h2>이벤트 비전 스테레오 Depth</h2>
+              <p>
+                FPGA 실시간 정렬과 멀티센서 데이터셋을 바탕으로 이벤트 스테레오
+                Depth 카메라와 zero-shot 위치 추정을 구현하는 작업입니다.
+              </p>
+            </a>
             <a class="home-panel" href="#nrv-fpga-troubleshooting">
               <span>개발 기록 묶음</span>
               <h2>NRV FPGA 트러블슈팅</h2>
@@ -63,12 +79,12 @@
                 따라가며 해결한 과정을 정리했습니다.
               </p>
             </a>
-            <a class="home-panel" href="#github-projects">
-              <span>프로젝트 묶음</span>
-              <h2>공개 프로젝트</h2>
+            <a class="home-panel" href="#side-projects">
+              <span>사이드 프로젝트 묶음</span>
+              <h2>사이드 프로젝트</h2>
               <p>
-                캘리브레이션 글과 함께 볼 수 있는 GitHub 프로젝트도
-                별도의 글 묶음으로 정리합니다.
+                캘리브레이션 도구, 실험 타깃, 3D 프린팅 브라켓과 진행 중인
+                카메라 제품 케이스 제작 기록을 모았습니다.
               </p>
             </a>
             <a class="home-panel" href="#hardware-notes">
@@ -89,15 +105,15 @@
             </a>
           </div>
 
-          <section class="doc-section visible" id="planned-work">
-            <h2>0. 진행 중인 연구·개발</h2>
+          <section class="doc-section visible" id="drone-motion-capture">
+            <h2>LED 모션캡처 기반 드론 비행경로 제어 시스템 (진행중)</h2>
             <p>
-              아직 완성 전이거나 다음 단계로 준비 중인 연구와 제품 개발 계획입니다.
-              아래 카드는 현재 방향과 목표 일정을 정리한 미리보기이며, 상세 페이지가
-              준비된 항목은 클릭해 진행 내용을 확인할 수 있습니다.
+              드론의 LED를 여러 카메라로 추적해 비행경로를 제어하는 졸업논문 시스템과,
+              리니어 모터 스테이지를 이용해 모션캡처 경로의 정확도를 확인하는 검증 환경을
+              함께 구축하고 있습니다.
             </p>
 
-            <div class="project-grid planned-work-grid" aria-label="진행 중인 연구와 개발 계획">
+            <div class="project-grid planned-work-grid" aria-label="LED 모션캡처 드론 연구">
               <a
                 class="project-card plan-card plan-card-link"
                 href="pages/planned/01-led-motion-capture-drone.html"
@@ -133,20 +149,20 @@
                 <div
                   class="project-thumb plan-thumb-empty"
                   role="img"
-                  aria-label="산업용 로봇팔 연구 미리보기 이미지 준비 중"
+                  aria-label="산업용 리니어 모터 스테이지 검증 환경 미리보기 이미지 준비 중"
                 ></div>
                 <span class="sitemap-number">02</span>
-                <small>Ground Truth · Robot Arm</small>
-                <h2>산업용 로봇팔 기반 경로 검증 환경</h2>
+                <small>Ground Truth · Linear Motor Stage</small>
+                <h2>산업용 리니어 모터 스테이지 기반 경로 검증 환경</h2>
                 <div class="plan-meta">
                   <span>학습 예정</span>
                   <time datetime="2026-10-10">목표 2026.10.10</time>
                 </div>
                 <p>
-                  NRV가 보유한 산업용 로봇팔에 드론을 고정하고, 로봇팔에 입력한 기준
-                  경로와 모션캡처가 검출한 경로를 비교하는 Ground Truth 환경을 만들
-                  계획입니다. 이를 위해 로봇팔의 운용법과 제어 방법을 익히며, 실험 조건에
-                  따라 산업용 리니어 모터도 함께 활용하는 방안을 검토합니다.
+                  산업용 리니어 모터 스테이지에 LED 표적 또는 드론을 고정하고, 스테이지에
+                  입력한 기준 경로와 모션캡처가 검출한 경로를 비교하는 Ground Truth 환경을
+                  만들 계획입니다. 이를 위해 리니어 모터 스테이지의 운용법과 제어 방법을
+                  익히고 반복 위치 정밀도와 경로 검출 오차를 함께 확인합니다.
                 </p>
                 <p class="plan-progress">
                   졸업논문 시스템과 같은 일정인 2026년 10월 10일까지 검증 환경 완성을
@@ -154,87 +170,6 @@
                 </p>
               </article>
 
-              <a
-                class="project-card plan-card plan-card-link"
-                href="pages/planned/03-camera-module-case.html"
-              >
-                <img
-                  class="project-thumb plan-thumb-image"
-                  src="assets/camera-module-3d-dummy-model.png"
-                  alt="카메라 케이스 설계를 위해 직접 제작한 단순화된 비기능성 카메라 모듈 3D 더미 모델"
-                />
-                <span class="sitemap-number">03</span>
-                <small>Product Design · CAD/3D Printing</small>
-                <h2>신규 카메라 모듈 제품 케이스 제작</h2>
-                <div class="plan-meta">
-                  <span>제작 중</span>
-                  <time datetime="2026-08">목표 2026.08</time>
-                </div>
-                <p>
-                  미리보기 이미지는 카메라 케이스 설계를 위해 제가 직접 제작한 단순화된
-                  비기능성 3D 더미 모델을 캡처한 화면입니다. 실제 회로 및 PCB 설계 정보는
-                  포함하지 않습니다. NRV의 신규 카메라 모듈 출시에 맞춰 실제 제품에 들어갈 외장
-                  케이스를 제작하고 있으며, 앞서 스테레오 카메라용 3D 프린팅 브라켓을
-                  설계하며 익힌 CAD 모델링과 3D 프린터 운용 경험을 제품 구조, 조립성,
-                  커넥터 배치와 케이블 간섭을 고려한 케이스 설계에 적용합니다.
-                </p>
-                <p class="plan-progress">
-                  설계 검토와 출력·조립 확인을 거쳐 2026년 8월 안에 완성할 예정입니다.
-                </p>
-                <span class="plan-open-label">진행 내용 보기 →</span>
-              </a>
-
-              <article class="project-card plan-card">
-                <div
-                  class="project-thumb plan-thumb-empty"
-                  role="img"
-                  aria-label="이벤트 카메라와 라이다 데이터셋 미리보기 이미지 준비 중"
-                ></div>
-                <span class="sitemap-number">04</span>
-                <small>Dataset · LiDAR Control</small>
-                <h2>이벤트 카메라·LiDAR 융합 데이터셋</h2>
-                <div class="plan-meta">
-                  <span>기획·학습 예정</span>
-                  <time datetime="2026-11">목표 2026.11</time>
-                </div>
-                <p>
-                  공개 데이터셋이 연구와 제품 활용 생태계를 넓히는 기반이 되는 만큼,
-                  NRV 이벤트 카메라로 주행 장면과 동적 장면을 기록한 데이터셋을 만드는
-                  프로젝트에 팀원으로 참가하고 있습니다. NRV가 보유한 LiDAR 센서의 운용과
-                  제어 방법을 익히고, 이벤트 데이터와 거리 정보를 함께 수집·정렬할 수 있는
-                  기록 환경을 구성합니다.
-                </p>
-                <p class="plan-progress">
-                  데이터 수집 절차와 센서 연동을 포함해 2026년 11월까지 완성할 예정입니다.
-                </p>
-              </article>
-
-              <article class="project-card plan-card">
-                <div
-                  class="project-thumb plan-thumb-empty"
-                  role="img"
-                  aria-label="FPGA 실시간 스테레오 정렬과 보정 미리보기 이미지 준비 중"
-                ></div>
-                <span class="sitemap-number">05</span>
-                <small>Computer Vision · FPGA</small>
-                <h2>FPGA 실시간 스테레오 정렬·보정</h2>
-                <div class="plan-meta">
-                  <span>다음 단계 준비</span>
-                  <time datetime="2027-01-01">목표 2027.01.01</time>
-                </div>
-                <p>
-                  현재 NRV 이벤트 카메라 캘리브레이션을 담당하며 실제 촬영, 파라미터 계산,
-                  결과 확인까지 수행하는 앱 개발을 완료했습니다. 다음 단계에서는 계산된
-                  캘리브레이션 파라미터를 카메라 모듈의 FPGA에 입력해 왜곡 보정과 스테레오
-                  정렬을 실시간으로 처리하는 기능을 구현할 계획입니다.
-                </p>
-                <p class="plan-progress">
-                  스테레오 카메라는 단일 카메라보다 물리적 정렬과 보정이 까다롭기 때문에,
-                  앞서 제작한 3D 프린팅 브라켓도 이 문제를 먼저 이해하고 해결하기 위한
-                  준비 과정이었습니다. 2027년 1월 1일까지 기능 구현과 논문 정리를 마치고
-                  실제 제품 적용과 출시까지 연결하는 것이 목표입니다.
-                </p>
-              </article>
             </div>
           </section>
 
@@ -286,15 +221,6 @@
               NRV 이벤트 카메라의 캘리브레이션 기능은 제가 직접 구현했으며,
               아래의 한글 사용·설명 문서도 직접 작성했습니다.
             </p>
-            <div class="source-note" role="note">
-              <strong>작성 안내</strong>
-              <span>
-                아래의 <b>NRV DVS 캘리브레이션</b> 글 4개는 제가 구현한 기능을 기준으로
-                직접 작성한 한국어 설명 자료입니다. 이 첫 화면은 제가 개인적으로 정리한
-                글 목록이며, 앞으로 추가되는 개인 논문이나 프로젝트 글 전체가
-                NRV 공식 문서라는 뜻은 아닙니다.
-              </span>
-            </div>
             <div class="sitemap-grid">
               <a class="sitemap-card calibration-preview-card" href="pages/calibration/01-camera-calibration.html">
                 <img
@@ -347,6 +273,99 @@
             </div>
           </section>
 
+          <section class="doc-section visible" id="nrv-dvs-rectify">
+            <h2>NRV DVS Rectify 설명</h2>
+            <p>
+              캘리브레이션으로 구한 파라미터를 DVS 영상에 적용해 왜곡을 보정하고,
+              스테레오 영상의 대응점을 같은 높이로 정렬하는 이유와 처리 원리를 정리했습니다.
+              실제 Viewer에서 Rectify 기능을 사용하는 방법까지 세 편의 한글 문서로 설명합니다.
+            </p>
+            <div class="sitemap-grid">
+              <a class="sitemap-card calibration-preview-card" href="pages/rectify/01-why-rectification.html">
+                <img
+                  class="calibration-card-thumb"
+                  src="assets/rectify/line-before.png"
+                  alt="스테레오 정렬 전 좌우 영상의 대응점 높이 차이"
+                  loading="lazy"
+                />
+                <span class="sitemap-number">01</span>
+                <small class="entry-card-kicker">REAL-TIME RECTIFICATION</small>
+                <h2>DVS 정렬이 필요한 이유</h2>
+                <p>렌즈 왜곡과 카메라 배치 차이를 보정하고, 좌우 대응점을 같은 scanline에 놓아야 하는 이유를 설명합니다.</p>
+              </a>
+              <a class="sitemap-card calibration-preview-card" href="pages/rectify/02-rectification-principles.html">
+                <img
+                  class="calibration-card-thumb"
+                  src="assets/rectify/nearest-dvs-pixel-selection.png"
+                  alt="DVS Rectify에서 출력 픽셀과 가장 가까운 원본 픽셀을 선택하는 원리"
+                  loading="lazy"
+                />
+                <span class="sitemap-number">02</span>
+                <small class="entry-card-kicker">RECTIFICATION PRINCIPLE</small>
+                <h2>DVS 정렬 처리 원리</h2>
+                <p>캘리브레이션 파라미터, remap 좌표와 nearest-neighbor 방식으로 이벤트 픽셀을 옮기는 처리 흐름을 설명합니다.</p>
+              </a>
+              <a class="sitemap-card calibration-preview-card" href="pages/rectify/03-viewer-rectification.html">
+                <img
+                  class="calibration-card-thumb"
+                  src="assets/rectify/viewer-rectify-button.png"
+                  alt="NRV DVS Viewer의 Rectify 기능 실행 화면"
+                  loading="lazy"
+                />
+                <span class="sitemap-number">03</span>
+                <small class="entry-card-kicker">VIEWER WORKFLOW</small>
+                <h2>Viewer에서 정렬 사용하기</h2>
+                <p>Viewer에서 캘리브레이션 파일을 불러오고, 실시간 Rectify 결과를 확인하는 절차를 설명합니다.</p>
+              </a>
+            </div>
+          </section>
+
+          <section class="doc-section visible" id="event-stereo-depth">
+            <h2>이벤트 비전 스테레오 Depth 카메라 (진행중)</h2>
+            <p>
+              FPGA 실시간 스테레오 정렬·보정과 이벤트 카메라·LiDAR·RGB 융합 데이터셋을
+              하나의 개발 흐름으로 연결해, 이벤트 스테레오 Depth 카메라와 제로샷 위치 추정
+              기능을 구현하는 작업입니다.
+            </p>
+            <div class="sitemap-grid">
+              <article class="sitemap-card">
+                <span class="sitemap-number">01</span>
+                <small class="entry-card-kicker">FPGA REAL-TIME RECTIFICATION</small>
+                <h2>FPGA 실시간 스테레오 정렬·보정</h2>
+                <p>
+                  직접 구현한 캘리브레이션 앱의 파라미터를 FPGA에 적용해 왜곡 보정과
+                  스테레오 정렬을 실시간 처리하고, 실제 카메라 제품과 Depth 처리로 연결합니다.
+                </p>
+              </article>
+              <article class="sitemap-card">
+                <span class="sitemap-number">02</span>
+                <small class="entry-card-kicker">EVENT · LIDAR · RGB DATASET</small>
+                <h2>이벤트 카메라·LiDAR·RGB 융합 데이터셋</h2>
+                <p>
+                  주행·동적 장면의 이벤트, LiDAR 거리, 일반 RGB 영상을 동기화해 기록하는
+                  프로젝트에 팀원으로 참여하고 있습니다. 데이터셋은 스테레오 Depth와
+                  제로샷 위치 추정 기능 개발에 활용할 계획입니다.
+                </p>
+              </article>
+              <a
+                class="sitemap-card"
+                href="https://www.youtube.com/watch?v=lGbHEgp9Xqw"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span class="sitemap-number">03</span>
+                <small class="entry-card-kicker">STEREO DEPTH DEMO</small>
+                <h2>NRV 이벤트 스테레오 Depth 데모</h2>
+                <p>
+                  NRV 스테레오 이벤트 카메라만으로 Depth를 처리한 영상입니다. FPGA 실시간
+                  정렬과 센서 융합 파이프라인을 연결해 이와 같은 결과를 실시간으로 구동하는
+                  것이 목표입니다.
+                </p>
+                <span class="plan-open-label">YouTube 영상 보기 →</span>
+              </a>
+            </div>
+          </section>
+
           <section class="doc-section visible" id="nrv-fpga-troubleshooting">
             <h2>NRV FPGA 트러블슈팅 노트</h2>
             <p>
@@ -378,11 +397,11 @@
             </div>
           </section>
 
-          <section class="doc-section visible" id="github-projects">
-            <h2>GitHub 프로젝트 링크</h2>
+          <section class="doc-section visible" id="side-projects">
+            <h2>사이드 프로젝트 링크</h2>
             <p>
-              아래 프로젝트는 NRV DVS 캘리브레이션 설명과 별도로 공개한 개인 GitHub 프로젝트입니다.
-              자세한 사용법과 코드는 각 저장소에서 확인할 수 있습니다.
+              본문 기술 노트와 함께 볼 수 있는 개인 사이드 프로젝트를 모았습니다.
+              공개 코드와 사용법은 각 저장소에서, 제작 과정은 연결된 상세 페이지에서 확인할 수 있습니다.
             </p>
             <div class="project-grid collection-card-grid">
               <a class="project-card" href="https://github.com/jaypark0115/blinking-circle-grid-for-dvs-calibration" target="_blank" rel="noopener noreferrer">
@@ -413,6 +432,20 @@
                 <p>
                   스테레오 이벤트 카메라 모듈과 FPGA 보드를 고정하고 기준 거리 조절을 위해
                   직접 설계·출력한 3D 프린팅 브라켓의 설계와 조립 기록입니다.
+                </p>
+              </a>
+              <a class="project-card" href="pages/planned/03-camera-module-case.html">
+                <img
+                  class="project-thumb"
+                  src="assets/camera-module-3d-dummy-model.png"
+                  alt="카메라 제품 케이스 설계를 위해 직접 제작한 비기능성 3D 더미 모델"
+                />
+                <span class="sitemap-number">04</span>
+                <small>Product case · 진행중</small>
+                <h2>신규 카메라 모듈 제품 케이스 제작 (진행중)</h2>
+                <p>
+                  직접 제작한 3D 더미 모델과 프린팅 시제품으로 치수·조립·발열 구조를
+                  확인하고, 금속 제품 케이스 제작을 진행하는 과정을 정리했습니다.
                 </p>
               </a>
             </div>
@@ -551,11 +584,13 @@
         </article>
         <aside class="page-toc home-page-toc" aria-label="대표 페이지 바로가기">
           <strong>기술 노트와 진행 계획</strong>
-          <a href="#planned-work">진행 중인 연구·개발</a>
+          <a href="#drone-motion-capture">LED 모션캡처 드론 제어</a>
           <a href="#snn-research">SNN 연구 노트</a>
           <a href="#nrv-dvs-calibration">NRV DVS 캘리브레이션 설명</a>
+          <a href="#nrv-dvs-rectify">NRV DVS Rectify 설명</a>
+          <a href="#event-stereo-depth">이벤트 비전 스테레오 Depth (진행중)</a>
           <a href="#nrv-fpga-troubleshooting">NRV FPGA 트러블슈팅 노트</a>
-          <a href="#github-projects">GitHub 프로젝트 링크</a>
+          <a href="#side-projects">사이드 프로젝트 링크</a>
           <a href="#hardware-notes">SoC/FPGA 학습 노트</a>
           <a href="#competition-case-studies">경진대회 기술 노트</a>
         </aside>

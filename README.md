@@ -1,10 +1,7 @@
 # Jay Tech Notes
 
 제가 직접 작성하고 정리한 기술 글, 실험 기록, 논문 자료를 모아두는 개인 기술 노트입니다.
-현재 공개 페이지는 메인 화면에 보이는 순서와 동일하게 `진행 중인 연구·개발`, `SNN 연구 노트`, `NRV DVS 캘리브레이션 설명`, `NRV FPGA 트러블슈팅 노트`, `GitHub 프로젝트 링크`, `SoC/FPGA 학습 노트`, `경진대회 기술 노트` 순서로 구성되어 있습니다.
-
-이 저장소의 첫 화면은 개인적으로 정리한 글 목록이며, NRV 공식 문서가 아닙니다.
-NRV와 관련된 공식 정보는 NRV docs 웹페이지에서 확인해야 합니다.
+현재 공개 페이지는 메인 화면에 보이는 순서와 동일하게 `LED 모션캡처 기반 드론 비행경로 제어 시스템`, `SNN 연구 노트`, `NRV DVS 캘리브레이션 설명`, `NRV DVS Rectify 설명`, `이벤트 비전 스테레오 Depth 카메라`, `NRV FPGA 트러블슈팅 노트`, `사이드 프로젝트 링크`, `SoC/FPGA 학습 노트`, `경진대회 기술 노트` 순서로 구성되어 있습니다.
 
 ## 웹페이지로 보기
 
@@ -14,29 +11,18 @@ https://jaypark0115.github.io/jay-tech-notes/
 
 ## 공개 페이지 순서
 
-### 0. 진행 중인 연구·개발
+### 1. LED 모션캡처 기반 드론 비행경로 제어 시스템 (진행중)
 
-계획 카드 중 상세 페이지가 준비된 항목은 클릭할 수 있습니다. 아직 정리 중인 카드는 결과가 준비되면 상세 기록의 진입점으로 전환할 예정입니다.
+드론의 LED를 여러 카메라로 추적해 비행경로를 제어하는 졸업논문 시스템과, 리니어 모터 스테이지를 이용한 경로 검증 환경을 함께 구축하고 있습니다.
 
 1. [**LED 모션캡처 기반 드론 비행경로 제어 시스템**](https://jaypark0115.github.io/jay-tech-notes/pages/planned/01-led-motion-capture-drone.html)
    - 드론의 LED를 추적해 비행경로를 제어하고 휴대폰에서 목표·실시간 경로와 결과를 확인하는 졸업논문 시스템입니다.
    - 목표: 2026.10.10, 대한전자공학회 2026년도 추계학술대회 제출 예정
-2. **산업용 로봇팔 기반 경로 검증 환경**
-   - 로봇팔에 드론을 고정해 기준 경로와 모션캡처 검출 경로를 비교하며, 필요하면 산업용 리니어 모터도 활용할 계획입니다.
+2. **산업용 리니어 모터 스테이지 기반 경로 검증 환경**
+   - 리니어 모터 스테이지에 LED 표적 또는 드론을 고정해 기준 경로와 모션캡처 검출 경로를 비교합니다.
    - 목표: 2026.10.10
-3. [**신규 카메라 모듈 제품 케이스 제작**](https://jaypark0115.github.io/jay-tech-notes/pages/planned/03-camera-module-case.html)
-   - 기존 3D 프린팅 브라켓 작업에서 익힌 CAD와 3D 프린터 경험을 신규 카메라 모듈의 실제 제품 케이스 제작에 적용합니다.
-   - 미리보기는 카메라 케이스 설계를 위해 직접 제작한 단순화된 비기능성 3D 더미 모델을 캡처한 화면이며, 실제 회로 및 PCB 설계 정보는 포함하지 않습니다.
-   - 3D 프린팅 시제품 조립과 발열판 형상 검토를 마쳤으며, 금속 케이스 제작을 진행하고 있습니다.
-   - 목표: 2026.08
-4. **이벤트 카메라·LiDAR 융합 데이터셋**
-   - 주행·동적 장면의 이벤트 데이터와 LiDAR 거리 정보를 함께 수집하는 데이터셋 제작과 센서 제어를 준비합니다.
-   - 목표: 2026.11
-5. **FPGA 실시간 스테레오 정렬·보정**
-   - 개발을 완료한 캘리브레이션 앱의 파라미터를 FPGA에 적용해 왜곡 보정과 스테레오 정렬을 실시간으로 처리하고, 논문과 제품 출시로 연결할 계획입니다.
-   - 목표: 2027.01.01
 
-### 1. SNN 연구 노트
+### 2. SNN 연구 노트
 
 1. [SA 기반 SNN 안정성 분석 논문 PDF](https://jaypark0115.github.io/jay-tech-notes/pages/snn/snn-paper.html)
    - 2026년도 대한전자공학회 하계학술대회 논문집 포스터 부문 pp.811-814에 게재된 Fashion-MNIST Sensory Adaptation SNN 논문입니다.
@@ -47,7 +33,7 @@ https://jaypark0115.github.io/jay-tech-notes/
 4. [fashion-mnist-sa-1250-extension](https://github.com/jaypark0115/fashion-mnist-sa-1250-extension)
    - 안정 SA 파라미터를 유지하면서 excitatory/inhibitory 뉴런 수를 확장한 후속 실험 코드입니다.
 
-### 2. NRV DVS 캘리브레이션 설명
+### 3. NRV DVS 캘리브레이션 설명
 
 NRV 이벤트 카메라의 캘리브레이션 기능은 제가 직접 구현했으며, 아래 한글 사용·설명 문서도 직접 작성했습니다.
 
@@ -60,14 +46,36 @@ NRV 이벤트 카메라의 캘리브레이션 기능은 제가 직접 구현했�
 4. [캘리브레이션 촬영 및 처리 절차](https://jaypark0115.github.io/jay-tech-notes/pages/calibration/04-calibration-workflow.html)
    - 직접 구현한 DVS Calibration 앱에서 촬영, 후보 선별, Coverage 확인, 계산과 결과 보관까지 진행하는 방법을 정리했습니다.
 
-### 3. NRV FPGA 트러블슈팅 노트
+### 4. NRV DVS Rectify 설명
+
+캘리브레이션 파라미터를 DVS 영상에 적용해 왜곡을 보정하고, 스테레오 좌우 영상의 대응점을 정렬하는 이유와 처리 방법을 정리했습니다.
+
+1. [DVS 정렬이 필요한 이유](https://jaypark0115.github.io/jay-tech-notes/pages/rectify/01-why-rectification.html)
+   - 렌즈 왜곡과 카메라 배치 차이를 보정하고 좌우 대응점을 같은 scanline에 놓아야 하는 이유를 설명합니다.
+2. [DVS 정렬 처리 원리](https://jaypark0115.github.io/jay-tech-notes/pages/rectify/02-rectification-principles.html)
+   - 캘리브레이션 파라미터와 remap 좌표를 이용해 이벤트 픽셀을 이동시키는 처리 흐름을 설명합니다.
+3. [Viewer에서 정렬 사용하기](https://jaypark0115.github.io/jay-tech-notes/pages/rectify/03-viewer-rectification.html)
+   - Viewer에서 캘리브레이션 파일을 불러오고 실시간 Rectify 결과를 확인하는 절차를 설명합니다.
+
+### 5. 이벤트 비전 스테레오 Depth 카메라 (진행중)
+
+FPGA 실시간 스테레오 정렬·보정과 이벤트 카메라·LiDAR·RGB 융합 데이터셋을 연결해 이벤트 스테레오 Depth 카메라와 제로샷 위치 추정 기능을 구현하고 있습니다.
+
+1. **FPGA 실시간 스테레오 정렬·보정**
+   - 직접 구현한 캘리브레이션 앱의 파라미터를 FPGA에 적용해 왜곡 보정과 스테레오 정렬을 실시간 처리하고, 실제 카메라 제품과 Depth 처리로 연결합니다.
+2. **이벤트 카메라·LiDAR·RGB 융합 데이터셋**
+   - 주행·동적 장면의 이벤트, LiDAR 거리, 일반 RGB 영상을 동기화해 기록하는 프로젝트에 팀원으로 참여하고 있습니다. 이 데이터셋은 스테레오 Depth와 제로샷 위치 추정 기능 개발에 활용할 계획입니다.
+3. [NRV 이벤트 스테레오 Depth 데모 영상](https://www.youtube.com/watch?v=lGbHEgp9Xqw)
+   - NRV 스테레오 이벤트 카메라만으로 Depth를 처리한 영상이며, FPGA 실시간 정렬과 센서 융합 파이프라인을 연결해 이와 같은 결과를 실시간으로 구동하는 것이 목표입니다.
+
+### 6. NRV FPGA 트러블슈팅 노트
 
 1. [FPGA I²C 디바이스 인식 오류](https://jaypark0115.github.io/jay-tech-notes/pages/troubleshooting/02-fpga-i2c-false-ack.html)
    - 블록 디자인에서 미사용으로 제외한 포트를 내부 Verilog가 유효 SDA 변수로 다시 참조해 가짜 ACK가 발생한 원인과 수정 과정을 정리했습니다.
 2. [FX10 외부 SPI 플래시 쓰기 실패](https://jaypark0115.github.io/jay-tech-notes/pages/troubleshooting/01-fx10-external-spi-flash.html)
    - 잘못된 bitstream이 CR3NV[3]을 변경해 hybrid mode가 되었지만 programmer는 uniform mode로 erase해 발생한 readback mismatch와 복구 과정을 정리했습니다.
 
-### 4. GitHub 프로젝트 링크
+### 7. 사이드 프로젝트 링크
 
 1. [blinking-circle-grid-for-dvs-calibration](https://github.com/jaypark0115/blinking-circle-grid-for-dvs-calibration)
    - NRV DVS 캘리브레이션에 사용할 blinking asymmetric circle grid 패턴을 모니터에 표시하기 위한 프로젝트입니다.
@@ -75,8 +83,10 @@ NRV 이벤트 카메라의 캘리브레이션 기능은 제가 직접 구현했�
    - 이벤트 카메라 실험에서 시간 변화가 있는 타깃을 구성하고 확인하기 위한 Arduino 기반 스톱워치 타깃 프로젝트입니다.
 3. [stereo-fpga-camera-bracket](https://github.com/jaypark0115/stereo-fpga-camera-bracket)
    - 스테레오 이벤트 카메라 모듈과 FPGA 보드를 고정하고 기준 거리 조절을 위해 설계·출력한 3D 프린팅 브라켓 기록입니다.
+4. [신규 카메라 모듈 제품 케이스 제작 (진행중)](https://jaypark0115.github.io/jay-tech-notes/pages/planned/03-camera-module-case.html)
+   - 직접 제작한 비기능성 3D 더미 모델과 프린팅 시제품으로 치수·조립·발열 구조를 확인하고, 금속 제품 케이스 제작을 진행하는 과정을 정리했습니다.
 
-### 5. SoC/FPGA 학습 노트
+### 8. SoC/FPGA 학습 노트
 
 1. [APB Control Bus](https://jaypark0115.github.io/jay-tech-notes/pages/soc/04-apb-bus.html)
    - APB setup/enable phase와 Lab2~4의 register, SRAM, interrupt 실습을 설명합니다.
@@ -87,7 +97,7 @@ NRV 이벤트 카메라의 캘리브레이션 기능은 제가 직접 구현했�
 4. [AXI-to-APB Bridge](https://jaypark0115.github.io/jay-tech-notes/pages/soc/07-axi-to-apb-bridge.html)
    - AXI-to-APB protocol conversion, write/read FSM, APB slave, testbench, PASS 로그를 기준으로 최종 프로젝트를 정리했습니다.
 
-### 6. 경진대회 기술 노트
+### 9. 경진대회 기술 노트
 
 제가 참여한 두 경진대회의 문제 정의, 입력 표현, 하드웨어 구조와 검증 결과를 프로젝트별 네 편의 기술 문서로 나누어 설명합니다.
 
