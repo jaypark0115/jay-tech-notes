@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Jetson Orin Nano와 OV9281 카메라 4대를 연결한 모션캡처 초기 구현. 웹 Viewer, 체커보드 캘리브레이션, 원점 설정, 위치·자세 추적과 3차원 궤적을 실제 사진과 영상으로 설명합니다." />
+    <meta name="description" content="Jetson Orin Nano의 JetPack·카메라 드라이버 설치부터 동기화된 OV9281 카메라 4대 연결, 웹 Viewer·캘리브레이션·원점 설정·체커보드 추적까지 직접 구축한 첫 단계." />
     <meta property="og:title" content="4카메라 모션캡처 시스템 1차 구현 — Jay Tech Notes" />
-    <meta property="og:description" content="카메라 연결부터 캘리브레이션, 원점 설정, 체커보드 궤적 추적까지 이어지는 초기 구현 기록." />
+    <meta property="og:description" content="Jetson 환경을 준비하고 동기화된 쿼드 카메라를 연결해 네 가지 웹 기능을 구현한 개발 기록." />
     <meta property="og:image" content="https://jaypark0115.github.io/jay-tech-notes/assets/drone-mocap-jetson-camarray.jpg" />
     <title>4카메라 모션캡처 시스템 1차 구현 — Jay Tech Notes</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260830-mocap" />
+    <link rel="stylesheet" href="../../styles.css?v=20260830-mocap-first-stage" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="planned-detail-page drone-mocap-page">
@@ -17,7 +17,7 @@
         <article class="content">
           <div class="document-kicker">
             <span>LED 모션캡처 드론 연구</span>
-            <div class="kicker-actions"><span class="draft-label">초기 구현 · 2026.08.30</span></div>
+            <div class="kicker-actions"><span class="draft-label">1차 구현</span></div>
           </div>
           <a class="home-link" href="../../index.html#drone-motion-capture">← LED 모션캡처 드론 연구로 돌아가기</a>
           <nav class="chapter-switcher" aria-label="LED 모션캡처 드론 연구 상세 페이지">
@@ -31,245 +31,234 @@
 
           <h1>4카메라 모션캡처 시스템 1차 구현</h1>
           <p class="lead">
-            카메라 영상에서 움직이는 물체의 위치를 얻으려면 영상 입력, 카메라 보정,
-            좌표계 설정과 추적이 같은 기준으로 연결되어야 합니다. Jetson Orin Nano와
-            OV9281 카메라 4대를 이용해 이 과정을 하나의 웹 프로그램으로 구현했습니다.
-            현재 추적 대상은 체커보드이며, 보드를 움직이면
-            추정된 3차원 위치가 화면에 궤적으로 누적됩니다.
+            드론 경로 추정을 위한 첫 단계로, Jetson Orin Nano에 카메라 4대를 연결하고
+            촬영부터 위치 추적까지 실행할 수 있는 웹앱을 제작했습니다. JetPack과 카메라
+            드라이버를 직접 설치해 동기화된 영상을 받아오는 환경을 구축한 뒤,
+            영상 확인·캘리브레이션·원점 설정·추적 기능을 연결했습니다.
+            체커보드를 움직이면 네 카메라의 관측을 바탕으로 이동 경로가 3차원 화면에 표시됩니다.
           </p>
           <div class="scope-note" role="note">
             <strong>주요 기능</strong>
-            <p>4카메라 영상 입력 → 캘리브레이션 → 월드 원점 설정 → 체커보드 위치·자세 추적 → 궤적 표시·CSV 기록으로 이어지는 모션캡처 프로그램입니다.</p>
+            <p>Viewer로 네 영상 확인 → Calibration으로 카메라 보정 → World Origin으로 기준점 설정 → Tracking으로 이동 경로 표시</p>
           </div>
-          <nav class="mocap-contents" aria-label="이 글의 목차">
-            <a href="#pipeline">처리 흐름</a>
-            <a href="#hardware">장비 구성</a>
-            <a href="#viewer">영상 입력</a>
-            <a href="#calibration">캘리브레이션</a>
-            <a href="#world-origin">원점 설정</a>
-            <a href="#tracking">추적과 데모</a>
-            <a href="#optimization">처리 속도와 재검출</a>
-            <a href="#next">다음 단계</a>
-          </nav>
 
-          <section class="doc-section searchable-section" id="pipeline" data-search-title="초기 구현의 처리 흐름">
-            <h3>1. 영상 입력에서 3차원 궤적까지</h3>
+          <section class="doc-section searchable-section" id="first-stage" data-search-title="첫 번째 단계의 구현 목표">
+            <h3>1. 카메라 연결과 네 가지 기능 구현</h3>
             <p>
-              모션캡처는 물체의 움직임을 시간에 따른 위치·자세로 기록하는 기술입니다.
-              한 카메라에서 보드가 오른쪽으로 이동해 보여도, 다른 카메라에서는 왼쪽으로
-              보일 수 있습니다. 여러 관측을 연결하려면 공통 기준이 필요합니다.
-              렌즈와 카메라 배치를 보정하고, 각 카메라의 관측을 공통 좌표계로
-              바꾼 뒤 시간 순서대로 연결해야 하나의 경로가 됩니다.
+              첫 번째 단계의 목표는 실제 카메라를 연결한 장치에서 보정과 추적을 반복할 수 있는
+              실험 환경을 만드는 것이었습니다. Jetson을 켜고 같은 Wi-Fi의 PC에서 웹앱을 열면,
+              네 카메라의 영상을 확인하고 보정한 다음 기준 위치를 정해 추적을 시작하는 흐름입니다.
+              장비 준비와 프로그램 사용 절차를 이 흐름에 맞춰 구성했습니다.
+            </p>
+            <p>
+              먼저 Jetson의 운영 환경과 카메라 드라이버를 설치하고 네 영상이 함께 들어오는지
+              확인했습니다. 이후 각 카메라의 렌즈와 배치 차이를 보정하는 기능, 실험 공간의
+              기준점을 정하는 기능, 표적을 움직이며 경로를 확인하는 기능을 순서대로 구현했습니다.
+              이 단계의 표적으로는 크기와 모서리 위치가 일정한 체커보드를 사용했습니다.
+              같은 패턴으로 카메라 보정부터 이동 경로 확인까지 이어갈 수 있기 때문입니다.
             </p>
             <ol class="thesis-process-list">
-              <li><strong>Viewer</strong><span>네 영상이 정상적으로 들어오는지 확인하고 노출을 조절합니다.</span></li>
-              <li><strong>Calibration</strong><span>체커보드를 여러 위치·각도에서 관측해 렌즈 특성과 카메라 사이의 위치·회전을 구합니다.</span></li>
-              <li><strong>World Origin</strong><span>기준 위치에 놓인 보드로 궤적의 원점과 좌표축을 정합니다.</span></li>
-              <li><strong>Tracking</strong><span>움직이는 보드의 위치·자세를 추정하고 3차원 궤적과 CSV로 기록합니다.</span></li>
+              <li><strong>Viewer</strong><span>동기화된 네 카메라 영상을 한 화면에서 확인하고 촬영 밝기를 조절합니다.</span></li>
+              <li><strong>Calibration</strong><span>체커보드를 여러 위치에서 촬영해 네 카메라의 보정값을 구하고 저장합니다.</span></li>
+              <li><strong>World Origin</strong><span>기준 위치에 둔 체커보드로 실험 공간의 원점과 방향을 정합니다.</span></li>
+              <li><strong>Tracking</strong><span>체커보드의 움직임을 추적하고 이동 경로를 3차원 화면에 표시합니다.</span></li>
             </ol>
-            <p>
-              크기를 알고 코너를 반복 검출할 수 있는 체커보드는 초기 시스템을 확인하기에
-              적합합니다. LED 마커를 구분하고 여러 영상 사이에서 대응시키는 문제를 추가하기
-              전에, 영상부터 좌표 출력까지 이어지는 기반 기능을 시험할 수 있습니다.
-            </p>
           </section>
 
-          <section class="doc-section searchable-section" id="hardware" data-search-title="Jetson과 OV9281 CamArray 구성">
-            <h3>2. Jetson과 4카메라 장비 구성</h3>
+          <section class="doc-section searchable-section" id="hardware" data-search-title="장비 선택과 JetPack 드라이버 설치">
+            <h3>2. 장비 선택과 Jetson 실행 환경 구축</h3>
+            <h4>동기화 촬영과 Jetson 호환성을 갖춘 쿼드 카메라</h4>
             <p>
-              연산 장치는 Jetson Orin Nano 개발 키트이고, 영상 입력은 Arducam B0267
-              1MP×4 OV9281 CamArray Kit입니다. 네 개의 흑백 글로벌 셔터 카메라를
-              CamArray HAT에 연결하고, HAT의 출력을 Jetson의 CSI 입력으로 받습니다.
-              글로벌 셔터는 화면의 행마다 촬영 시점이 달라 생기는 형상 왜곡을 줄입니다.
-              다만 움직임에 의한 흐림은 노출 시간에도 좌우되므로 별도 조절이 필요합니다.
+              연산 장치로 Jetson Orin Nano 개발 키트를 사용하고, 카메라는 Arducam B0267
+              OV9281 쿼드 카메라 키트를 연결했습니다. 이 키트는 흑백 글로벌 셔터 카메라
+              4대와 CamArray HAT로 구성되며, 네 카메라를 동기화해 같은 순간의 장면을
+              촬영합니다. 움직이는 표적을 여러 방향에서 함께 관측하기에 적합하고,
+              Jetson용 드라이버와 연결 방법이 제공되어 이 구성을 사용했습니다.
+              <a href="https://docs.arducam.com/Nvidia-Jetson-Camera/Multi-Camera-CamArray/quick-start/" target="_blank" rel="noopener noreferrer">Arducam의 쿼드 카메라 안내</a>에서도
+              기본 동작을 동기화된 4채널 모드로 설명합니다.
+            </p>
+            <p>
+              카메라 한 대의 영상 크기는 1280×800입니다. 네 카메라의 흑백 영상이 동기화되어
+              Jetson으로 들어오며, 프로그램은 이를 카메라별 화면으로 보여줍니다.
+              현재 장치의 카메라 입력은 8비트 흑백·45FPS로 설정했습니다.
+              장비는 하나의 프레임에 고정해 카메라 사이의 위치를 유지하고,
+              가운데 Jetson과 CamArray HAT에 네 카메라를 연결했습니다.
             </p>
             <figure class="doc-figure planned-hero">
               <a href="../../assets/drone-mocap-jetson-camarray.jpg" aria-label="Jetson과 4카메라 장비 사진 크게 보기">
-                <img src="../../assets/drone-mocap-jetson-camarray.jpg" alt="프레임 네 모서리의 OV9281 카메라와 가운데 Jetson, CamArray HAT 및 연결 케이블" width="1800" height="1382" loading="lazy" />
+                <img src="../../assets/drone-mocap-jetson-camarray.jpg" alt="프레임 네 모서리에 고정한 OV9281 카메라와 가운데 Jetson 및 CamArray HAT" width="1800" height="1382" loading="lazy" />
               </a>
-              <figcaption>카메라 입력과 체커보드 추적을 위한 초기 실험 장치입니다. 네 카메라를 같은 프레임에 고정해 상대 배치를 유지하고, 가운데 Jetson과 CamArray HAT에 연결했습니다.</figcaption>
+              <figcaption>Jetson Orin Nano와 OV9281 카메라 4대를 연결한 실험 장치입니다.</figcaption>
             </figure>
+
+            <h4>JetPack 설치부터 카메라 드라이버 적용까지</h4>
             <p>
-              초기 준비는 Jetson 펌웨어·운영체제 설정, 실행 중인 커널에 맞는 카메라
-              드라이버 구성, 영상 장치 인식 순서로 진행했습니다. 아래 사진은 개발 키트 준비와
-              부팅 환경 구축 당시의 기록입니다. 장비 연결 이후에는 네 영상의 순서가
-              물리적인 카메라 배치와 일치하는지도 확인해야 합니다.
+              장비 준비는 Jetson에 운영체제를 설치하는 것부터 시작했습니다.
+              NVIDIA의 JetPack 6.2.1 microSD 이미지를 카드에 기록하고, 보드 펌웨어와
+              부팅 환경을 준비한 뒤 Ubuntu 초기 설정을 진행했습니다. 이후 JetPack 6.2.2로
+              업데이트해 카메라 프로그램을 실행할 환경을 갖췄습니다.
+              <a href="https://developer.nvidia.com/embedded/jetpack-sdk-622" target="_blank" rel="noopener noreferrer">NVIDIA의 JetPack 6.2.2 설치 안내</a>가
+              제시하는 SD 이미지 설치와 업데이트 순서를 따른 구성입니다.
             </p>
             <figure class="doc-figure">
               <div class="figure-grid mocap-setup-grid">
-                <div><a href="../../assets/drone-mocap-jetson-kit.jpg"><img src="../../assets/drone-mocap-jetson-kit.jpg" alt="초기 준비 단계의 Jetson Orin Nano 개발 키트" loading="lazy" /></a><span>Jetson 개발 키트 준비</span></div>
-                <div><a href="../../assets/drone-mocap-firmware-setup.jpg"><img src="../../assets/drone-mocap-firmware-setup.jpg" alt="Jetson 펌웨어 업데이트 진행 화면" loading="lazy" /></a><span>펌웨어와 부팅 환경 설정</span></div>
-                <div><a href="../../assets/drone-mocap-jetson-desktop.jpg"><img src="../../assets/drone-mocap-jetson-desktop.jpg" alt="Jetson 부팅 후 Ubuntu 데스크톱과 터미널을 확인하는 화면" loading="lazy" /></a><span>운영체제와 개발 환경 확인</span></div>
+                <div><a href="../../assets/drone-mocap-jetson-kit.jpg"><img src="../../assets/drone-mocap-jetson-kit.jpg" alt="설치를 준비한 Jetson Orin Nano 개발 키트" loading="lazy" /></a></div>
+                <div><a href="../../assets/drone-mocap-firmware-setup.jpg"><img src="../../assets/drone-mocap-firmware-setup.jpg" alt="Jetson 펌웨어 업데이트 화면" loading="lazy" /></a></div>
+                <div><a href="../../assets/drone-mocap-jetson-desktop.jpg"><img src="../../assets/drone-mocap-jetson-desktop.jpg" alt="Jetson에 설치한 Ubuntu 데스크톱과 개발 터미널" loading="lazy" /></a></div>
               </div>
-              <figcaption>장비 준비 과정의 원본 사진을 웹용 크기로 축소했습니다. 각 사진을 누르면 크게 볼 수 있습니다.</figcaption>
-            </figure>
-          </section>
-
-          <section class="doc-section searchable-section" id="viewer" data-search-title="결합 프레임과 웹 Viewer">
-            <h3>3. 네 영상을 한 번에 읽는 웹 Viewer</h3>
-            <p>
-              현재 드라이버는 네 영상을 가로로 이어 붙인
-              5120×800 결합 프레임을 제공합니다. 프로그램은 이를 1280×800 영상 네 장으로
-              나누고 같은 캡처 주기 번호를 부여합니다. 같은 결합 프레임에서 나온
-              네 관측을 하나의 세트로 처리하는 구조입니다.
-            </p>
-            <p>
-              Jetson에서는 FastAPI·Uvicorn 서버가 동작하고, 같은 네트워크의 PC나
-              스마트폰은 <code>http://&lt;JETSON_IP&gt;:8080</code>으로 접속합니다.
-              영상은 카메라별 MJPEG로, 모드와 추적 상태는 API로 전달합니다.
-              Viewer에서는 캘리브레이션 없이도 네 영상, 입력 상태와 노출을 확인할 수 있습니다.
-            </p>
-            <figure class="doc-figure">
-              <a href="../../assets/drone-mocap-four-camera-viewer.png" aria-label="4카메라 Viewer 화면 크게 보기"><img src="../../assets/drone-mocap-four-camera-viewer.png" alt="네 카메라의 흑백 영상을 가로로 표시하고 연결 상태와 노출 설정을 제공하는 웹 Viewer" width="2842" height="1330" loading="lazy" /></a>
-              <figcaption>같은 장면을 서로 다른 시점에서 촬영한 네 영상을 표시하는 초기 Viewer입니다. 촬영 당시 입력 속도는 약 11.7FPS이며, 이후 처리 속도 개선 과정은 7절에서 설명합니다.</figcaption>
-            </figure>
-          </section>
-
-          <section class="doc-section searchable-section" id="calibration" data-search-title="내부 파라미터와 카메라 사이 보정">
-            <h3>4. 체커보드로 카메라의 기준 맞추기</h3>
-            <p>
-              캘리브레이션은 영상 좌표와 실제 공간 사이의 관계를 구하는 과정입니다.
-              현재 설정은 내부 코너 8×3개, 한 칸 간격 23mm인 체커보드입니다.
-              내부 코너는 사각형 사이의 교차점으로, 가로 8개·세로 3개입니다.
-              칸 간격은 출력된 위치의 실제 길이 기준이 되므로, 태블릿에 패턴을 표시한다면
-              화면 확대율까지 반영해 실제 표시 간격을 확인해야 합니다.
-            </p>
-            <p>
-              보드를 화면 중앙에만 두는 대신 위치와 기울기를 바꾸어 샘플을 수집합니다.
-              앱은 코너 검출과 샘플 상태를 표시하고, 수집 뒤 백그라운드에서 보정을 계산합니다.
-              각 카메라에서는 초점거리·주점·렌즈 왜곡을 구하고, 같은 보드를 함께 본 카메라
-              쌍에서는 상대 회전과 이동을 구합니다. 이 관계를 연결해 네 카메라를 하나의
-              기준 카메라 좌표계로 표현합니다. 네 카메라의 상대 관계가 모두 연결되면
-              공통 좌표계에서 관측을 처리할 수 있습니다.
-            </p>
-            <figure class="doc-figure">
-              <a href="../../assets/drone-mocap-calibration.png" aria-label="캘리브레이션 화면 크게 보기"><img src="../../assets/drone-mocap-calibration.png" alt="네 카메라 미리보기와 샘플 12세트 수집 상태, 캘리브레이션 계산 단계를 보여주는 화면" width="2879" height="1289" loading="lazy" /></a>
-              <figcaption>목표 샘플 12세트를 저장한 뒤 보정 계산 단계로 넘어간 화면입니다. 저장 상태는 12/12이며, 촬영 순간 현재 프레임의 보드 검출 상태는 0/4입니다.</figcaption>
             </figure>
             <p>
-              계산 결과는 검토한 뒤 적용·저장하고 다음 실행에서 불러올 수 있습니다.
-              재투영 오차는 추정한 카메라 모델로 보드 코너를 영상에 다시 투영했을 때의
-              차이입니다. 영상에서의 보정 상태를 판단하는 지표이며,
-              실제 공간의 위치 정확도는 기준 장비의 경로와 비교해 평가합니다.
-            </p>
-          </section>
-
-          <section class="doc-section searchable-section" id="world-origin" data-search-title="월드 좌표와 원점 후보">
-            <h3>5. 보드의 기준 위치로 월드 원점 설정</h3>
-            <p>
-              카메라 보정이 끝나도 ‘실험 공간의 어디를 0으로 볼 것인가’는 남아 있습니다.
-              원점 설정은 기준 위치에 둔 보드의 중심을 원점으로, 보드 평면을 X·Y축으로,
-              평면의 법선 방향을 Z축으로 정하는 과정입니다. 원점과 좌표축의 방향은
-              기준 위치에 놓인 보드의 자세를 따릅니다.
+              카메라 드라이버는 Jetson의 운영체제와 커널 버전에 맞춰 설치했습니다.
+              <a href="https://docs.arducam.com/Nvidia-Jetson-Camera/Introduction-to-Arducam-Jetson-Cameras/#official-nvidia-orin-nano-development-kit" target="_blank" rel="noopener noreferrer">Arducam의 Orin Nano 지원표</a>에서
+              Jetvariety 카메라의 L4T 36.5.0 지원과 CAM1 연결 조건을 확인하고,
+              JetPack 6.2.2 환경에 맞는 공식 드라이버를 적용했습니다.
+              설치 프로그램은 Arducam이 제공하는 <code>install_full.sh</code>이며,
+              OV9281 키트에 해당하는 <code>-m arducam</code> 옵션을 사용했습니다.
             </p>
             <p>
-              현재 구현은 네 카메라가 모두 보드를 검출한 관측을 모아 12개 자세를
-              강건하게 평균합니다. 보드가 흔들리거나 관측 사이의 위치·회전 차이가 크면
-              품질 검사에서 제외합니다. 스냅샷이 포함된 원점 후보를 최대 3세트까지
-              저장하고, 사용자가 후보를 확인해 적용합니다. 설정한 원점은 추적 중 유지되며,
-              사용자가 재설정 절차를 통해 변경할 수 있습니다.
-            </p>
-            <figure class="doc-figure">
-              <a href="../../assets/drone-mocap-world-origin.png" aria-label="월드 원점 후보 화면 크게 보기"><img src="../../assets/drone-mocap-world-origin.png" alt="월드 원점 설정 상태와 저장된 후보 2세트 및 카메라 스냅샷을 보여주는 화면" width="2879" height="1337" loading="lazy" /></a>
-              <figcaption>원점 설정 화면. 저장된 후보 2/3세트와 각 후보의 관측 영상을 확인할 수 있습니다. 기준 위치를 기록하는 단계와 이후 이동하는 표적을 추적하는 단계가 구별됩니다.</figcaption>
-            </figure>
-            <p>
-              추적 중에는 보드의 카메라 기준 자세를 공통 장치 좌표계로 변환하고,
-              저장된 원점 변환의 역변환을 적용해 월드 좌표를 얻습니다. 원점 아래로 이동한
-              결과는 음의 Z로 표현됩니다. 카메라 배치가
-              바뀌면 재보정이 필요하고, 장치 전체가 움직이면 실험 공간의 원점도 다시
-              확인해야 합니다.
-            </p>
-          </section>
-
-          <section class="doc-section searchable-section" id="tracking" data-search-title="체커보드 추적과 궤적 데모">
-            <h3>6. 코너 추적, 자세 융합과 3차원 궤적</h3>
-            <p>
-              첫 관측에서는 체커보드 전체를 검출하고, 이후에는 이전 프레임의 코너가
-              어디로 이동했는지 Lucas–Kanade 광류로 추적합니다. 앞뒤 프레임을 왕복했을 때
-              코너가 원래 위치로 돌아오는지 확인하고, 보드 평면의 변환 관계에서 벗어나는
-              대응점을 제외해 잘못 따라간 점을 걸러냅니다.
-            </p>
-            <p>
-              남은 영상 코너와 실제 보드의 3차원 좌표를 이용해 카메라마다
-              <code>solvePnP</code>로 보드의 위치·자세를 구합니다. PnP는 크기를 아는
-              물체의 점들이 영상에서 어디에 보이는지를 이용하는 방식입니다. 각 결과를
-              공통 좌표계로 바꾼 뒤 관측 품질을 반영해 융합합니다. 체커보드의 알려진
-              형상과 여러 카메라의 자세 추정 결과를 함께 활용하는 방식입니다.
-            </p>
-            <p>
-              유효한 카메라가 2대 이상이면 융합 결과를 만들고, 3대·4대 관측 상태도
-              따로 표시합니다. 유효 위치는 시간 순서대로 궤적에 추가되며 화면에서는
-              회전·확대·이동과 위쪽 시점 전환이 가능합니다. CSV에는 유효 여부도 함께
-              기록합니다. 표적을 잃으면 상태를 TARGET LOST로 표시하고 궤적 갱신을
-              멈춥니다. 이때 화면에는 마지막 유효 관측까지의 경로가 유지됩니다.
-            </p>
-            <figure class="doc-figure">
-              <a href="../../assets/drone-mocap-trajectory.png" aria-label="Tracking 궤적 화면 크게 보기"><img src="../../assets/drone-mocap-trajectory.png" alt="왼쪽 네 카메라 영상과 오른쪽 누적 3차원 궤적, 현재 TARGET LOST 상태를 표시한 Tracking 화면" width="2879" height="1340" loading="lazy" /></a>
-              <figcaption>네 카메라 영상과 보드의 누적 이동 경로를 함께 표시하는 Tracking 화면입니다. 촬영 순간에는 TARGET LOST·유효 추적 0FPS 상태이며, 오른쪽에 마지막 관측까지의 궤적이 유지되어 있습니다.</figcaption>
-            </figure>
-            <h4>모션캡처 동작 데모</h4>
-            <p>체커보드를 움직이며 카메라 입력과 3차원 궤적 표시를 확인하는 동작 영상입니다. 실제 장비 구성과 웹 프로그램의 추적 화면을 함께 볼 수 있습니다.</p>
-            <figure class="doc-figure">
-              <div class="mocap-video">
-                <iframe src="https://www.youtube.com/embed/2IC90g03l4A" title="4카메라 모션캡처 초기 구현 동작 데모" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-              </div>
-              <figcaption>재생 버튼을 누르면 동작 영상이 시작됩니다. <a href="https://www.youtube.com/watch?v=2IC90g03l4A" target="_blank" rel="noopener noreferrer">YouTube에서 영상 보기 ↗</a></figcaption>
-            </figure>
-          </section>
-
-          <section class="doc-section searchable-section" id="optimization" data-search-title="처리 속도와 원거리 재검출 개선">
-            <h3>7. 처리 지연과 원거리 표적 재검출 개선</h3>
-            <p>
-              초기 화면 이후의 개발에서는 프레임마다 보드 전체를 다시 찾는 연산과
-              불필요한 영상 변환을 줄였습니다. 흑백 GREY 입력을 그대로 처리하고,
-              입력 프레임을 쌓아 두는 대신 최신 프레임 세트를 유지합니다. 표적을 이미
-              찾은 카메라는 광류 추적을 이어 가며, 전체 검출은 별도의 재탐색 작업으로
-              실행합니다. 오래된 프레임에서 얻은 검출 결과는 현재 영상에서 다시 확인한 뒤
-              자세 계산에 사용합니다. 재탐색 결과도 현재 프레임의 관측과 같은 시점에 맞춰
-              융합하는 구조입니다.
-            </p>
-            <p>
-              가까이서 추적을 시작한 보드는 멀어져도 따라가지만, 처음부터 멀리 있는 보드를
-              찾지 못하는 문제도 있었습니다. 작은 보드의 대비가 전체 화면 통계에 묻혀
-              후보에서 제외되는 경로를 수정하고, 관심 영역의 국소 대비와 여러 해상도의
-              검출을 조합했습니다. 보드 크기에 맞춘 코너 정밀화도 적용했습니다.
-              실제 약 1m 거리의 밝은 태블릿 표적을 처음부터 검출하는 시험은 추가 확인 대상입니다.
+              설치 과정에서는 드라이버가 실제 실행 중인 커널에 들어갔는지 확인하고,
+              패키지의 이전 커널 경로를 현재 환경에 맞춰 수정했습니다. 재부팅 후 드라이버가
+              정상적으로 로드되는 것을 확인한 다음, CAM1 포트의 케이블 방향과 전원 연결을
+              점검해 카메라 인식까지 마쳤습니다. 카메라를 사용할 수 있는 상태가 된 뒤에는
+              네 영상이 동시에 갱신되는지와 각 화면이 어느 카메라에 대응하는지를 확인했습니다.
             </p>
             <div class="thesis-table-wrap">
               <table class="thesis-schedule-table">
-                <thead><tr><th scope="col">2026.08.30 시험</th><th scope="col">확인 결과</th><th scope="col">시험 조건</th></tr></thead>
+                <thead><tr><th scope="col">항목</th><th scope="col">구축한 환경</th></tr></thead>
                 <tbody>
-                  <tr><th scope="row">실시간 처리 경로</th><td>약 15초 구간에서 약 45세트/초 처리</td><td>표적 대기 상태에서 4개 미리보기·상태 조회·CSV 동시 실행. 해당 구간의 유효 자세 출력은 0세트</td></tr>
-                  <tr><th scope="row">저장 이미지 재생</th><td>450세트 중 446세트 유효 융합, 444세트 4카메라 유효</td><td>실제 보드 촬영 이미지에 작은 이동을 적용한 재생 시험. 시작 시 표적 획득 구간 포함</td></tr>
-                  <tr><th scope="row">회귀 시험</th><td>43개 테스트 통과</td><td>검출·추적·상태 처리 기능을 확인하는 소프트웨어 시험</td></tr>
+                  <tr><th scope="row">연산 장치</th><td>Jetson Orin Nano 개발 키트</td></tr>
+                  <tr><th scope="row">운영 환경</th><td>Ubuntu 22.04.5 LTS · JetPack 6.2.2 · Jetson Linux 36.5.0</td></tr>
+                  <tr><th scope="row">커널</th><td>5.15.185-tegra</td></tr>
+                  <tr><th scope="row">카메라 드라이버</th><td>Arducam Jetvariety · arducam-nvidia-l4t-kernel (5.15.185 / 36.5.0용)</td></tr>
+                  <tr><th scope="row">카메라 연결</th><td>OV9281 4대 + CamArray HAT · Jetson CAM1 포트</td></tr>
+                  <tr><th scope="row">카메라 입력 설정</th><td>1280×800 × 4대 · 동기화 흑백 영상 · 45FPS</td></tr>
                 </tbody>
               </table>
             </div>
             <p>
-              최신 설정의 영상 입력·처리 목표는 45FPS, 웹 미리보기는 15FPS,
-              상태 조회는 4Hz입니다. 처리 속도는 입력 세트를 계산하는 빈도,
-              미리보기 속도는 브라우저 영상 갱신 빈도입니다. 유효 자세 출력 빈도는
-              품질 검사를 통과한 위치·자세가 생성되는 속도를 나타냅니다.
+              이 과정으로 장비 부팅, 드라이버 로딩, 카메라 입력까지 이어지는 기반을 갖췄습니다.
+              그 위에 웹앱을 실행해 같은 Wi-Fi에 연결된 PC에서 장비를 확인하고
+              보정과 추적을 진행할 수 있도록 구성했습니다.
             </p>
           </section>
 
-          <section class="doc-section searchable-section" id="next" data-search-title="현재 결과와 다음 검증 단계">
-            <h3>8. 현재 결과와 다음 검증 단계</h3>
+          <section class="doc-section searchable-section" id="viewer" data-search-title="동기화된 네 영상을 보여주는 Viewer">
+            <h3>3. Viewer: 네 카메라 영상을 웹에서 확인</h3>
             <p>
-              현재 결과는 네 카메라의 입력부터 보정값 저장, 원점 선택, 보드 추적과
-              궤적 기록까지 연결된 측위 프로그램입니다. 카메라 설정과 실험 상태를 웹에서
-              확인할 수 있어 다음 실험에서도 같은 절차를 반복할 수 있습니다.
-              현재 프로그램은 카메라 측위와 기록 기능을 중심으로 동작하며,
-              비행 제어 연동은 다음 개발 단계입니다.
+              Viewer는 장비 연결 상태와 촬영 장면을 확인하는 첫 화면입니다.
+              Jetson이 받아온 동기화된 네 영상을 카메라별로 배치해,
+              어느 방향에서 표적이 보이는지 한눈에 확인할 수 있도록 만들었습니다.
+              PC나 스마트폰을 Jetson과 같은 Wi-Fi에 연결하고 웹앱 주소를 열면
+              실시간 영상을 볼 수 있습니다.
             </p>
-            <ol class="thesis-process-list">
-              <li><strong>추적 안정성</strong><span>거리·조명·기울기·가림 조건을 바꾸고, 최초 검출과 표적 상실 후 재획득을 각각 평가합니다.</span></li>
-              <li><strong>IR LED 마커</strong><span>밝은 점 검출, 마커 대응과 강체 자세 추정으로 현재 체커보드 표적을 확장합니다.</span></li>
-              <li><strong>정량 위치 검증</strong><span>리니어 모터 스테이지의 기준 경로와 측위 결과를 비교해 위치 오차·반복 정밀도·지연을 측정합니다.</span></li>
-              <li><strong>드론 제어 연동</strong><span>측위 신뢰성과 안전 조건을 확인한 뒤 목표 경로 입력과 폐루프 비행 제어로 연결합니다.</span></li>
-            </ol>
-            <p>전체 연구 목표와 역할·일정은 <a href="01-led-motion-capture-drone.html">1편의 연구 계획</a>에서 이어서 볼 수 있습니다.</p>
+            <p>
+              실제 촬영에서는 표적이 선명하게 보이도록 밝기를 맞추는 작업도 필요했습니다.
+              Viewer에 노출 조절 기능을 넣어 네 카메라의 밝기를 함께 바꿀 수 있게 했습니다.
+              카메라 연결을 확인하고 체커보드가 잘 보이도록 조절한 뒤
+              Calibration으로 넘어가는 순서입니다.
+            </p>
+            <figure class="doc-figure">
+              <a href="../../assets/drone-mocap-four-camera-viewer.png" aria-label="4카메라 Viewer 화면 크게 보기"><img src="../../assets/drone-mocap-four-camera-viewer.png" alt="동기화된 흑백 영상 네 개와 카메라 상태 및 밝기 조절 기능을 제공하는 Viewer" width="2842" height="1330" loading="lazy" /></a>
+              <figcaption>동기화된 네 카메라 영상을 나란히 배치한 Viewer입니다. 화면은 초기 구동 단계의 촬영 기록입니다.</figcaption>
+            </figure>
+            <p>
+              장비 옆에서 표적을 움직이면서도 다른 기기의 브라우저로 네 영상을 볼 수 있어,
+              카메라 방향과 표적 위치를 맞추는 작업을 한 화면에서 진행할 수 있습니다.
+              Viewer를 공통 진입점으로 두고 이후 보정·원점 설정·추적 화면에서도 같은
+              카메라 영상을 확인하도록 구성했습니다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="calibration" data-search-title="네 카메라를 함께 사용하기 위한 보정 기능">
+            <h3>4. Calibration: 네 카메라를 함께 사용하기 위한 보정</h3>
+            <p>
+              네 카메라가 같은 표적을 보더라도 렌즈 특성과 설치 위치에 따라 영상에 나타나는
+              모양이 달라집니다. Calibration은 이 차이를 구해, 네 카메라의 관측을
+              하나의 위치 추정에 사용할 수 있도록 준비하는 기능입니다.
+              보정에 필요한 촬영부터 계산과 저장까지 웹앱 안에서 진행하도록 구현했습니다.
+            </p>
+            <p>
+              촬영에는 가로 8개·세로 3개의 내부 코너가 있는 체커보드를 사용했습니다.
+              칸 간격은 23mm로 설정하고, 보드를 카메라 앞에서 좌우·위아래로 옮기거나
+              기울이며 여러 모습을 수집했습니다. 화면의 다양한 위치를 촬영하면 렌즈의
+              특성과 카메라 사이의 배치를 구하는 데 필요한 관측을 확보할 수 있습니다.
+            </p>
+            <figure class="doc-figure">
+              <a href="../../assets/drone-mocap-calibration.png" aria-label="캘리브레이션 화면 크게 보기"><img src="../../assets/drone-mocap-calibration.png" alt="네 카메라 미리보기와 체커보드 촬영 진행 상태를 보여주는 Calibration 화면" width="2879" height="1289" loading="lazy" /></a>
+              <figcaption>체커보드를 촬영해 12세트의 보정 샘플을 모은 화면입니다. 촬영 진행 상태를 확인한 뒤 보정 계산을 실행합니다.</figcaption>
+            </figure>
+            <p>
+              앱에서는 체커보드가 검출되는지와 샘플이 얼마나 모였는지 확인할 수 있습니다.
+              수집을 마치면 보정값을 계산하고 결과를 적용·저장합니다.
+              저장한 보정값을 다음 실행에서 불러오도록 구성해,
+              같은 카메라 배치에서 원점 설정과 추적 실험을 이어갈 수 있게 했습니다.
+              이 기능으로 카메라 네 대가 하나의 측위 장치로 동작할 준비를 마칩니다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="world-origin" data-search-title="실험 공간의 기준 위치를 정하는 원점 설정">
+            <h3>5. World Origin: 실험 공간의 기준점 설정</h3>
+            <p>
+              보정이 끝난 다음에는 이동 경로를 어디서부터 표시할지 정해야 합니다.
+              World Origin은 실험 공간에서 기준으로 삼을 위치를 지정하는 기능입니다.
+              체커보드를 원하는 기준 위치에 두고 원점을 설정하면,
+              이후 움직임을 그 위치로부터 얼마나 이동했는지로 확인할 수 있습니다.
+            </p>
+            <p>
+              설정 화면에서는 네 카메라에 체커보드가 보이는 상태를 확인한 뒤
+              기준 위치를 촬영합니다. 여러 관측을 모아 원점 후보를 만들고,
+              촬영한 화면과 함께 저장하도록 구성했습니다.
+              사용자는 저장된 후보를 살펴보고 사용할 원점을 적용할 수 있습니다.
+              기준을 다시 정할 때도 같은 화면에서 촬영과 선택을 진행합니다.
+            </p>
+            <figure class="doc-figure">
+              <a href="../../assets/drone-mocap-world-origin.png" aria-label="원점 설정 화면 크게 보기"><img src="../../assets/drone-mocap-world-origin.png" alt="기준 위치의 촬영 화면과 저장된 원점 후보를 확인하는 World Origin 화면" width="2879" height="1337" loading="lazy" /></a>
+              <figcaption>기준 위치를 촬영하고 저장된 후보를 선택하는 World Origin 화면입니다.</figcaption>
+            </figure>
+            <p>
+              원점을 정하는 과정을 따로 둔 이유는 카메라 보정과 실험의 시작 위치가
+              서로 다른 역할을 하기 때문입니다. 카메라 보정으로 장치의 배치를 파악하고,
+              원점 설정으로 이번 실험에서 사용할 기준 위치를 정합니다.
+              이렇게 준비한 기준을 Tracking 화면의 3차원 경로에 그대로 사용합니다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="tracking" data-search-title="체커보드 움직임과 3차원 경로 확인">
+            <h3>6. Tracking: 체커보드의 움직임을 3차원 경로로 표시</h3>
+            <p>
+              Tracking에서는 보정값과 원점을 적용한 상태로 체커보드를 움직이며
+              이동 경로를 확인합니다. 네 카메라에 보이는 같은 표적의 위치를 함께 이용해
+              공간상의 위치를 추정하고, 시간에 따라 이어지는 움직임을 화면에 표시합니다.
+              카메라 영상에서 보이던 움직임을 실험 공간의 경로로 확인하는 단계입니다.
+            </p>
+            <p>
+              화면 왼쪽에는 네 카메라 영상을, 오른쪽에는 3차원 궤적을 배치했습니다.
+              표적을 어느 방향으로 움직였는지 영상과 경로를 함께 비교할 수 있고,
+              궤적 화면을 회전하거나 확대해 이동한 모양을 살펴볼 수 있습니다.
+              추적 상태도 함께 표시해 표적이 현재 관측되고 있는지 확인할 수 있도록 했습니다.
+            </p>
+            <figure class="doc-figure">
+              <a href="../../assets/drone-mocap-trajectory.png" aria-label="체커보드 추적 화면 크게 보기"><img src="../../assets/drone-mocap-trajectory.png" alt="왼쪽 네 카메라 영상과 오른쪽 체커보드의 누적 이동 경로를 표시한 Tracking 화면" width="2879" height="1340" loading="lazy" /></a>
+              <figcaption>네 카메라 영상과 누적 이동 경로를 함께 표시한 Tracking 화면입니다. 사진은 표적이 화면을 벗어난 뒤 기존 궤적이 남아 있는 상태입니다.</figcaption>
+            </figure>
+            <p>
+              아래 영상은 구성한 장비 앞에서 체커보드를 움직이며 웹앱의 추적 화면을
+              확인하는 모습입니다. 카메라 연결, 보정, 원점 설정을 거쳐
+              움직임이 3차원 경로로 표시되는 첫 단계의 동작을 보여줍니다.
+            </p>
+            <figure class="doc-figure">
+              <div class="mocap-video">
+                <iframe src="https://www.youtube.com/embed/2IC90g03l4A" title="4카메라 모션캡처 초기 구현 동작 데모" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+              </div>
+              <figcaption><a href="https://www.youtube.com/watch?v=2IC90g03l4A" target="_blank" rel="noopener noreferrer">YouTube에서 동작 영상 보기 ↗</a></figcaption>
+            </figure>
+            <p>
+              첫 번째 단계에서는 Jetson의 실행 환경과 동기화 카메라 입력을 준비하고,
+              네 가지 기능을 하나의 웹앱으로 연결했습니다. 장비를 켠 뒤 영상 확인부터
+              보정·원점 설정·추적까지 진행할 수 있는 실험 기반입니다.
+              다음 단계에서는 이 기반을 IR LED 마커 추적과 기준 장비를 이용한 위치 검증으로
+              확장할 계획입니다.
+            </p>
           </section>
 
           <p class="bottom-author">by jy</p>
@@ -277,7 +266,6 @@
             <a class="pager-link pager-prev" href="01-led-motion-capture-drone.html">← 1. 드론 비행경로 제어 연구 계획</a>
             <span class="pager-link pager-next pager-disabled">3. 리니어 모터 기반 경로 검증 · 준비 중</span>
           </nav>
-          <p class="repository-note">2026년 8월 30일의 프로그램·시험 기록과 직접 촬영한 자료를 바탕으로 작성했습니다. 사진은 촬영 당시 UI를 유지하며, 이후 개선 내용은 7절에서 별도로 설명합니다.</p>
           <footer class="page-footer"><span>졸업논문 진행 기록</span><a href="#top">맨 위로 ↑</a></footer>
         </article>
       </main>
