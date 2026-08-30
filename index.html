@@ -33,8 +33,8 @@
               <span>진행 중인 연구 묶음</span>
               <h2>LED 모션캡처 드론 제어</h2>
               <p>
-                LED 기반 드론 비행경로 제어 시스템과 리니어 모터 스테이지를 이용한
-                경로 검증 환경을 함께 정리했습니다.
+                연구 계획, 4카메라 모션캡처 초기 구현, 리니어 모터를 이용한
+                정량 검증 계획을 차례로 정리했습니다.
               </p>
             </a>
             <a class="home-panel" href="#snn-research">
@@ -106,13 +106,11 @@
           <section class="doc-section visible" id="drone-motion-capture">
             <h2>LED 모션캡처 기반 드론 비행경로 제어 시스템 (진행중)</h2>
             <p>
-              드론의 LED 빛을 여러 카메라로 감지해 위치와 비행 경로를 추적하고, 그 결과로
-              목표 경로를 따라 비행하도록 제어하는 졸업논문 시스템입니다. 스마트폰 앱에서
-              목표·실제 경로와 비행 결과를 실시간으로 확인할 수 있도록 구성하며,
-              리니어 모터 스테이지로 모션캡처 경로의 정확도를 검증합니다. 중앙대학교
-              전자전기공학부 제어 및 로봇 SLAM 연구실을 운영하는 심덕선 교수님의 지도 아래
-              진행하며, 2026년 10월 10일까지 졸업논문을 마무리해 대한전자공학회 2026년도
-              추계학술대회 제출을 목표로 작성하고 있습니다.
+              여러 카메라로 드론의 LED 마커를 관측하고, 추정한 위치를 비행경로 제어에
+              연결하는 졸업논문 연구입니다. 현재는 Jetson과 OV9281 카메라 4대를 연결해
+              영상 확인, 캘리브레이션, 원점 설정과 체커보드의 3차원 궤적 표시까지 구현했습니다.
+              IR LED 추적과 드론 제어, 리니어 모터 기준 경로를 이용한 정확도 검증은 후속 단계입니다.
+              중앙대학교 심덕선 교수님의 지도 아래 진행하며, 2026년 10월 논문 정리를 목표로 합니다.
             </p>
 
             <div class="project-grid planned-work-grid" aria-label="LED 모션캡처 드론 연구">
@@ -126,11 +124,27 @@
                   alt="네 대의 카메라로 LED 마커가 부착된 드론을 추적하고 휴대폰에서 비행경로를 입력하는 모션캡처 시스템 구성"
                 />
                 <span class="sitemap-number">01</span>
-                <small>졸업논문 · 드론 모션캡처</small>
-                <h2>LED 모션캡처 기반 드론 비행경로 제어 시스템</h2>
+                <small>연구 계획 · 드론 모션캡처</small>
+                <h2>LED 모션캡처 기반 드론 비행경로 제어 연구 계획</h2>
                 <p>
-                  다중 카메라로 드론 LED를 추적해 목표 비행경로를 따라가도록 제어하는
-                  졸업논문 시스템입니다.
+                  다중 카메라 측위를 드론 제어에 연결하기 위한 연구 목표, 시스템 구성과
+                  단계별 검증 계획을 설명합니다.
+                </p>
+              </a>
+
+              <a class="project-card plan-card plan-card-link" href="pages/planned/02-mocap-initial-implementation.html">
+                <img
+                  class="project-thumb plan-thumb-image"
+                  src="assets/drone-mocap-jetson-camarray.jpg"
+                  alt="Jetson과 CamArray HAT에 연결해 프레임에 고정한 OV9281 카메라 네 대"
+                  loading="lazy"
+                />
+                <span class="sitemap-number">02</span>
+                <small>초기 구현 · Jetson · 4 Cameras</small>
+                <h2>4카메라 모션캡처 시스템 1차 구현</h2>
+                <p>
+                  카메라 연결부터 웹 Viewer, 캘리브레이션, 원점 설정과 체커보드 궤적
+                  추적까지 실제 장비 사진과 동작 영상으로 설명합니다.
                 </p>
               </a>
 
@@ -141,12 +155,12 @@
                   alt="드론 모션캡처 경로 검증에 사용할 산업용 리니어 모터 스테이지"
                   loading="lazy"
                 />
-                <span class="sitemap-number">02</span>
-                <small>Ground Truth · Linear Motor Stage</small>
+                <span class="sitemap-number">03</span>
+                <small>정량 검증 계획 · 준비 중</small>
                 <h2>산업용 리니어 모터 스테이지 기반 경로 검증 환경</h2>
                 <p>
                   리니어 모터 스테이지로 기준 경로를 재현하고, 모션캡처가 검출한 경로와
-                  비교하는 Ground Truth 검증 환경입니다.
+                  비교할 계획입니다. 정량 평가 결과와 상세 글은 준비 중입니다.
                 </p>
               </article>
 

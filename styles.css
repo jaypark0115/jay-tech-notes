@@ -2359,6 +2359,64 @@ body.home-page .sitemap-number {
 }
 
 /* Graduation thesis / capstone plan page. */
+/* Initial mocap article: reuse the shared document typography and figure styles. */
+.drone-mocap-page h1 {
+  word-break: keep-all;
+}
+
+.drone-mocap-page .mocap-contents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin: 1.5rem 0 2.5rem;
+  padding: 1rem 0;
+  border-block: 1px solid var(--line);
+  font-size: 0.92rem;
+}
+
+.drone-mocap-page .mocap-setup-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.drone-mocap-page .doc-figure img {
+  height: auto;
+}
+
+.drone-mocap-page .scope-note p {
+  margin: 0;
+}
+
+.drone-mocap-page .content p a,
+.drone-mocap-page .doc-figure figcaption a,
+.drone-mocap-page .mocap-contents a {
+  color: var(--accent);
+}
+
+.drone-mocap-page .mocap-setup-grid img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  background: #fff;
+}
+
+.drone-mocap-page .mocap-video {
+  aspect-ratio: 16 / 9;
+  background: #111827;
+}
+
+.drone-mocap-page .mocap-video iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+@media (max-width: 620px) {
+  .drone-mocap-page .mocap-setup-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 body.planned-detail-page {
   --accent: #0f766e;
   --accent-soft: #ecfdf5;

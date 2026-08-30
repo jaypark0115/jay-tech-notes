@@ -5,23 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="LED 모션캡처 기반 드론 비행경로 제어 시스템의 졸업논문 주제, 구성, 검증 방법과 개발 일정."
+      content="LED 모션캡처 기반 드론 비행경로 제어 연구 계획. 졸업논문 목표, 시스템 구성, 담당 역할과 향후 정량 검증 방법을 설명합니다."
     />
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <title>LED 모션캡처 기반 드론 비행경로 제어 시스템 — Jay Tech Notes</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260725-thesis-note" />
+    <title>LED 모션캡처 기반 드론 비행경로 제어 연구 계획 — Jay Tech Notes</title>
+    <link rel="stylesheet" href="../../styles.css?v=20260830-mocap" />
     <script src="../../script.js" defer></script>
   </head>
-  <body class="planned-detail-page">
+  <body class="planned-detail-page drone-mocap-page">
     <div class="site-shell">
       <main class="content-wrap" id="top">
         <article class="content">
           <div class="document-kicker">
             <span>LED 모션캡처 드론 연구</span>
             <div class="kicker-actions">
-              <span class="draft-label">졸업논문 진행 중</span>
+              <span class="draft-label">연구 계획 · 졸업논문 진행 중</span>
             </div>
           </div>
 
@@ -33,26 +33,31 @@
             <span class="chapter-switcher-label">드론 연구 글 목록</span>
             <div>
               <a class="current" href="01-led-motion-capture-drone.html" aria-current="page">
-                1. LED 모션캡처 기반 드론 비행경로 제어 시스템
+                1. 드론 비행경로 제어 연구 계획
               </a>
-              <span class="disabled">2. 산업용 리니어 모터 스테이지 기반 경로 검증 환경</span>
+              <a href="02-mocap-initial-implementation.html">2. 4카메라 모션캡처 시스템 1차 구현</a>
+              <span class="disabled">3. 리니어 모터 기반 경로 검증 · 준비 중</span>
             </div>
           </nav>
 
-          <h1>LED 모션캡처 기반 드론 비행경로 제어 시스템</h1>
+          <h1>LED 모션캡처 기반 드론 비행경로 제어 연구 계획</h1>
           <p class="lead">
             실내의 여러 적외선 카메라로 드론에 부착한 LED 마커를 추적해 3차원 위치와
             자세를 실시간으로 계산하고, 사용자가 입력한 목표 경로를 드론이 따라가도록
-            제어하는 시스템을 구현하고 있습니다. 스마트폰에서는 목표 경로를 입력하고
-            실제 비행 경로와 결과를 확인할 수 있도록 구성할 예정입니다.
+            제어하는 시스템의 연구 계획입니다. 스마트폰에서 목표 경로를 입력하고
+            실제 비행 경로와 결과를 확인하는 것을 최종 목표로 합니다.
+            현재 구현한 카메라 입력과 체커보드 추적은
+            <a href="02-mocap-initial-implementation.html">2편의 초기 구현 기록</a>에서 설명합니다.
           </p>
 
           <div class="scope-note thesis-summary-note" role="note">
-            <strong>연구 개요</strong>
+            <strong>연구 개요와 진행 단계</strong>
             <span>
               박재연 외 2명(조원 1, 조원 2)이 참여합니다. 2026년 10월 10일까지
               졸업논문과 학술대회 제출 결과를 정리하고, 11월에 최종 제작·발표·보고서
               작성을 마칠 계획입니다.
+              2026년 8월 30일 기준으로 4카메라 입력·보정·원점 설정·체커보드 궤적 표시를
+              구현했으며, 아래의 IR LED 추적·드론 제어·리니어 모터 검증은 후속 계획입니다.
             </span>
           </div>
 
@@ -63,7 +68,8 @@
             />
             <figcaption>
               네 대의 카메라, 드론의 IR LED 마커, Jetson 연산 장치와 스마트폰 경로 입력으로
-              구성한 실내 드론 모션캡처·궤적 추종 제어 시스템 개념도입니다.
+              구성할 실내 드론 모션캡처·궤적 추종 제어 시스템의 계획 개념도입니다.
+              실제 완성 장비나 비행 실험 사진은 아닙니다.
             </figcaption>
           </figure>
 
@@ -93,9 +99,9 @@
             </p>
             <h4>상용 모션캡처 시스템의 한계</h4>
             <p>
-              OptiTrack이나 Vicon과 같은 상용 시스템은 높은 정밀도를 제공하지만 구축
-              비용이 수천만 원에서 수억 원에 이를 수 있어 일반 연구실이나 개인이 연구용
-              테스트 환경으로 사용하기 어렵습니다.
+              상용 모션캡처 장비를 도입할 때는 카메라뿐 아니라 설치 공간, 전용 소프트웨어와
+              유지 비용도 고려해야 합니다. 이 연구는 자체 구성한 비전 센서와 연산 장치로
+              필요한 기능을 구현하고, 그 성능을 별도의 기준 장비로 확인하는 접근입니다.
             </p>
             <h4>자체 구축의 의의</h4>
             <p>
@@ -109,10 +115,11 @@
           <section class="doc-section searchable-section" id="system" data-search-title="시스템 구성">
             <h3>3. 시스템 구성</h3>
             <p>
-              실내 안전 케이지 안에 네 대의 적외선 글로벌 셔터 카메라를 배치하고, 드론에
-              부착한 IR LED 마커를 여러 방향에서 촬영합니다. 글로벌 셔터를 사용해 빠르게
-              이동하는 드론의 잔상을 줄이고, 네 카메라의 관측값으로 드론의 3차원 위치와
-              자세를 추정합니다.
+              최종 구성에서는 실내 안전 케이지 안에 네 대의 적외선 글로벌 셔터 카메라를
+              배치하고, 드론에 부착한 IR LED 마커를 여러 방향에서 촬영할 계획입니다.
+              글로벌 셔터는 영상의 행별 촬영 시차에 따른 형상 왜곡을 줄이며, 움직임에 의한
+              흐림은 노출 시간 조절도 필요합니다. 여러 카메라의 관측값으로 드론의
+              3차원 위치와 자세를 추정하는 것이 측위 단계의 목표입니다.
             </p>
             <ol class="thesis-process-list">
               <li><strong>영상 수집</strong><span>네 대의 IR 카메라로 LED 마커를 동시에 관측합니다.</span></li>
@@ -121,8 +128,8 @@
               <li><strong>비행 제어</strong><span>계산된 오차를 줄이는 제어 명령을 드론으로 전달합니다.</span></li>
             </ol>
             <p>
-              4채널 고용량 영상 처리, 궤적 오차 계산과 제어 명령 전달은
-              Jetson Orin Nano Super에서 수행합니다. 스마트폰 웹 앱에서는 복잡한
+              최종 시스템의 4채널 영상 처리, 궤적 오차 계산과 제어 명령 전달은
+              Jetson Orin Nano Super에서 수행하도록 설계합니다. 스마트폰 웹 앱에서는 복잡한
               콘솔 조작 없이 목표 경로를 입력하고 실제 경로와 결과를 확인할 수 있도록
               구성할 예정입니다.
             </p>
@@ -138,7 +145,8 @@
           </section>
 
           <section class="doc-section searchable-section" id="role" data-search-title="담당 역할">
-            <h3>4. 담당 역할</h3>
+            <h3>4. 담당 역할과 개발 범위</h3>
+            <p>제안서의 역할 분담은 다음과 같습니다. 완성된 기능 목록이 아니라 각 참여자의 개발 담당 범위를 나타냅니다.</p>
             <dl class="thesis-role-list">
               <div>
                 <dt>박재연</dt>
@@ -163,12 +171,12 @@
           </section>
 
           <section class="doc-section searchable-section" id="validation" data-search-title="검증 방법">
-            <h3>5. 검증 방법</h3>
+            <h3>5. 정량 검증 계획</h3>
             <p>
               자체 구축한 IR 모션캡처 시스템의 신뢰성을 확인하기 위해 산업용 리니어 모터
-              스테이지를 Ground Truth로 사용합니다. IR LED 표적이나 드론을 스테이지에
+              스테이지를 기준 장비(Ground Truth)로 사용할 계획입니다. IR LED 표적이나 드론을 스테이지에
               고정하고 정밀하게 제어된 기준 궤적으로 이동시킨 뒤, 모션캡처가 추정한
-              3차원 경로와 비교합니다.
+              3차원 경로와 비교할 예정입니다. 아직 이 장비를 이용한 위치 오차 측정 결과는 없습니다.
             </p>
             <ul class="thesis-check-list">
               <li><strong>Accuracy</strong> — 정적·동적 위치 추정 정확도</li>
@@ -178,13 +186,13 @@
             </ul>
             <p>
               정량 검증을 완료한 뒤 실제 드론의 폐루프 궤적 추종 비행에 적용해 사용자가
-              입력한 목표 경로와 실제 경로 사이의 최종 오차를 분석합니다.
+              입력한 목표 경로와 실제 경로 사이의 최종 오차를 분석할 계획입니다.
             </p>
           </section>
 
           <section class="doc-section searchable-section" id="schedule" data-search-title="개발 일정">
             <h3>6. 개발 일정</h3>
-            <p>2026년 6월 30일 작성 제안서의 7~11월 추진 일정을 정리했습니다.</p>
+            <p>2026년 6월 30일 작성 제안서의 7~11월 추진 일정입니다. 아래 시점은 계획이며 각 항목의 완료를 의미하지 않습니다. 실제 진행 내용은 <a href="02-mocap-initial-implementation.html">초기 구현 기록</a>에서 확인할 수 있습니다.</p>
             <div class="thesis-table-wrap">
               <table class="thesis-schedule-table">
                 <thead>
@@ -246,7 +254,7 @@
             <a class="pager-link pager-prev" href="../../index.html#drone-motion-capture">
               ← LED 모션캡처 드론 연구 목록
             </a>
-            <span class="pager-link pager-next pager-disabled">다음 글 준비 중</span>
+            <a class="pager-link pager-next" href="02-mocap-initial-implementation.html">2. 4카메라 모션캡처 시스템 1차 구현 →</a>
           </nav>
 
           <p class="repository-note">
