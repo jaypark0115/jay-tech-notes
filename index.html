@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="드론 모션캡처, SNN 연구, NRV DVS 캘리브레이션·Rectify, 이벤트 비전 스테레오 Depth와 FPGA 기술 노트 모음." />
     <title>Jay Tech Notes</title>
-    <link rel="stylesheet" href="styles.css?v=20260830-mocap-first-stage" />
+    <link rel="stylesheet" href="styles.css?v=20260830-mocap-card-crop" />
     <script src="script.js" defer></script>
   </head>
   <body class="home-page">
@@ -33,7 +33,7 @@
               <span>진행 중인 연구 묶음</span>
               <h2>LED 모션캡처 드론 제어</h2>
               <p>
-                연구 계획, 4카메라 모션캡처 초기 구현, 리니어 모터를 이용한
+                연구 계획, Jetson 기반 모션캡처 초기 구현, 리니어 모터를 이용한
                 정량 검증 계획을 차례로 정리했습니다.
               </p>
             </a>
@@ -133,15 +133,16 @@
               </a>
 
               <a class="project-card plan-card plan-card-link" href="pages/planned/02-mocap-initial-implementation.html">
-                <img
-                  class="project-thumb plan-thumb-image"
-                  src="assets/drone-mocap-jetson-camarray.jpg"
-                  alt="Jetson과 CamArray HAT에 연결해 프레임에 고정한 OV9281 카메라 네 대"
-                  loading="lazy"
-                />
+                <div class="project-thumb plan-thumb-frame">
+                  <img
+                    src="assets/drone-mocap-jetson-camarray.jpg"
+                    alt="Jetson과 CamArray HAT에 연결해 프레임에 고정한 OV9281 카메라 네 대"
+                    loading="lazy"
+                  />
+                </div>
                 <span class="sitemap-number">02</span>
                 <small>초기 구현 · Jetson · 4 Cameras</small>
-                <h2>4카메라 모션캡처 시스템 1차 구현</h2>
+                <h2>Jetson 기반 모션캡처 시스템 1차 구현</h2>
                 <p>
                   카메라 연결부터 웹 Viewer, 캘리브레이션, 원점 설정과 체커보드 궤적
                   추적까지 실제 장비 사진과 동작 영상으로 설명합니다.
