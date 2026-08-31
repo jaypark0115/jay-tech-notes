@@ -8,7 +8,7 @@
     <meta property="og:description" content="Jetson 환경을 준비하고 동기화된 쿼드 카메라를 연결해 네 가지 웹 기능을 구현한 개발 기록." />
     <meta property="og:image" content="https://jaypark0115.github.io/jay-tech-notes/assets/drone-mocap-jetson-camarray.jpg" />
     <title>4카메라 모션캡처 시스템 1차 구현 — Jay Tech Notes</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260830-mocap-first-stage" />
+    <link rel="stylesheet" href="../../styles.css?v=20260831-mocap-demo" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="planned-detail-page drone-mocap-page">
@@ -41,6 +41,15 @@
             <strong>주요 기능</strong>
             <p>Viewer로 네 영상 확인 → Calibration으로 카메라 보정 → World Origin으로 기준점 설정 → Tracking으로 이동 경로 표시</p>
           </div>
+          <figure class="doc-figure mocap-demo-figure">
+            <div class="mocap-video">
+              <iframe src="https://www.youtube.com/embed/2IC90g03l4A" title="4카메라 모션캡처 초기 구현 동작 데모" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+            <figcaption>
+              체커보드를 움직이며 네 카메라의 관측으로 이동 경로가 3차원 화면에 표시되는 초기 구현 데모입니다.
+              <a href="https://www.youtube.com/watch?v=2IC90g03l4A" target="_blank" rel="noopener noreferrer">YouTube에서 보기 ↗</a>
+            </figcaption>
+          </figure>
 
           <section class="doc-section searchable-section" id="first-stage" data-search-title="첫 번째 단계의 구현 목표">
             <h3>1. 카메라 연결과 네 가지 기능 구현</h3>
@@ -240,17 +249,6 @@
             <figure class="doc-figure">
               <a href="../../assets/drone-mocap-trajectory.png" aria-label="체커보드 추적 화면 크게 보기"><img src="../../assets/drone-mocap-trajectory.png" alt="왼쪽 네 카메라 영상과 오른쪽 체커보드의 누적 이동 경로를 표시한 Tracking 화면" width="2879" height="1340" loading="lazy" /></a>
               <figcaption>네 카메라 영상과 누적 이동 경로를 함께 표시한 Tracking 화면입니다. 사진은 표적이 화면을 벗어난 뒤 기존 궤적이 남아 있는 상태입니다.</figcaption>
-            </figure>
-            <p>
-              아래 영상은 구성한 장비 앞에서 체커보드를 움직이며 웹앱의 추적 화면을
-              확인하는 모습입니다. 카메라 연결, 보정, 원점 설정을 거쳐
-              움직임이 3차원 경로로 표시되는 첫 단계의 동작을 보여줍니다.
-            </p>
-            <figure class="doc-figure">
-              <div class="mocap-video">
-                <iframe src="https://www.youtube.com/embed/2IC90g03l4A" title="4카메라 모션캡처 초기 구현 동작 데모" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-              </div>
-              <figcaption><a href="https://www.youtube.com/watch?v=2IC90g03l4A" target="_blank" rel="noopener noreferrer">YouTube에서 동작 영상 보기 ↗</a></figcaption>
             </figure>
             <p>
               첫 번째 단계에서는 Jetson의 실행 환경과 동기화 카메라 입력을 준비하고,

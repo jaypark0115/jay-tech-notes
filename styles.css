@@ -2408,6 +2408,11 @@ body.home-page .sitemap-number {
   background: #111827;
 }
 
+.drone-mocap-page .mocap-demo-figure {
+  width: min(100%, 760px);
+  margin: 1.6rem auto 2.4rem;
+}
+
 .drone-mocap-page .mocap-video iframe {
   display: block;
   width: 100%;
