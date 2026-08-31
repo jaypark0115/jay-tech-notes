@@ -20,7 +20,6 @@ https://jaypark0115.github.io/jay-tech-notes/
    - 목표: 2026.10.10, 대한전자공학회 2026년도 추계학술대회 제출 예정
 2. [4카메라 모션캡처 시스템 1차 구현](https://jaypark0115.github.io/jay-tech-notes/pages/planned/02-mocap-initial-implementation.html)
    - Jetson·OV9281 연결, 웹 Viewer, 캘리브레이션, 원점 설정, 체커보드 추적과 궤적 표시를 사진·영상과 함께 설명합니다.
-   - 2026.08.30 코드·시험 기록 기준이며, 드론 비행과 IR LED 추적은 후속 단계입니다.
 3. **산업용 리니어 모터 스테이지 기반 경로 검증 환경 — 준비 중**
    - 리니어 모터 스테이지에 LED 표적 또는 드론을 고정해 기준 경로와 모션캡처 검출 경로를 비교할 계획입니다.
    - 목표: 2026.10.10
