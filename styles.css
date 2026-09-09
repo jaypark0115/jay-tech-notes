@@ -2179,6 +2179,11 @@ body.home-page .doc-section > .nrv-docs-link-line {
   margin-top: 8px;
 }
 
+body.home-page .doc-section > .nrv-docs-link-description {
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+
 body.home-page .nrv-docs-link-line a {
   color: var(--accent);
   font-weight: 750;
