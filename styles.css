@@ -2185,6 +2185,13 @@ body.home-page .nrv-docs-link-line a {
   text-underline-offset: 3px;
 }
 
+body.home-page .nrv-docs-url {
+  display: block;
+  margin-top: 2px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
 body.home-page .nrv-docs-link-line a:focus-visible {
   outline: 3px solid rgb(15 118 110 / 24%);
   outline-offset: 2px;
