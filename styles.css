@@ -2175,6 +2175,21 @@ body.home-page .source-note {
   background: #f8fafc;
 }
 
+body.home-page .doc-section > .nrv-docs-link-line {
+  margin-top: 8px;
+}
+
+body.home-page .nrv-docs-link-line a {
+  color: var(--accent);
+  font-weight: 750;
+  text-underline-offset: 3px;
+}
+
+body.home-page .nrv-docs-link-line a:focus-visible {
+  outline: 3px solid rgb(15 118 110 / 24%);
+  outline-offset: 2px;
+}
+
 body.home-page .chapter-switcher a:hover {
   border-color: rgb(15 118 110 / 28%);
   color: var(--accent);
