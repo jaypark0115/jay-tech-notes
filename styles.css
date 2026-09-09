@@ -2191,8 +2191,8 @@ body.home-page .nrv-docs-link-line a {
 }
 
 body.home-page .nrv-docs-url {
-  display: block;
-  margin-top: 2px;
+  display: inline;
+  margin-left: 0.35em;
   font-weight: 500;
   overflow-wrap: anywhere;
 }
