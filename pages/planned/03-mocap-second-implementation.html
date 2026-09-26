@@ -8,7 +8,7 @@
     <meta property="og:description" content="체커보드 추적 시스템을 실제 드론의 IR 마커 추적과 폐루프 호버 제어로 확장한 과정." />
     <meta property="og:image" content="https://jaypark0115.github.io/jay-tech-notes/assets/drone-mocap-second-implementation.png" />
     <title>4카메라 모션캡처 시스템 2차 구현 — Jay Tech Notes</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260926-mocap-v2" />
+    <link rel="stylesheet" href="../../styles.css?v=20260926-mocap-v2b" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="planned-detail-page drone-mocap-page mocap-second-page">
@@ -48,13 +48,6 @@
             </figcaption>
           </figure>
 
-          <figure class="doc-figure planned-hero mocap-v2-hero">
-            <a href="../../assets/drone-mocap-second-implementation.png" aria-label="4카메라 드론 모션캡처 2차 구현 실험 환경 크게 보기">
-              <img src="../../assets/drone-mocap-second-implementation.png" alt="카메라 어레이와 Jetson, 모니터링 화면, Crazyflie를 함께 운용하는 드론 모션캡처 2차 구현 환경" width="1249" height="994" />
-            </a>
-            <figcaption>카메라 어레이, Jetson 연산부, 웹 모니터링 화면과 IR 마커 드론을 하나의 실험 흐름으로 연결했습니다.</figcaption>
-          </figure>
-
           <div class="scope-note" role="note">
             <strong>1차 구현에서 2차 구현으로</strong>
             <p>체커보드 추적 → 실제 드론 조립 → IR LED 추적 → 3차원 위치 계산 → BLE 외부 위치 전달 → 폐루프 호버·착륙</p>
@@ -69,13 +62,21 @@
               Jetson에서 계산되고, 계산된 위치가 무선으로 기체에 전달되며, Crazyflie 내부 위치
               제어기가 목표점과 현재 위치의 차이를 줄이도록 자세와 모터 출력을 조절합니다.
             </p>
+            <p>
+              이 과정에서 중요한 변화는 추적 결과가 더 이상 화면에 그려지는 좌표로 끝나지
+              않는다는 점입니다. 카메라 보정과 원점 설정이 잘못되면 그 오차가 그대로 기체의
+              현재 위치로 들어가고, 반대로 통신이나 상태 추정이 늦으면 카메라가 올바른 위치를
+              보더라도 제어기는 과거 상태를 기준으로 반응합니다. 그래서 2차 구현은 영상 처리,
+              좌표 변환, BLE 전달, 기체 제어와 기록을 한 흐름으로 묶어 각 단계의 입력과 출력을
+              함께 확인하는 방향으로 개발했습니다.
+            </p>
             <ol class="thesis-process-list">
               <li><strong>관측</strong><span>4대의 OV9281 카메라가 드론의 IR LED 마커를 같은 촬영 주기로 관측합니다.</span></li>
               <li><strong>측위</strong><span>Jetson이 카메라별 LED 점을 검출하고 보정값을 이용해 드론의 3차원 위치·방향을 계산합니다.</span></li>
               <li><strong>전달</strong><span>계산한 외부 위치를 BLE 통신으로 Crazyflie 상태 추정기에 보냅니다.</span></li>
               <li><strong>제어</strong><span>기체 내부 위치 제어기가 목표 위치를 유지하도록 보정하며, Jetson은 명령·상태·궤적을 기록합니다.</span></li>
             </ol>
-            <figure class="doc-figure">
+            <figure class="doc-figure mocap-v2-compact-photo mocap-v2-aruco-photo">
               <a href="../../assets/drone-mocap-aruco-board.jpg"><img src="../../assets/drone-mocap-aruco-board.jpg" alt="초기 카메라 보정과 기준 좌표 확인에 사용한 ArUco 보드" width="2169" height="2209" loading="lazy" /></a>
               <figcaption>체커보드·ArUco 보드로 카메라와 기준 좌표를 먼저 확인한 뒤, 같은 보정 결과를 IR 마커 드론 추적으로 확장했습니다.</figcaption>
             </figure>
@@ -89,6 +90,13 @@
               연결 가능성, BLE 통신, 기체의 기존 상태 추정·위치 제어 기능을 함께 검토한 뒤
               과제 장비로 확보했습니다. 수령한 기체는 모터·프로펠러·배터리와 마커 데크를 직접
               조립하고, LED 방향과 기체 전방축을 확인해 기존 모션캡처 시스템에 연결했습니다.
+            </p>
+            <p>
+              조립 단계에서는 단순히 부품을 결합하는 데서 끝내지 않고, 네 모터와 프로펠러의
+              회전 방향, 배터리와 데크의 체결 상태, 마커가 가리키는 방향과 소프트웨어가 사용하는
+              기체 전방축을 차례로 맞췄습니다. 카메라 좌표와 드론 좌표가 서로 다른 상태에서는
+              위치 오차를 줄이려는 명령이 실제 공간에서 엉뚱한 방향으로 작용할 수 있기 때문에,
+              실물 조립 기준을 이후 좌표 변환과 실험 기록에도 동일하게 유지했습니다.
             </p>
             <figure class="doc-figure">
               <div class="figure-grid mocap-v2-gallery mocap-v2-gallery-four">
@@ -110,7 +118,7 @@
               드론과는 BLE로 위치·명령과 상태·응답을 주고받습니다. 브라우저 화면은 같은 네트워크로
               Jetson의 영상, 계산 위치, 목표 경로와 기체 상태를 표시합니다.
             </p>
-            <figure class="doc-figure">
+            <figure class="doc-figure mocap-v2-compact-photo mocap-v2-hardware-photo">
               <a href="../../assets/drone-mocap-system-hardware.jpg"><img src="../../assets/drone-mocap-system-hardware.jpg" alt="카메라 어레이, Jetson 연산부, 드론, 모니터링 화면으로 구성한 실제 모션캡처 시스템" width="2655" height="1895" loading="lazy" /></a>
               <figcaption>실제 장치에서 카메라 어레이·Jetson·드론·모니터링 화면을 함께 운용한 구성입니다.</figcaption>
             </figure>
@@ -142,6 +150,26 @@
               마커는 분명하게 남고 배경은 어둡게 보이도록 맞췄습니다. 이 설정과 캡처 주기,
               검출 결과와 유효 카메라 수를 함께 기록해 영상과 위치 데이터를 다시 대조할 수 있게 했습니다.
             </p>
+            <p>
+              아래 이미지는 실제 45fps 회전 기록에서 같은 시점의 네 카메라 영상을 모은 자료입니다.
+              배경을 어둡게 억제하면 Active Marker가 카메라마다 세 개의 밝은 점으로 보이고, 드론을
+              회전시키면 점 사이의 상대 배치도 함께 바뀝니다. 프로그램은 단순히 가장 밝은 한 점을
+              드론으로 취급하지 않고, 이 점들의 배치와 여러 카메라에서의 관측을 함께 사용해 마커의
+              대응 관계를 정한 뒤 3차원 위치·방향을 계산합니다.
+            </p>
+            <figure class="doc-figure mocap-v2-ir-contact-figure">
+              <a class="mocap-v2-ir-contact-crop" href="../../assets/drone-active-marker-4camera-contact-sheet.jpg" aria-label="실제 45fps Active Marker 4카메라 기록 전체 보기">
+                <img src="../../assets/drone-active-marker-4camera-contact-sheet.jpg" alt="카메라 4대에서 Active Marker의 IR LED 세 점이 보이는 실제 45fps 촬영 기록" width="1280" height="3400" loading="lazy" />
+              </a>
+              <figcaption>CAM0–CAM3에서 관측한 실제 IR 영상입니다. 각 화면의 밝은 점 세 개가 Active Marker이며, 이미지를 누르면 회전 전 구간의 전체 contact sheet를 볼 수 있습니다.</figcaption>
+            </figure>
+            <p>
+              한 카메라에서 점을 찾았다는 사실만으로 3차원 위치가 정해지는 것은 아닙니다. 같은
+              촬영 주기의 관측을 카메라 보정값과 결합하고, 충분한 카메라에서 대응이 성립했을 때만
+              유효 pose를 만듭니다. 이렇게 얻은 월드 좌표는 실험 시작점과 축 방향을 기준으로 비행
+              로컬 좌표로 변환되며, 동일한 값이 웹 궤적과 기록 파일, 기체로 보내는 외부 위치의
+              기준이 되도록 연결했습니다.
+            </p>
             <figure class="doc-figure diagram-figure program-diagram-figure">
               <a href="../../assets/drone-mocap-program-diagram.png"><img src="../../assets/drone-mocap-program-diagram.png" alt="Jetson 웹 요청, 카메라 영상 처리, 위치 계산, BLE 드론 통신과 기록 모듈을 연결한 프로그램 블록도" width="4930" height="2850" loading="lazy" /></a>
               <figcaption>웹 요청, 카메라 캡처·위치 계산, BLE 비행, 기체 상태와 실험 기록을 실제 소스 모듈 기준으로 나눈 프로그램 구조입니다.</figcaption>
@@ -157,6 +185,13 @@
               확인할 수 있습니다. 실험 화면에서는 목표 경로를 옅게, 실제 측정 경로를 진하게 표시해
               드론이 명령을 얼마나 따라갔는지 바로 비교하도록 구성했습니다.
             </p>
+            <p>
+              화면은 단순한 시각화 페이지가 아니라 실험 순서를 한곳에 모은 운영 도구입니다.
+              먼저 카메라별 영상과 프레임률을 확인하고, 보정과 월드 원점이 적용됐는지 확인한 뒤,
+              Tracking에서 pose가 연속으로 들어오는 상태를 거쳐 비행 화면으로 이동합니다. 실험이
+              시작되면 목표점, 실제 위치, 통신 상태와 진행 단계를 같은 시간축으로 남기므로 영상에서
+              보인 움직임과 프로그램이 판단한 상태를 나중에 다시 대조할 수 있습니다.
+            </p>
             <figure class="doc-figure current-ui-figure">
               <a href="../../assets/drone-mocap-current-ui.png"><img src="../../assets/drone-mocap-current-ui.png" alt="4카메라 모션캡처의 Closed-Loop Flight와 실제·목표 궤적을 보여주는 현재 웹 화면" width="2880" height="1438" loading="lazy" /></a>
               <figcaption>현재 웹앱의 Closed-Loop Flight 화면입니다. 카메라, 목표 경로, 실제 3차원 궤적과 기체 상태를 같은 실험 화면에서 확인합니다.</figcaption>
@@ -171,6 +206,13 @@
               기체 내부 위치 제어기는 추정 위치와 목표의 차이를 줄이는 방향으로 자세를 조정합니다.
               상승·중심 유지·하강·착륙을 각각 기록하고, 목표와 실제 MoCap 궤적을 함께 남겨
               단순히 모터가 도는 것이 아니라 위치 피드백이 연결됐는지 확인했습니다.
+            </p>
+            <p>
+              상승 구간에서는 목표 고도를 한 번에 점프시키기보다 시간에 따라 올리고, 목표 부근에
+              도달하면 같은 XY 중심을 유지하도록 합니다. 착륙도 단순히 모터 출력을 끊는 방식이
+              아니라 하강 목표를 만들고 지면으로 돌아오는 동안 위치 기록을 계속 남깁니다. 영상에
+              보이는 작은 회전과 흔들림을 포함해 실제 궤적이 목표 중심 주변에서 어떻게 수렴하는지,
+              하강 중 수평 위치가 얼마나 유지되는지를 함께 확인하는 것이 이번 호버 실험의 핵심입니다.
             </p>
             <div class="result-band mocap-v2-result-band">
               <article><span>입력</span><strong>4-camera IR pose</strong><small>같은 캡처 주기의 다중 시점 관측</small></article>
@@ -194,6 +236,13 @@
               함께 확인했습니다. 하드웨어 제작과 소프트웨어 통합이 따로 진행되지 않도록 케이지
               크기, 카메라 방향, 케이블 통과 위치와 장착 방식을 계속 맞췄습니다.
             </p>
+            <p>
+              특히 소프트웨어 쪽에서 카메라가 어느 방향을 바라보는지와 하드웨어 쪽에서 실제로
+              고정할 수 있는 각도가 일치해야 했습니다. 저는 카메라 PCB 실측과 1:1 모델, 필요한
+              시야 방향과 케이블 여유를 공유했고, 팀원들은 케이지 구조와 체결 방식을 반영했습니다.
+              각자 만든 결과를 PR로 합치는 과정에서 사진, 치수와 실행 화면을 함께 확인해 장착부의
+              변경이 보정·추적 프로그램에 어떤 영향을 주는지도 지속적으로 맞췄습니다.
+            </p>
             <dl class="thesis-role-list">
               <div><dt>개인 담당</dt><dd>장비 사양 검토·선정, Jetson 실행 환경, 4카메라 위치 추정, BLE 드론 연동, 웹 모니터링과 통합 시험</dd></div>
               <div><dt>케이지 제작팀</dt><dd>비행 보호 구조물, 카메라 고정 위치와 장착부 제작</dd></div>
@@ -208,7 +257,7 @@
               조립하고 카메라가 들어갈 위치를 확인하면서, 케이지가 완성된 뒤에도 네 카메라의 상대
               위치와 방향이 쉽게 변하지 않도록 장착 방식을 함께 검토했습니다.
             </p>
-            <figure class="doc-figure">
+            <figure class="doc-figure mocap-v2-cad-figure">
               <div class="figure-grid mocap-v2-gallery mocap-v2-gallery-three">
                 <a href="../../assets/drone-cage-build-1.jpg"><img src="../../assets/drone-cage-build-1.jpg" alt="PVC 파이프로 드론 실험용 케이지 모서리를 조립하는 과정" width="2614" height="3183" loading="lazy" /></a>
                 <a href="../../assets/drone-cage-build-2.jpg"><img src="../../assets/drone-cage-build-2.jpg" alt="카메라 장착 위치를 확인하며 케이지 프레임을 조립하는 팀 작업" width="3000" height="3648" loading="lazy" /></a>
@@ -234,17 +283,38 @@
               </div>
               <figcaption>실제 카메라 PCB와 같은 비율로 만든 전면·후면·측면 CAD 모델입니다.</figcaption>
             </figure>
-            <figure class="doc-figure">
-              <div class="figure-grid mocap-v2-gallery mocap-v2-prototype-grid">
+            <h4>실제 카메라와 1:1 출력 모델 비교</h4>
+            <p>
+              먼저 실제 카메라를 바로 케이스에 넣기 전에, PCB 외곽과 체결 홀, 렌즈 높이를 그대로
+              옮긴 1:1 출력 모델을 만들었습니다. 전면과 후면, 측면을 실제 모듈 옆에 놓고 비교하면서
+              CAD 치수가 출력 과정에서도 유지되는지 확인했습니다. 이 비교용 모델은 케이지 제작팀이
+              실제 카메라를 반복해서 분리하지 않고도 장착 위치와 간섭을 검토할 수 있게 했습니다.
+            </p>
+            <figure class="doc-figure mocap-v2-prototype-figure">
+              <div class="figure-grid mocap-v2-gallery mocap-v2-comparison-grid">
                 <a href="../../assets/drone-camera-case-prototype-1.jpg"><img src="../../assets/drone-camera-case-prototype-1.jpg" alt="실제 OV9281 카메라와 초기 3D 프린트 장착 모델 비교" width="1493" height="2822" loading="lazy" /></a>
+                <a href="../../assets/drone-camera-case-prototype-6.jpg"><img src="../../assets/drone-camera-case-prototype-6.jpg" alt="실제 카메라 PCB 후면과 같은 위치로 만든 1대1 출력 모델" width="2223" height="1303" loading="lazy" /></a>
+                <a href="../../assets/drone-camera-case-prototype-7.jpg"><img src="../../assets/drone-camera-case-prototype-7.jpg" alt="실제 카메라와 1대1 출력 모델의 렌즈 높이 비교" width="2056" height="662" loading="lazy" /></a>
+              </div>
+              <figcaption>실제 OV9281 모듈과 1:1 출력 모델의 전면·후면·측면을 따로 비교했습니다.</figcaption>
+            </figure>
+
+            <h4>케이지 고정용 케이스 본체와 덮개</h4>
+            <p>
+              비교 모델로 치수를 확인한 뒤에는 카메라가 들어갈 본체와 후면 덮개를 별도로
+              제작했습니다. 렌즈 개구부와 네 모서리 체결 홀, 리본 케이블이 빠져나오는 공간을
+              나누어 설계했고, 출력물을 조립해 덮개가 PCB를 누르지 않는지 확인했습니다. 케이지
+              체결부는 카메라 방향을 유지하면서도 보정이나 정비 때 분리할 수 있도록 본체와
+              독립된 구조로 검토하고 있습니다.
+            </p>
+            <figure class="doc-figure mocap-v2-case-figure">
+              <div class="figure-grid mocap-v2-gallery mocap-v2-case-grid">
                 <a href="../../assets/drone-camera-case-prototype-2.jpg"><img src="../../assets/drone-camera-case-prototype-2.jpg" alt="카메라 PCB, 케이스 본체, 덮개와 체결 부품 시제품" width="2268" height="4032" loading="lazy" /></a>
                 <a href="../../assets/drone-camera-case-prototype-3.jpg"><img src="../../assets/drone-camera-case-prototype-3.jpg" alt="카메라 렌즈 개구부와 체결 홀을 만든 케이스 시제품" width="1318" height="1722" loading="lazy" /></a>
                 <a href="../../assets/drone-camera-case-prototype-4.jpg"><img src="../../assets/drone-camera-case-prototype-4.jpg" alt="카메라 케이스 본체와 후면 덮개 시제품" width="1304" height="1507" loading="lazy" /></a>
                 <a href="../../assets/drone-camera-case-prototype-5.jpg"><img src="../../assets/drone-camera-case-prototype-5.jpg" alt="후면 덮개를 결합한 카메라 케이스 시제품" width="2095" height="1807" loading="lazy" /></a>
-                <a href="../../assets/drone-camera-case-prototype-6.jpg"><img src="../../assets/drone-camera-case-prototype-6.jpg" alt="실제 카메라 PCB 후면과 같은 위치로 만든 1대1 출력 모델" width="2223" height="1303" loading="lazy" /></a>
-                <a href="../../assets/drone-camera-case-prototype-7.jpg"><img src="../../assets/drone-camera-case-prototype-7.jpg" alt="실제 카메라와 1대1 출력 모델의 렌즈 높이 비교" width="2056" height="662" loading="lazy" /></a>
               </div>
-              <figcaption>1:1 모델과 실제 PCB를 반복 대조해 케이스의 홀, 렌즈 개구부, 덮개와 장착부 형상을 맞췄습니다.</figcaption>
+              <figcaption>치수 비교 사진과 분리해, 실제 케이스 본체·덮개·체결 구조의 제작 과정을 정리했습니다.</figcaption>
             </figure>
           </section>
 
