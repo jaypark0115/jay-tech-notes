@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="드론 모션캡처, SNN 연구, NRV DVS 캘리브레이션·Rectify, 이벤트 비전 스테레오 Depth와 FPGA 기술 노트 모음." />
     <title>Jay Tech Notes</title>
-    <link rel="stylesheet" href="styles.css?v=20260909-nrv-docs-inline" />
+    <link rel="stylesheet" href="styles.css?v=20260926-drone-mocap-v2" />
     <script src="script.js" defer></script>
   </head>
   <body class="home-page">
@@ -108,8 +108,9 @@
             <p>
               여러 카메라로 드론의 LED 마커를 관측하고, 추정한 위치를 비행경로 제어에
               연결하는 졸업논문 연구입니다. 현재는 Jetson과 OV9281 카메라 4대를 연결해
-              영상 확인, 캘리브레이션, 원점 설정과 체커보드의 3차원 궤적 표시까지 구현했습니다.
-              IR LED 추적과 드론 제어, 리니어 모터 기준 경로를 이용한 정확도 검증은 후속 단계입니다.
+              영상 확인, 캘리브레이션과 원점 설정을 구축한 뒤, IR LED Active Marker를 장착한
+              Crazyflie의 위치 추정·BLE 외부 위치 전달·폐루프 호버와 착륙까지 연결했습니다.
+              다음 단계는 케이지에 카메라를 고정한 정량 정확도 측정과 지정 형상 경로 비행입니다.
               중앙대학교 심덕선 교수님의 지도 아래 진행하며, 2026년 10월 논문 정리를 목표로 합니다.
             </p>
 
@@ -149,21 +150,22 @@
                 </p>
               </a>
 
-              <article class="project-card plan-card">
-                <img
-                  class="project-thumb plan-thumb-image"
-                  src="assets/linear-motor-stage.png"
-                  alt="드론 모션캡처 경로 검증에 사용할 산업용 리니어 모터 스테이지"
-                  loading="lazy"
-                />
+              <a class="project-card plan-card plan-card-link" href="pages/planned/03-mocap-second-implementation.html">
+                <div class="project-thumb plan-thumb-frame">
+                  <img
+                    src="assets/drone-mocap-second-implementation.png"
+                    alt="4카메라 모션캡처로 Crazyflie 드론의 호버를 제어하는 2차 구현 실험 환경"
+                    loading="lazy"
+                  />
+                </div>
                 <span class="sitemap-number">03</span>
-                <small>정량 검증 계획 · 준비 중</small>
-                <h2>산업용 리니어 모터 스테이지 기반 경로 검증 환경</h2>
+                <small>2차 구현 · Active Marker · Closed Loop</small>
+                <h2>4카메라 모션캡처 시스템 2차 구현</h2>
                 <p>
-                  리니어 모터 스테이지로 기준 경로를 재현하고, 모션캡처가 검출한 경로와
-                  비교할 계획입니다. 정량 평가 결과와 상세 글은 준비 중입니다.
+                  직접 조립한 Crazyflie와 IR 마커를 4카메라 추적에 연결하고, 위치 피드백을
+                  이용한 상승·중심 유지·착륙까지 확장한 개발 과정을 설명합니다.
                 </p>
-              </article>
+              </a>
 
             </div>
           </section>
