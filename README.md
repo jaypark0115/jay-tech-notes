@@ -89,6 +89,8 @@ FPGA 실시간 스테레오 정렬·보정과 이벤트 카메라·LiDAR·RGB �
    - 스테레오 이벤트 카메라 모듈과 FPGA 보드를 고정하고 기준 거리 조절을 위해 설계·출력한 3D 프린팅 브라켓 기록입니다.
 4. [신규 카메라 모듈 케이스 완성품](https://jaypark0115.github.io/jay-tech-notes/pages/planned/03-camera-module-case.html)
    - 초기 3D 모델과 실제 FX10 PCB로 조립 조건을 검토하고, 제작 담당자들과 의견을 주고받으며 Delta10 카메라의 금속 케이스와 최종 조립까지 참여한 기록입니다.
+5. [ov9281-camera-module-3d-model](https://github.com/jaypark0115/ov9281-camera-module-3d-model)
+   - 케이스와 케이지 장착부 설계를 위해 실제 OV9281 모듈을 측정해 만든 3D 기준 모델과 렌더·실물 비교 자료입니다.
 
 ### 8. SoC/FPGA 학습 노트
 
