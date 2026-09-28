@@ -4632,7 +4632,7 @@ body.troubleshooting-page .reference-section a {
 }
 
 .competition-home-heading {
-  max-width: 780px;
+  max-width: none;
   margin-bottom: 3.75rem;
 }
 
