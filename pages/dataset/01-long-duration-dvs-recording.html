@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="직접 녹화 실험을 설계하고 저장 속도, 용량, 프로그램 문제를 차례로 확인하며 20여 분 고속 녹화 환경을 마련한 과정과 협업 기록." />
+    <title>DVS 장시간 녹화 개선 — Jay Tech Notes</title>
+    <link rel="stylesheet" href="../../styles.css" />
+    <link rel="stylesheet" href="../../assets/dataset/recording.css?v=2" />
+    <script src="../../script.js" defer></script>
+  </head>
+  <body class="troubleshooting-page dataset-recording-page">
+    <div class="site-shell">
+      <main class="content-wrap" id="top">
+        <article class="content">
+          <div class="document-kicker">
+            <span>이벤트 카메라 데이터셋 구축 노트</span>
+            <div class="kicker-actions"><span class="draft-label">Dataset · 01</span></div>
+          </div>
+          <a class="home-link" href="../../index.html#event-camera-dataset">← 이벤트 카메라 데이터셋 글묶음으로 돌아가기</a>
+
+          <h1>DVS 장시간 녹화 개선</h1>
+          <p class="lead">
+            이벤트 카메라 데이터셋을 촬영하기 전에, 원시 데이터를 오랫동안 기록할 수 있는 환경부터 확인했습니다.
+            직접 촬영 조건을 정하고 실험하면서, 녹화가 막히는 이유를 저장 속도와 용량, 프로그램 처리 방식으로 나누어 확인했습니다.
+            촬영 프로그램을 개선하고 부족한 저장장비를 요청한 뒤, 선임들과 수정 방향과 실험 결과를 공유하며
+            20여 분 동안 고속 프레임으로 녹화할 수 있는 환경을 만들어간 과정을 정리합니다.
+          </p>
+
+          <section class="doc-section searchable-section" id="capture-plan" data-search-title="데이터셋 촬영 조건과 선풍기 표적">
+            <h3>1. 실험 조건</h3>
+            <p>
+              Viewer는 카메라가 보내는 데이터를 받아 화면에 보여주고 파일로 저장하는 촬영 프로그램이다.
+              데이터셋에는 화면에 표시된 영상뿐 아니라 밝기 변화의 위치와 시각이 담긴 이벤트 데이터가 필요하다.
+              따라서 <code>.dvs</code> 파일에 이벤트 데이터를 기록하고, 촬영 후 기록 시간과 데이터량을 확인하는 방식으로 실험을 설계했다.
+              녹화 시간, 센서 설정 속도, 감도, 저장장치를 함께 기록해 조건이 바뀌었을 때 결과를 비교할 수 있도록 했다.
+            </p>
+            <p>
+              촬영 대상은 계속 회전하는 선풍기로 정했다. 움직임이 지속되는 장면에서 화면 표시와 파일 저장을 동시에 실행해
+              데이터가 계속 들어오는 동안 Viewer와 저장장치가 처리량을 유지하는지 살펴봤다.
+              처음에는 센서를 1000 FPS와 높은 감도로 설정했다.
+              먼저 이 조건에서 발생한 저장 문제를 해결하고, 이후 더 높은 부하를 감당할 수 있는 수신 환경에서 2000 FPS로 실험을 확장했다.
+            </p>
+            <figure class="doc-figure troubleshooting-figure">
+              <video controls muted playsinline preload="none" poster="../../assets/dataset/cx3-fan-poster.png" aria-label="초기 녹화 실험에서 촬영한 회전 선풍기의 이벤트 영상">
+                <source src="../../assets/dataset/cx3-fan-recording.mp4" type="video/mp4" />
+                <a href="../../assets/dataset/cx3-fan-recording.mp4">선풍기 촬영 영상 보기</a>
+              </video>
+              <figcaption>직접 촬영한 선풍기의 짧은 이벤트 영상입니다. 움직임이 계속되는 장면에서 화면 표시와 원시 데이터 저장을 함께 확인했습니다.</figcaption>
+            </figure>
+          </section>
+
+          <section class="doc-section searchable-section" id="recording-gap" data-search-title="녹화 시간과 실제 저장 구간의 차이">
+            <h3>2. 증상과 원인 구분</h3>
+            <p>
+              처음에는 15분 녹화를 목표로 했다. 약 6분 30초가 지나자 PC를 조작하기 어려울 정도로
+              응답이 느려졌고, USB를 분리한 뒤 Viewer와 시스템을 종료했다.
+              이후 파일을 분석해 보니 실제로 남은 구간은 약 2분 21초뿐이었다.
+              녹화 버튼을 누른 뒤 경과한 시간과 디스크에 기록된 데이터의 시간이 크게 벌어져 있었다.
+            </p>
+            <p>
+              응답 저하만으로 저장장치나 프로그램 중 하나를 원인으로 단정할 수는 없었다.
+              먼저 저장된 구간의 파일 크기와 기록 시간으로 초당 약 93MB의 데이터량을 계산했다.
+              같은 조건으로 15분을 촬영하려면 약 84GB의 공간이 필요했다.
+              이를 기준으로 저장 공간은 목표 시간만큼 충분한지, 쓰기 속도는 초당 데이터량을 감당하는지 나누어 확인했다.
+              이 조건에서는 100MB/s를 넘는 지속 쓰기 여유가 필요했다.
+            </p>
+            <p>
+              프로그램에서는 수신한 데이터를 큐에 넣고 파일로 쓰는 과정을 따라갔다.
+              기존 큐에는 상한이 없어 쓰기 처리가 늦어지면 메모리 사용량도 계속 늘어날 수 있었다.
+              따라서 저장장치를 바꾸는 것과 별개로, 쓰기 효율을 높이고 대기 데이터의 증가를 제한하는 수정이 필요했다.
+              이후에는 저장 위치를 명확히 지정하고, 프로그램 개선과 저장장치 교체 후의 녹화 결과를 다시 확인했다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="viewer-ui" data-search-title="저장 폴더 선택과 남은 용량 UI 개선">
+            <h3>3. 저장 UI 개선</h3>
+            <p>
+              저장 속도를 비교하려면 실제로 어느 장치에 파일을 쓰고 있는지부터 명확해야 했다.
+              기존 Viewer는 문서 폴더 아래의 정해진 위치에 저장했다. 다른 저장장치를 연결해도 바로 선택하기 어렵고,
+              녹화 화면에서는 남은 공간을 확인할 수 없었다. 그래서 <code>CHANGE FOLDER</code> 버튼으로 저장 폴더를 선택하고
+              다음 실행에도 그 위치를 기억하도록 수정했다. <code>OPEN FILE</code>도 선택한 폴더에서 저장 파일을 찾도록 맞췄다.
+            </p>
+            <p>
+              선택한 폴더에 작은 임시 파일을 써 보도록 해, 실제로 저장 가능한 위치인지 녹화 전에 확인했다.
+              화면에는 선택한 저장장치의 여유 공간을 표시하고, 녹화 중에는 폴더 변경을 막아 기록 도중 경로가 바뀌지 않게 했다.
+            </p>
+            <div class="recording-ui-comparison">
+              <figure class="doc-figure">
+                <img src="../../assets/dataset/save-options-before.png" alt="저장 경로 선택과 남은 용량 표시가 없던 기존 저장 옵션" loading="lazy" />
+                <figcaption>개선 전: 저장 경로가 고정되어 있고 녹화 시간만 확인할 수 있었습니다.</figcaption>
+              </figure>
+              <figure class="doc-figure">
+                <img src="../../assets/dataset/recording-save-options.png" alt="Storage 여유 용량과 CHANGE FOLDER 버튼이 추가된 저장 옵션" loading="lazy" />
+                <figcaption>개선 후: 저장 폴더 선택과 여유 공간 표시를 추가했습니다.</figcaption>
+              </figure>
+            </div>
+          </section>
+
+          <section class="doc-section searchable-section" id="save-path" data-search-title="묶음 쓰기 지속 처리량 큐 상한과 종료 처리">
+            <h3>4. 파일 쓰기 구조 개선</h3>
+            <h4>배치 쓰기와 처리량</h4>
+            <p>
+              장시간 녹화에서는 각 데이터를 즉시 파일에 넘기는 지연보다, 들어오는 양을 계속 기록할 수 있는 지속 처리량이 중요하다.
+              작은 묶음을 자주 쓰면 호출과 버퍼 정리 비용도 반복된다.
+              여러 데이터를 모아 쓰는 배치 쓰기는 이 비용을 더 많은 데이터에 나누어 부담시키는 방식이다.
+              이번 수정에서는 한 번에 쓰는 단위를 1MiB에서 8MiB로 늘려 호출 빈도를 줄였다.
+              같은 데이터량이라면 쓰기 호출 횟수는 약 8분의 1이 되지만, 실제 성능은 저장장치와 다른 처리 비용에도 영향을 받는다.
+            </p>
+            <p>
+              매 묶음마다 수행하던 <code>fflush</code>는 누적 128MiB마다 수행하도록 바꿨다.
+              자주 비우는 대신 일정량을 모아 운영체제에 전달해 처리량을 확보하는 선택이었다.
+              다만 묶음을 크게 하면 데이터가 버퍼에 머무는 시간도 길어질 수 있으므로, 크기를 무조건 늘리는 것이 목표는 아니다.
+              녹화 중에는 반복 처리 비용을 줄이고, 정상 종료할 때는 남은 데이터를 모두 쓰도록 두 동작을 함께 설계했다.
+            </p>
+            <div class="diagnostic-table-wrap">
+              <table class="diagnostic-table">
+                <thead><tr><th>확인한 부분</th><th>기존 동작</th><th>반영한 변경</th></tr></thead>
+                <tbody>
+                  <tr><td>쓰기 묶음</td><td>1MiB</td><td>8MiB로 확대</td></tr>
+                  <tr><td>Flush</td><td>묶음을 쓸 때마다 수행</td><td>누적 128MiB마다 수행, 종료 시 잔여 데이터 처리</td></tr>
+                  <tr><td>저장 큐</td><td>용량 상한 없이 증가</td><td>전체 최대 1GiB, 통합 스테레오는 스트림당 512MiB</td></tr>
+                  <tr><td>쓰기 오류</td><td><code>errno</code> 중심 확인</td><td><code>fwrite</code> 반환값도 검사해 부분 쓰기와 공간 부족 감지</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              다음으로 수신과 저장을 생산자–소비자 구조로 보았다. 수신 측은 데이터를 계속 생산하고, 파일 쓰기 측은 이를 소비한다.
+              장시간 유지되려면 평균 쓰기 처리량이 평균 입력량보다 충분히 커야 한다.
+              평균 속도가 같더라도 디스크가 잠시 느려질 때 쌓인 데이터를 줄일 여유가 없기 때문이다.
+              큐에 필요한 크기는 이런 일시적인 입력·출력 차이가 얼마나 오래 누적되는지에 따라 달라진다.
+              이 관점에서 메모리는 짧은 속도 변동을 흡수하는 수단이고, 지속적인 처리량 부족을 해결하는 수단은 아니다.
+            </p>
+            <p>
+              저장이 밀릴 때 프로그램이 메모리를 끝없이 사용하지 않도록, 저장 대기 데이터의 최대 크기를 정했다.
+              이 한도에 도달하면 녹화를 계속하는 대신 새로운 데이터를 저장 큐에 넣는 것을 멈춘다.
+              그다음 이미 큐에 들어온 데이터를 파일에 쓰고 파일을 닫도록 했다.
+              즉, 데이터가 쌓이는 상황을 방치하지 않고 정해진 메모리 범위 안에서 녹화를 종료하는 방식이다.
+            </p>
+            <h4>스레드 간 종료 상태 공유</h4>
+            <p>
+              C++ 코드에서는 저장 스레드가 읽는 실행 상태를 일반 <code>bool</code>에서 <code>std::atomic&lt;bool&gt;</code>로 바꾸고,
+              녹화 실행 여부와 잔여 데이터 처리 여부를 별도의 상태로 관리했다.
+              한 스레드가 종료를 요청하는 동안 다른 스레드가 상태를 읽기 때문에, 공유 플래그의 접근을 원자적으로 처리한 것이다.
+              큐에 데이터를 넣고 빼는 복합 동작은 기존 잠금으로 보호하고, atomic은 실행 상태를 전달하는 데 사용했다.
+            </p>
+            <pre class="code-block-light"><code class="language-cpp">// 저장 스레드가 확인하는 두 상태
+std::atomic&lt;bool&gt; mPacketSaveToFile;
+std::atomic&lt;bool&gt; mDrainBeforeStop;
+
+// 실제 반복 조건: 녹화 중이거나 잔여 데이터 처리 중이면 실행
+while (save-&gt;mPacketSaveToFile.load() ||
+       save-&gt;mDrainBeforeStop.load()) {
+    // 큐에서 데이터를 가져와 파일에 기록
+    // 종료 요청 이후 큐가 비면 반복 종료
+}</code></pre>
+            <p>
+              위 코드는 상태 선언과 반복 조건을 발췌하고 처리 본문을 생략한 것이다.
+              종료할 때는 먼저 저장 큐로 들어오는 새 데이터를 차단하고,
+              <code>mDrainBeforeStop</code>을 켠 뒤 실행 상태를 끈다.
+              실행 상태만 껐다면 아직 큐에 남은 데이터를 처리하기 전에 반복문을 빠져나갈 수 있으므로,
+              새 입력을 받는 단계와 이미 받은 데이터를 마저 쓰는 단계를 분리했다.
+              쓰기가 실패한 경우에는 잔여 데이터 처리도 중단하도록 했다.
+            </p>
+            <h4>포화 알림과 오류 처리</h4>
+            <p>
+              큐가 더 이상 데이터를 받을 수 없으면 SDK가 전용 콜백을 호출하고,
+              Viewer에서는 Qt signal/slot으로 알림을 받아 녹화 중단을 요청하도록 연결했다.
+              중단 요청이 반복되지 않도록 상태 플래그를 두고, <code>QTimer::singleShot</code>에
+              <code>[this]</code> 람다를 전달해 종료와 알림 처리를 예약했다.
+              단순히 상태 확인 횟수를 줄이는 수정이 아니라, 포화가 발생한 지점에서 알림을 전달하고 종료 순서를 제어하는 구조로 정리한 것이다.
+            </p>
+            <p>
+              파일 쓰기 실패는 큐 포화와 따로 판단했다. 기존에는 <code>errno</code> 중심으로 확인했지만,
+              수정 후에는 <code>fwrite</code>가 반환하는 기록 항목 수를 요청한 항목 수와 먼저 비교했다.
+              <code>fwrite</code>의 반환값은 바이트 수가 아니라 크기가 <code>size</code>인 항목을 몇 개 썼는지이므로,
+              비교 대상은 <code>size</code>가 아닌 <code>count</code>이다.
+            </p>
+            <pre class="code-block-light"><code class="language-cpp">// 입력 검증과 세부 오류 분기를 생략한 핵심 비교
+errno = 0;
+const size_t itemsWritten = fwrite(buff, size, count, file);
+if (itemsWritten != static_cast&lt;size_t&gt;(count)) {
+    // errno를 확인해 공간 부족과 기타 쓰기 실패를 구분
+    return ERR_FILE_WRITE_FAIL;
+}</code></pre>
+            <p>
+              실제 구현에서는 공간 부족과 일반 쓰기 실패를 구분해 상위 호출자에게 반환했다.
+              <code>static_cast&lt;size_t&gt;</code>는 양수로 검증한 요청 개수를 반환값과 같은 자료형으로 비교하기 위해 사용했다.
+              이렇게 반환값으로 성공 여부를 판단하고 오류 코드로 원인을 구분하면서,
+              일부만 기록된 상황이 정상 저장으로 처리되지 않도록 했다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="storage" data-search-title="SSD 지속 쓰기 속도와 용량 확인">
+            <h3>5. 저장 조건 확인</h3>
+            <p>
+              프로그램 수정 후에는 실제 녹화를 다시 진행해, 저장장치가 초당 데이터량을 지속적으로 기록할 수 있는지 확인했다.
+              짧은 순간의 최고 속도보다 촬영 내내 유지되는 쓰기 속도를 기준으로 삼았다.
+              이어서 초당 데이터량에 목표 녹화 시간을 곱해 필요한 공간을 계산하고, 선택한 저장 위치에 충분한 여유가 있는지 확인했다.
+            </p>
+            <p>
+              쓰기 속도는 데이터를 제때 기록할 수 있는지를, 용량은 얼마나 오래 기록할 수 있는지를 결정한다.
+              두 조건을 따로 확인한 뒤, 기존 장비로 부족한 부분은 측정 결과와 목표 촬영 시간을 근거로 설명하고 필요한 저장장비를 요청했다.
+              이렇게 준비한 환경에서 촬영 속도와 시간을 늘려 다음 검증을 진행했다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="camera-settings" data-search-title="센서 설정과 수신 하드웨어 확인">
+            <h3>6. 고부하 조건 검증</h3>
+            <p>
+              다음에는 더 높은 FPS와 데이터량을 감당할 수 있는 수신 환경을 준비하고 촬영 부하를 높였다.
+              이 과정에서 설정값은 정상적으로 입력됐지만 실제 데이터가 거의 들어오지 않는 경우가 있었다.
+              저장 프로그램을 다시 수정하기 전에 카메라의 출력 설정과 실제 수신량부터 비교했다.
+            </p>
+            <p>
+              설정 파일에는 FPS뿐 아니라 데이터를 내보내는 신호 속도와 전송 묶음의 크기도 포함되어 있었다.
+              사용 중인 하드웨어에 맞는 전송 조건을 유지하면서 촬영 속도를 조정하고, 실제 데이터가 들어오는지 확인했다.
+              높은 FPS를 설정하는 것만으로 고부하 검증이 되는 것은 아니며, 그 조건에서 수신과 저장이 함께 동작해야 했다.
+            </p>
+            <p>
+              또한 설정 화면의 FPS만으로 촬영 상태를 판단하지 않았다. 감도와 장면에 따라 초당 데이터량이 달라지고,
+              센서 출력부터 USB 수신과 디스크 쓰기까지 각 구간이 그 양을 처리해야 한다.
+              따라서 카메라 설정값과 실제 저장 처리량을 나누어 보고, 최종 녹화는 2000 FPS와 기본 감도 조건으로 진행했다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="verification" data-search-title="고속 프레임 20분 녹화 완료">
+            <h3>7. 20분 녹화 결과</h3>
+            <p>
+              저장 속도와 용량, 수신 설정을 확인한 환경에서 선풍기를 20분 동안 촬영했다.
+              실시간 미리보기와 원시 저장을 함께 켠 상태에서 녹화를 마쳤고, 약 380.98GB의 파일이 생성됐다.
+              촬영을 마친 뒤 파일 크기와 기록 시간으로 평균 저장 속도를 확인했다.
+            </p>
+            <figure class="doc-figure troubleshooting-figure">
+              <video controls muted playsinline preload="none" poster="../../assets/dataset/fx10-fan-poster.png" aria-label="개선한 장시간 녹화 환경에서 촬영한 선풍기의 이벤트 영상">
+                <source src="../../assets/dataset/fx10-fan-recording.mp4" type="video/mp4" />
+                <a href="../../assets/dataset/fx10-fan-recording.mp4">고속 촬영한 선풍기 영상 보기</a>
+              </video>
+              <figcaption>개선한 환경에서 촬영한 짧은 선풍기 영상입니다. 아래 결과는 같은 촬영 조건으로 별도 녹화한 20분 원시 파일을 기준으로 정리했습니다.</figcaption>
+            </figure>
+            <div class="diagnostic-table-wrap">
+              <table class="diagnostic-table">
+                <thead><tr><th>항목</th><th>확인 결과</th></tr></thead>
+                <tbody>
+                  <tr><td>카메라 조건</td><td>설정 2000 FPS, 기본 감도</td></tr>
+                  <tr><td>녹화 시간</td><td>20분</td></tr>
+                  <tr><td>파일 크기</td><td>380.98GB, 약 354.81GiB</td></tr>
+                  <tr><td>평균 저장 속도</td><td>317.48MB/s, 약 2.54Gbit/s</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              초기 실험의 약 93MB/s보다 높은 평균 317.48MB/s 조건에서 20분 녹화를 마쳤다.
+              처음 정한 100MB/s 수준의 기준을 모든 촬영에 그대로 적용할 수는 없었다.
+              최종 촬영 조건에서는 초당 약 318MB를 지속적으로 기록하면서 일시적인 쓰기 지연도 따라잡을 여유가 필요했다.
+              이후 데이터셋 촬영에 필요한 저장 용량과 장비 구성을 이 결과에 맞춰 정리했다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="collaboration" data-search-title="SDK Calibration Viewer 빌드와 PR 협업">
+            <h3>8. 빌드와 협업</h3>
+            <p>
+              수정한 내용을 다른 사람도 실행해 볼 수 있도록 프로그램을 빌드했다.
+              저장 기능은 화면뿐 아니라 카메라 데이터를 받는 공통 코드와도 연결되어 있어,
+              기반 라이브러리부터 Viewer까지 의존 순서에 맞춰 빌드했다.
+              공통 라이브러리 수정이 최종 실행파일에 반영되려면 관련 모듈을 함께 갱신해야 한다는 의존 관계도 확인했다.
+              지원하는 두 운영체제에서 빌드와 연결을 확인하고, 촬영에 사용하는 PC에서는 실제 카메라를 연결해 저장 동작을 다시 점검했다.
+            </p>
+            <p>
+              코드 변경은 PR로 보내 선임들과 수정 이유와 영향을 검토했다.
+              직접 겪은 녹화 문제와 UI 전후 화면, 개선 후 촬영 결과를 함께 전달해 왜 이런 수정이 필요했는지 설명했다.
+              검토 과정에서는 변경을 더 작은 단위로 나누면 확인하기 쉽다는 의견도 받았다.
+              이를 통해 기능을 구현하는 것뿐 아니라, 다른 사람이 이해하고 검토하기 좋은 범위로 작업을 정리하는 방법도 배웠다.
+            </p>
+            <p>
+              실험에서 확인한 수치를 바탕으로 필요한 하드웨어를 요청하고, 프로그램 수정은 선임들의 검토를 거쳐 반영했다.
+              혼자 촬영 결과를 확인하는 데서 끝내지 않고, 어떤 문제가 남아 있고 다음에 무엇을 확인할지 공유하며 작업을 이어갔다.
+            </p>
+          </section>
+
+          <section class="doc-section searchable-section" id="lessons" data-search-title="데이터셋 촬영 준비에서 배운 점">
+            <h3>9. 설계 관점 정리</h3>
+            <p>
+              이번 작업에서는 저장 문제를 하나의 성능 수치로 판단하지 않고, 지속 처리량·일시적인 지연·총용량으로 나누어 보게 됐다.
+              묶음 쓰기는 반복 처리 비용을 줄이고, 제한된 큐는 일시적인 속도 차이를 흡수하며, 저장 용량은 가능한 촬영 시간을 결정한다.
+              각 요소가 해결하는 문제가 다르므로 프로그램 최적화와 장비 교체도 각각의 근거를 가지고 진행해야 했다.
+            </p>
+            <p>
+              직접 녹화한 결과로 필요한 속도와 용량을 계산하고, 부족한 장비를 요청한 뒤 다시 촬영해 조건을 확인했다.
+              코드에서는 정상적으로 기록되는 경우뿐 아니라 처리가 밀리거나 쓰기가 실패했을 때의 동작도 함께 수정했다.
+              C++ 구현에서는 공유 플래그의 원자적 접근, 큐의 잠금, 콜백을 통한 오류 전달이 서로 다른 역할을 한다는 점을 함께 정리했다.
+              이런 실험 결과와 수정 근거를 선임들과 공유하면서, 장시간 동작하는 프로그램은 처리량과 자원 한계, 스레드 간 상태 전달과 종료 순서를 함께 설계해야 한다는 관점을 익혔다.
+            </p>
+            <h4>다음 촬영 시 확인할 사항</h4>
+            <p>이번 실험을 바탕으로, 이후 촬영 조건을 바꿀 때는 다음 항목을 먼저 확인하려 한다.</p>
+            <ul class="takeaway-list">
+              <li>장면·감도·FPS 변경 시 초당 데이터량을 다시 측정하고, 지속 쓰기 속도에 여유가 있는지 확인한다.</li>
+              <li>예상 데이터량과 목표 촬영 시간으로 필요한 용량을 계산하고, 실제 저장 위치의 남은 공간을 확인한다.</li>
+              <li>프로그램 변경 시 정상 녹화뿐 아니라 저장 지연·쓰기 실패·종료 처리도 확인하고, 결과를 선임들과 공유한다.</li>
+            </ul>
+          </section>
+
+          <div class="bottom-author">by jy</div>
+          <footer class="page-footer"><span>Jay Tech Notes · 이벤트 카메라 데이터셋 구축 노트</span></footer>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>

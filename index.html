@@ -3,9 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="드론 모션캡처, SNN 연구, NRV DVS 캘리브레이션·Rectify, 이벤트 비전 스테레오 Depth와 FPGA 기술 노트 모음." />
+    <meta name="description" content="드론 모션캡처, SNN 연구, NRV DVS 캘리브레이션·Rectify, 이벤트 카메라 데이터셋 구축, 스테레오 Depth와 FPGA 기술 노트 모음." />
     <title>Jay Tech Notes</title>
     <link rel="stylesheet" href="styles.css?v=20260926-drone-mocap-v2" />
+    <link rel="stylesheet" href="assets/dataset/recording.css" />
     <script src="script.js" defer></script>
   </head>
   <body class="home-page">
@@ -59,6 +60,14 @@
               <p>
                 정렬이 필요한 이유부터 좌표 보정 원리, Viewer에서 사용하는 절차까지
                 세 편의 한글 문서로 정리했습니다.
+              </p>
+            </a>
+            <a class="home-panel" href="#event-camera-dataset">
+              <span>진행 중인 데이터셋 묶음</span>
+              <h2>이벤트 카메라 데이터셋 구축 노트</h2>
+              <p>
+                데이터셋 촬영에 필요한 카메라 조건을 검토하고, Viewer 저장 기능과
+                촬영 환경을 개선하며 직접 확인한 과정을 정리합니다.
               </p>
             </a>
             <a class="home-panel" href="#event-stereo-depth">
@@ -356,6 +365,48 @@
             </div>
           </section>
 
+          <section class="doc-section visible" id="event-camera-dataset">
+            <h2>이벤트 카메라 데이터셋 구축 노트 (진행중)</h2>
+            <p>
+              이벤트 카메라로 데이터셋을 촬영하기 위해 필요한 장비와 촬영 조건을 검토하고 있습니다.
+              장시간 녹화 환경 개선을 시작으로 망원경 촬영 준비, 발사체 DVS·CIS 촬영,
+              이벤트·LiDAR·RGB 융합 데이터셋으로 이어지는 과정과 배운 내용을 정리합니다.
+            </p>
+            <div class="project-grid collection-card-grid">
+              <a class="project-card" href="pages/dataset/01-long-duration-dvs-recording.html">
+                <img class="project-thumb" src="assets/dataset/recording-save-options.png" alt="저장 위치 선택과 남은 공간 표시를 추가한 DVS Viewer 저장 옵션" loading="lazy" />
+                <span class="sitemap-number">01</span>
+                <small>Dataset · Long-duration recording</small>
+                <h2>DVS 장시간 녹화 개선</h2>
+                <p>
+                  직접 실험하며 저장 속도·용량·프로그램 문제를 구분하고,
+                  촬영 프로그램 개선과 장비 요청, 선임들과의 소통을 거쳐 20여 분 고속 녹화 환경을 마련한 과정을 정리했습니다.
+                </p>
+              </a>
+              <article class="project-card">
+                <img class="project-thumb" src="assets/dataset/telescope-camera-setup.png" alt="망원경과 카메라를 연결한 촬영 장비 구성" loading="lazy" />
+                <span class="sitemap-number">02</span>
+                <small>Telescope · Remote capture</small>
+                <h2>망원경 연동과 원격 촬영</h2>
+                <p>판매처 연락과 구매·결제 진행부터 카메라 연결, 원격 촬영 환경 구성까지 직접 준비한 과정을 정리할 예정입니다.</p>
+              </article>
+              <article class="project-card">
+                <img class="project-thumb" src="assets/dataset/launch-dvs-cis-preview.png" alt="발사체 DVS·CIS 촬영 계획을 소개하는 발사 장면 참고 이미지" loading="lazy" />
+                <span class="sitemap-number">03</span>
+                <small>DVS · CIS capture</small>
+                <h2>발사체 DVS·CIS 촬영</h2>
+                <p>10월 7일 촬영을 목표로 DVS 이벤트와 CIS 영상을 장시간 기록할 계획입니다. 촬영 준비와 현장 과정, 촬영 영상은 이후 정리할 예정입니다.</p>
+              </article>
+              <article class="project-card">
+                <div class="project-thumb depth-card-thumb-empty" role="img" aria-label="이벤트 카메라·LiDAR·RGB 융합 데이터셋 대표 이미지 준비 중"></div>
+                <span class="sitemap-number">04</span>
+                <small>Event · LiDAR · RGB dataset</small>
+                <h2>이벤트 카메라·LiDAR·RGB 융합 데이터셋</h2>
+                <p>발사체 DVS·CIS 장시간 촬영에서 얻을 경험을 바탕으로, 팀원으로 참여 중인 주행·동적 장면의 이벤트·LiDAR 거리·RGB 동기화 기록으로 확장할 계획입니다. 데이터셋은 스테레오 Depth와 제로샷 위치 추정 개발에 활용합니다.</p>
+              </article>
+            </div>
+          </section>
+
           <section class="doc-section visible" id="event-stereo-depth">
             <h2>이벤트 비전 스테레오 Depth 카메라 (진행중)</h2>
             <p>
@@ -380,21 +431,6 @@
                   스테레오 정렬을 실시간 처리하고, 실제 카메라 제품과 Depth 처리로 연결합니다.
                 </p>
               </article>
-              <article class="sitemap-card">
-                <div
-                  class="calibration-card-thumb depth-card-thumb-empty"
-                  role="img"
-                  aria-label="이벤트 카메라·LiDAR·RGB 융합 데이터셋 대표 이미지 준비 중"
-                ></div>
-                <span class="sitemap-number">02</span>
-                <small class="entry-card-kicker">EVENT · LIDAR · RGB DATASET</small>
-                <h2>이벤트 카메라·LiDAR·RGB 융합 데이터셋</h2>
-                <p>
-                  주행·동적 장면의 이벤트, LiDAR 거리, 일반 RGB 영상을 동기화해 기록하는
-                  프로젝트에 팀원으로 참여하고 있습니다. 데이터셋은 스테레오 Depth와
-                  제로샷 위치 추정 기능 개발에 활용할 계획입니다.
-                </p>
-              </article>
               <a
                 class="sitemap-card"
                 href="https://www.youtube.com/watch?v=lGbHEgp9Xqw"
@@ -407,7 +443,7 @@
                   alt="NRV 스테레오 이벤트 카메라로 추정한 사람의 Depth 데모 화면"
                   loading="lazy"
                 />
-                <span class="sitemap-number">03</span>
+                <span class="sitemap-number">02</span>
                 <small class="entry-card-kicker">STEREO DEPTH DEMO</small>
                 <h2>NRV 이벤트 스테레오 Depth 데모</h2>
                 <p>
@@ -667,6 +703,7 @@
           <a href="#snn-research">SNN 연구 노트</a>
           <a href="#nrv-dvs-calibration">NRV DVS 캘리브레이션 설명</a>
           <a href="#nrv-dvs-rectify">NRV DVS Rectify 설명</a>
+          <a href="#event-camera-dataset">이벤트 카메라 데이터셋 구축 노트</a>
           <a href="#event-stereo-depth">이벤트 비전 스테레오 Depth</a>
           <a href="#nrv-fpga-troubleshooting">NRV FPGA 트러블슈팅 노트</a>
           <a href="#side-projects">사이드 프로젝트 링크</a>
