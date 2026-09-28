@@ -6,7 +6,7 @@
     <meta name="description" content="원거리 데이터셋 촬영을 위해 망원경 구매와 조립, 카메라 어댑터 설계·출력, PC 키보드 원격 조작까지 직접 준비한 기록." />
     <title>망원경 연동과 원격 촬영 — Jay Tech Notes</title>
     <link rel="stylesheet" href="../../styles.css" />
-    <link rel="stylesheet" href="../../assets/dataset/telescope.css" />
+    <link rel="stylesheet" href="../../assets/dataset/telescope.css?v=20260928-3" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="troubleshooting-page telescope-page">
@@ -26,14 +26,14 @@
           </p>
           <figure class="doc-figure telescope-demo-figure">
             <div class="telescope-video">
-              <iframe src="https://www.youtube.com/embed/4-M0PBgkFBU" title="PC 키보드로 망원경을 조작하는 원거리 촬영 데모" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+              <iframe width="760" height="428" src="https://www.youtube.com/embed/4-M0PBgkFBU" title="PC 키보드로 망원경을 조작하는 원거리 촬영 데모" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
             </div>
             <figcaption>컴퓨터에서 카메라 영상을 보며 키보드로 망원경 방향을 조작한 데모이다. <a href="https://www.youtube.com/watch?v=4-M0PBgkFBU" target="_blank" rel="noopener noreferrer">YouTube에서 보기 ↗</a></figcaption>
           </figure>
 
           <section class="doc-section searchable-section" id="requirements" data-search-title="망원경 촬영 조건과 장비 구성">
             <h3>1. 촬영 조건</h3>
-            <h4>거리와 화면에 담기는 크기</h4>
+            <h4>촬영 목적을 장비 조건으로 정리</h4>
             <p>
               앞선 녹화 실험에서는 들어오는 데이터를 오래 저장할 수 있는지 확인했다.
               다음 과제는 먼 거리의 대상을 카메라 화면에 충분한 크기로 담고, 움직이는 방향에 맞춰 망원경을 조작하는 것이었다.
@@ -46,29 +46,17 @@
               더 먼 발사체 촬영에 필요한 시야와 구동 조건을 준비하는 순서로 접근했다.
             </p>
             <p>
-              카메라를 직접 연결할 때는 접안렌즈의 배율보다 망원경의 초점거리와 센서 크기가 화면 범위를 결정한다.
-              같은 센서에서 초점거리가 길어지면 대상을 크게 담을 수 있지만 시야는 좁아진다.
-              선택한 NexStar 4SE와 C11의 초점거리는 각각 1,325mm와 2,800mm로, 같은 센서를 사용하면 C11에서 대상이 약 2.1배 크게 맺힌다.
-              그만큼 화면을 벗어난 대상을 다시 찾거나 움직임을 따라가는 조작은 더 까다로워진다.
-            </p>
-            <p>
-              거리의 영향을 단순화하면 센서에 맺히는 크기는 <code>초점거리 × 대상 크기 ÷ 거리</code>에 비례한다.
-              예를 들어 같은 대상을 2km 대신 10km에서 보면 영상 속 크기는 약 5분의 1이 된다.
-              이 예시는 거리와 영상 크기의 관계를 설명하기 위한 것으로, 장비의 확인된 촬영 한계 거리를 뜻하지 않는다.
-              이런 관계를 기준으로 넓게 대상을 찾는 구성과 더 크게 관찰하는 구성을 나누었다.
+              처음 다루는 장비였기 때문에 바로 제품을 고르기보다 필요한 작업부터 정리했다.
+              먼 대상을 화면에 넣을 수 있어야 하고, 카메라를 연결한 상태에서도 방향을 바꿀 수 있어야 했다.
+              현장으로 옮겨 설치할 수 있는지, PC에서 조작할 수 있는지, 맞는 연결 부품이 있는지도 확인할 항목으로 잡았다.
+              이후 제품 자료를 찾아보며 답을 얻을 수 있는 항목과 직접 문의하거나 장착해 봐야 하는 항목을 나누었다.
             </p>
             <h4>구동 속도와 지지 안정성</h4>
             <p>
               발사체를 따라가려면 화면에서 대상이 움직이는 각속도에 맞춰 마운트를 돌릴 수 있어야 한다.
-              필요한 회전 속도는 발사체의 이동 속도만으로 정해지지 않고, 관측 거리와 시선에 수직인 이동 성분에 따라 달라진다.
-              따라서 최대 회전 속도와 함께 낮은 속도에서 얼마나 세밀하게 방향을 바꿀 수 있는지도 검토했다.
-              CGE Pro 마운트 자료에는 엔코더가 내장된 DC 서보모터와 최대 5.5°/s, 2°/s, 0.5°/s, 그보다 느린 구동 단계가 제시되어 있었다.
-              큰 방향 전환에는 빠른 단계를, 고배율 화면에서 위치를 맞출 때는 느린 단계를 사용하는 운용을 생각했다.
-            </p>
-            <p>
-              이때 사양표의 <code>1×</code>는 초당 1도를 뜻하는 것이 아니라 지구 자전에 맞춘 항성시 속도이며, 약 0.00417°/s이다.
-              속도 단계의 단위를 구분해야 큰 방향 이동과 미세 조작에 어떤 설정을 쓸지 판단할 수 있었다.
-              천체를 따라가는 기본 추적 모드와, 발사체를 화면으로 보면서 방향을 조작하는 작업도 구분해 검토했다.
+              따라서 모터의 최대 이동 속도와 함께 낮은 속도에서 얼마나 세밀하게 방향을 바꿀 수 있는지도 검토했다.
+              CGE Pro 마운트 자료에서는 최대 5.5°/s의 구동 속도를 확인했고, 큰 방향 전환과 화면 중심 맞추기에 서로 다른 속도를 사용하는 운용을 생각했다.
+              실제로 얼마나 부드럽게 움직이는지, 카메라를 장착했을 때 흔들림은 어떤지도 문의하며 선택 조건을 구체화했다.
             </p>
             <p>
               가벼운 구성은 Celestron NexStar 4SE로, 상대적으로 낮은 배율로 대상을 찾고 촬영 방향을 잡는 용도이다. 이동과 설치가 수월한 조합으로, 약 100만원 규모로 준비했다.
@@ -94,7 +82,6 @@
                 <tbody>
                   <tr><td>광학 방식</td><td>막스토프 카세그레인</td><td>슈미트 카세그레인</td></tr>
                   <tr><td>구경</td><td>102mm · 4인치</td><td>279.4mm · 11인치</td></tr>
-                  <tr><td>초점거리 / 초점비</td><td>1,325mm / F13</td><td>2,800mm / F10</td></tr>
                   <tr><td>기본 접안렌즈 / 관측 배율</td><td>25mm / 53배</td><td>40mm / 70배</td></tr>
                   <tr><td>자료상 유효 배율 범위</td><td>15–241배</td><td>40–660배</td></tr>
                   <tr><td>마운트</td><td>싱글 포크 경위대 · 상하/좌우 구동</td><td>CGE Pro 적도의 · RA/DEC축 구동</td></tr>
@@ -103,37 +90,70 @@
                 </tbody>
               </table>
             </div>
-            <p>
-              접안렌즈로 눈으로 볼 때의 배율은 망원경 초점거리를 접안렌즈 초점거리로 나눈 값이다.
-              4SE는 <code>1,325 ÷ 25 = 53배</code>, C11은 <code>2,800 ÷ 40 = 70배</code>이다.
-              표의 유효 배율 범위는 제품 자료의 광학 관측 기준이며, 실제로 세부가 보이는 정도는 대기 상태와 흔들림에도 영향을 받는다.
-              이번처럼 접안렌즈 대신 카메라를 직접 연결하면 53배나 70배를 그대로 촬영 배율로 쓰지 않고, 초점거리와 센서 크기로 시야를 판단한다.
-            </p>
+            <p>표의 배율은 접안렌즈를 사용하는 관측 기준이다. 카메라를 직접 연결한 뒤에는 실제 화면에서 대상을 찾고 방향을 조작할 수 있는지를 확인했다.</p>
+            <h4>마운트 구조부터 익히기</h4>
             <p>
               4SE의 경위대는 상하와 좌우로 방향을 움직이는 구조라 화면을 보며 방향 조작을 익히기에 직관적이었다.
               CGE Pro는 적경(RA)과 적위(DEC) 두 축을 사용하는 적도의이다.
               천체 추적에서는 지구 자전에 맞춘 축 정렬이 중요하지만, 이번 준비에서는 카메라가 바라보는 방향과 각 축의 움직임을 연결해 이해하는 데 초점을 두었다.
               큰 C11 경통을 안정적으로 지지하면서 원하는 방향으로 움직일 수 있는지까지 광학계와 마운트를 한 조합으로 검토했다.
             </p>
+            <div class="telescope-photo-grid telescope-diagram-grid">
+              <figure class="doc-figure"><img src="../../assets/dataset/telescope-altaz-diagram.png" alt="경위대의 상하 고도축과 좌우 방위각축을 보여주는 설명 그림" loading="lazy" /><figcaption>경위대: 상하와 좌우로 방향을 움직이는 구조. 그림은 구동 방식의 이해를 위한 예시이다.</figcaption></figure>
+              <figure class="doc-figure"><img src="../../assets/dataset/telescope-equatorial-diagram.png" alt="적도의의 적경축과 적위축을 보여주는 설명 그림" loading="lazy" /><figcaption>적도의: 기울어진 적경축과 적위축을 사용하는 구조. 축의 움직임을 구분하며 매뉴얼을 읽었다.</figcaption></figure>
+            </div>
           </section>
 
           <section class="doc-section searchable-section" id="purchase" data-search-title="예산 검토 견적 세금계산서 구매 진행">
             <h3>2. 구매 진행</h3>
+            <h4>문의할 내용을 먼저 정리</h4>
             <p>
               대표님이 제시한 1,500만원 한도를 기준으로 구체적인 장비 구성과 구매 절차를 맡았다.
               후보별로 촬영 목적에 맞는지 비교하고, 직접 연락해 재고와 납기, 포함 부속품, 배송과 결제 조건을 확인했다.
               망원경 본체 가격만 보는 대신 실제로 조립하고 운용할 때 필요한 구성까지 확인한 뒤 견적을 요청했다.
             </p>
             <p>
-              두 장비는 각각 구매 내역을 확인할 수 있도록 견적서와 거래명세서를 구분해 요청했다.
-              회사 결제에 필요한 서류를 받아 금액과 구성품을 대조하고, 세금계산서 발행과 수정 사항도 연락하며 확인했다.
-              서류 준비와 결제 진행, 배송 일정 확인을 이어서 처리한 뒤 장비를 직접 수령했다.
-              구매 과정에서도 촬영에 필요한 조건을 문서상의 구성과 맞춰 확인해야 했다.
+              연락하면서 중요했던 것은 가격 한 가지만 묻지 않고, 구매 후 실제 사용까지 이어지는 조건을 함께 확인하는 것이었다.
+              장비가 있어도 촬영 일정에 맞춰 도착하지 않거나 조작을 익힐 방법이 없다면 준비 계획을 바꿔야 했다.
+              다음 항목을 질문 목록으로 정리하고, 전화와 이메일에서 받은 답변을 구매 판단에 반영했다.
             </p>
+            <ul class="takeaway-list">
+              <li><strong>성능과 구성:</strong> 모터의 움직임과 미세 조작, 카메라 장착 가능 여부, 기본 포함품과 추가로 필요한 부품.</li>
+              <li><strong>재고와 배송:</strong> 국내 재고 보유 여부, 출고 가능한 날짜, 예상 도착 일정, 배송비와 화물 운송 조건.</li>
+              <li><strong>실물 확인:</strong> 전시 제품이 있는지, 직접 방문해 볼 수 있는지, 카메라를 연결하거나 시연해 볼 수 있는지.</li>
+              <li><strong>사용 지원:</strong> 조작 방법 안내나 교육이 가능한지, 구매 후 사용 문의와 사후 서비스는 어떤 범위에서 받을 수 있는지.</li>
+              <li><strong>결제와 증빙:</strong> 계좌이체·카드 결제 가능 여부, 할인 조건, 견적서·세금계산서·영수증 등 필요한 증빙의 발행 여부.</li>
+            </ul>
             <p>
               구매 전에는 카메라를 가져가 미리 결합해 볼 수 있는지, 조작 방법을 배울 수 있는지도 문의했다.
               사전 실물 시험과 별도 교육은 어려워, 매뉴얼과 구성 자료를 먼저 비교하고 수령 후 직접 조립·연결을 확인하는 방식으로 진행했다.
               국내 재고와 배송 일정을 확인한 것도 촬영 준비 기간 안에 장비를 받고, 어댑터 제작과 조작 연습 시간을 확보하기 위해서였다.
+            </p>
+            <h4>구매 의도와 요청사항을 명확하게 전달</h4>
+            <p>
+              이메일에는 제품명과 수량을 적고, 두 구성을 각각 별도 견적서로 요청했다.
+              이때 두 견적이 구매 후보 중 하나를 고르기 위한 것으로 읽힐 수 있어, 두 구성 모두 구매하되 내부 회계처리만 나누려는 것이라고 추가로 설명했다.
+              내가 알고 있는 사정이 상대방에게도 당연히 전달되는 것은 아니었다. 구매 의도와 서류를 나누는 이유를 함께 적어야 요청이 분명해졌다.
+            </p>
+            <p>
+              배송은 함께 받고 서류는 구매 건별로 나누는 조건도 따로 정리했다.
+              배송비를 어느 구매 건에 포함할지 적고, 제품 구성과 최종 금액을 견적서에서 다시 확인했다.
+              담당자는 가능한 발행 방식과 출고 조건을 회신했고, 나는 그 답변을 기준으로 필요한 서류와 다음 절차를 다시 정리했다.
+              서로 확인한 내용을 이메일에 남겨 두니 수정 견적을 받았을 때도 무엇이 달라졌는지 대조할 수 있었다.
+            </p>
+            <h4>회신에 맞춰 절차 조정</h4>
+            <p>
+              처음에는 세금계산서 발행과 배송을 먼저 요청했지만, 물품 대금 입금 후 출고할 수 있다는 안내를 받았다.
+              이후에는 선입금에 필요한 서류부터 확보하는 순서로 바꿨다.
+              견적서, 사업자등록증, 통장사본, 거래명세서, 세금계산서를 목록으로 요청하고, 견적서와 거래명세서는 구매 건별로 각각 필요하다고 명시했다.
+              수정된 견적서와 세금계산서를 확인한 뒤 회사 결제 절차와 배송 일정을 이어서 맞췄다.
+            </p>
+            <p>
+              이 과정에서 업무 이메일을 쓰는 방법도 익혔다.
+              제목에는 견적·배송·서류 요청처럼 연락 목적을 드러내고, 본문에는 제품 구성과 요청사항을 구분해 적었다.
+              전화로 들은 조건은 다음 메일에 다시 정리하고, 상대가 답하기 위해 필요한 정보도 함께 전달했다.
+              특히 두 건 모두 구매한다는 점, 서류는 나누되 배송은 함께 받는다는 점처럼 오해하기 쉬운 조건을 명확히 적은 것이 도움이 됐다.
+              답변을 받으면 그 조건에 맞춰 다음 요청을 구체화하면서, 문의부터 실제 수령까지 직접 진행하는 방법을 배웠다.
             </p>
           </section>
 
@@ -223,6 +243,7 @@
 
           <section class="doc-section searchable-section" id="remote-control" data-search-title="컴퓨터 연결 키보드 제어와 원거리 촬영">
             <h3>5. PC 원격 조작</h3>
+            <h4>장비별 역할을 나누어 연결</h4>
             <p>
               카메라 장착 후에는 NexStar 4SE부터 컴퓨터에 연결했다.
               회사에 있던 외부 전원 장치를 활용하고, 핸드 컨트롤러와 PC를 USB로 연결해 키보드로 망원경 방향을 움직일 수 있게 했다.
@@ -243,6 +264,42 @@
               <img src="../../assets/dataset/telescope-pc-controller.jpg" alt="PC 연결에 사용한 망원경 핸드 컨트롤러와 USB 케이블" loading="lazy" />
               <figcaption>핸드 컨트롤러를 PC에 연결해 망원경 방향을 조작하는 구성을 확인했다.</figcaption>
             </figure>
+            <h4>키보드 입력과 실제 움직임 확인</h4>
+            <p>
+              처음부터 발사체를 따라가는 상황을 만들기보다는, 고정된 원거리 대상을 두고 연결과 조작을 익혔다.
+              먼저 마운트가 PC 명령에 반응하는지 확인하고, 카메라 화면을 함께 띄운 뒤 방향을 바꿔 보았다.
+              손으로 키보드를 누르는 장면과 그때 PC에 들어오는 영상을 따로 기록해, 조작과 관측 결과를 비교할 수 있도록 했다.
+            </p>
+            <figure class="doc-figure telescope-local-video">
+              <video controls muted playsinline preload="metadata" poster="../../assets/dataset/telescope-keyboard-poster.png" aria-label="키보드로 망원경 방향을 조작하는 현장 영상">
+                <source src="../../assets/dataset/telescope-keyboard-demo.mp4" type="video/mp4" />
+                <a href="../../assets/dataset/telescope-keyboard-demo.mp4">키보드 조작 영상 보기</a>
+              </video>
+              <figcaption>키보드를 직접 누르며 망원경을 조작하는 모습. 카메라 화면을 보면서 방향을 바꿨다.</figcaption>
+            </figure>
+            <h4>관측 화면으로 연결 결과 확인</h4>
+            <p>
+              PC에서는 방향과 이동 속도를 정하는 제어 창과 DVS Viewer를 함께 열어 두었다.
+              제어 창은 망원경에 움직임을 전달하고, Viewer는 카메라가 받아온 장면을 보여준다.
+              방향 명령을 바꿨을 때 건물의 윤곽이 화면에서 이동하는 것을 보며 두 연결이 함께 동작하는지 확인했다.
+              이벤트 영상에서는 장면의 변화가 나타나므로, 망원경이 움직일 때 고정된 건물의 윤곽도 영상에 드러난다.
+            </p>
+            <figure class="doc-figure telescope-local-video">
+              <video controls muted playsinline preload="metadata" poster="../../assets/dataset/telescope-viewer-poster.png" aria-label="망원경 방향 제어 창과 DVS Viewer를 함께 녹화한 PC 화면">
+                <source src="../../assets/dataset/telescope-viewer-demo.mp4" type="video/mp4" />
+                <a href="../../assets/dataset/telescope-viewer-demo.mp4">PC 관측 화면 영상 보기</a>
+              </video>
+              <figcaption>방향 제어 창과 DVS Viewer의 실제 화면. 망원경 방향 조작에 따라 관측 장면이 달라지는 것을 확인했다.</figcaption>
+            </figure>
+            <figure class="doc-figure telescope-target-photo">
+              <img src="../../assets/dataset/telescope-target-observation.jpg" alt="약 2km 떨어진 건물을 망원경으로 관찰한 모습" loading="lazy" />
+              <figcaption>조작 시험에 사용한 약 2km 거리의 건물. 망원경을 통해 본 관측 대상의 참고 사진이다.</figcaption>
+            </figure>
+            <p>
+              이렇게 전원과 장비 연결, 방향 명령, 영상 확인을 나누어 익히니 처음 보는 장비도 확인할 순서를 잡을 수 있었다.
+              원격 조작은 케이블을 연결하는 것으로 끝나지 않았다. 화면에서 대상을 찾고, 움직이는 방향을 이해하고,
+              필요한 만큼만 조작하는 연습까지 이어져야 현장에서 사용할 수 있는 상태가 됐다.
+            </p>
           </section>
 
           <section class="doc-section searchable-section" id="field-plan" data-search-title="두 망원경 원격 연결과 발사체 촬영 계획">
