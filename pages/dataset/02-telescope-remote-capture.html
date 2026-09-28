@@ -24,24 +24,96 @@
             1,500만원의 예산 한도 안에서 촬영 조건에 맞는 두 구성을 검토하고, 견적과 결제 서류 처리부터 수령·조립까지 직접 진행했습니다.
             카메라 연결용 어댑터를 설계·출력해 장착하고, PC에서 영상을 보며 키보드로 망원경 방향을 조작하는 환경을 구성한 과정을 정리합니다.
           </p>
-          <p><a href="https://www.youtube.com/watch?v=4-M0PBgkFBU" target="_blank" rel="noopener noreferrer">▶ PC 키보드로 망원경을 조작하는 원격 촬영 데모 보기</a></p>
+          <figure class="doc-figure telescope-demo-figure">
+            <div class="telescope-video">
+              <iframe src="https://www.youtube.com/embed/4-M0PBgkFBU" title="PC 키보드로 망원경을 조작하는 원거리 촬영 데모" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+            <figcaption>컴퓨터에서 카메라 영상을 보며 키보드로 망원경 방향을 조작한 데모이다. <a href="https://www.youtube.com/watch?v=4-M0PBgkFBU" target="_blank" rel="noopener noreferrer">YouTube에서 보기 ↗</a></figcaption>
+          </figure>
 
           <section class="doc-section searchable-section" id="requirements" data-search-title="망원경 촬영 조건과 장비 구성">
             <h3>1. 촬영 조건</h3>
+            <h4>거리와 화면에 담기는 크기</h4>
             <p>
               앞선 녹화 실험에서는 들어오는 데이터를 오래 저장할 수 있는지 확인했다.
               다음 과제는 먼 거리의 대상을 카메라 화면에 충분한 크기로 담고, 움직이는 방향에 맞춰 망원경을 조작하는 것이었다.
               이를 위해 한 대로 모든 조건을 맞추기보다 이동성과 고배율 촬영을 나누어 두 구성을 선택했다.
             </p>
             <p>
-              가벼운 구성은 상대적으로 낮은 배율로 대상을 찾고 촬영 방향을 잡는 용도이다. 이동과 설치가 수월한 조합으로, 약 100만원 규모로 준비했다.
-              다른 하나는 무게가 있더라도 고배율 촬영을 지탱할 수 있는 망원경과 구동 마운트의 조합이며, 약 1,100만원 규모이다.
+              발사체 촬영은 수 km 이상 떨어진 대상을 관찰해야 하므로, 거리와 대상의 크기를 먼저 생각했다.
+              같은 발사체라도 멀어질수록 화면에서 차지하는 크기는 작아지고, 상승하면서 관측 거리와 방향도 계속 바뀐다.
+              실제 연결 시험은 약 2km 거리의 지상 대상을 기준으로 진행했다. 이 시험으로 초점과 영상 수신, 방향 조작을 먼저 확인하고,
+              더 먼 발사체 촬영에 필요한 시야와 구동 조건을 준비하는 순서로 접근했다.
+            </p>
+            <p>
+              카메라를 직접 연결할 때는 접안렌즈의 배율보다 망원경의 초점거리와 센서 크기가 화면 범위를 결정한다.
+              같은 센서에서 초점거리가 길어지면 대상을 크게 담을 수 있지만 시야는 좁아진다.
+              선택한 NexStar 4SE와 C11의 초점거리는 각각 1,325mm와 2,800mm로, 같은 센서를 사용하면 C11에서 대상이 약 2.1배 크게 맺힌다.
+              그만큼 화면을 벗어난 대상을 다시 찾거나 움직임을 따라가는 조작은 더 까다로워진다.
+            </p>
+            <p>
+              거리의 영향을 단순화하면 센서에 맺히는 크기는 <code>초점거리 × 대상 크기 ÷ 거리</code>에 비례한다.
+              예를 들어 같은 대상을 2km 대신 10km에서 보면 영상 속 크기는 약 5분의 1이 된다.
+              이 예시는 거리와 영상 크기의 관계를 설명하기 위한 것으로, 장비의 확인된 촬영 한계 거리를 뜻하지 않는다.
+              이런 관계를 기준으로 넓게 대상을 찾는 구성과 더 크게 관찰하는 구성을 나누었다.
+            </p>
+            <h4>구동 속도와 지지 안정성</h4>
+            <p>
+              발사체를 따라가려면 화면에서 대상이 움직이는 각속도에 맞춰 마운트를 돌릴 수 있어야 한다.
+              필요한 회전 속도는 발사체의 이동 속도만으로 정해지지 않고, 관측 거리와 시선에 수직인 이동 성분에 따라 달라진다.
+              따라서 최대 회전 속도와 함께 낮은 속도에서 얼마나 세밀하게 방향을 바꿀 수 있는지도 검토했다.
+              CGE Pro 마운트 자료에는 엔코더가 내장된 DC 서보모터와 최대 5.5°/s, 2°/s, 0.5°/s, 그보다 느린 구동 단계가 제시되어 있었다.
+              큰 방향 전환에는 빠른 단계를, 고배율 화면에서 위치를 맞출 때는 느린 단계를 사용하는 운용을 생각했다.
+            </p>
+            <p>
+              이때 사양표의 <code>1×</code>는 초당 1도를 뜻하는 것이 아니라 지구 자전에 맞춘 항성시 속도이며, 약 0.00417°/s이다.
+              속도 단계의 단위를 구분해야 큰 방향 이동과 미세 조작에 어떤 설정을 쓸지 판단할 수 있었다.
+              천체를 따라가는 기본 추적 모드와, 발사체를 화면으로 보면서 방향을 조작하는 작업도 구분해 검토했다.
+            </p>
+            <p>
+              가벼운 구성은 Celestron NexStar 4SE로, 상대적으로 낮은 배율로 대상을 찾고 촬영 방향을 잡는 용도이다. 이동과 설치가 수월한 조합으로, 약 100만원 규모로 준비했다.
+              다른 하나는 Celestron C11 경통과 CGE Pro 적도의 마운트의 조합이며, 약 1,100만원 규모이다. 무게가 있더라도 고배율 촬영을 지탱할 수 있는 구성을 선택했다.
               여기서는 광학계뿐 아니라 카메라를 장착한 상태의 지지 안정성과 모터 조작 가능 여부를 함께 검토했다.
             </p>
             <p>
               고배율에서는 작은 방향 변화도 화면에서 크게 나타난다. 특히 이벤트 카메라는 밝기 변화에 반응하므로,
               장비가 흔들리면 관찰 대상의 움직임뿐 아니라 배경의 변화도 함께 기록될 수 있다.
               따라서 단순히 확대하는 것보다 불필요한 흔들림의 영향을 줄이는 구성을 우선했다.
+            </p>
+            <p>
+              중량은 지지 안정성과 현장 설치 부담을 함께 결정했다.
+              경량 구성은 본체 약 5kg과 삼각대 약 4.5kg 수준인 반면, 대형 구성은 마운트·삼각대·무게추만 약 70kg이고 경통은 별도로 약 12.4kg이었다.
+              대형 마운트의 지지하중은 약 41kg으로 제시되어 있어 경통뿐 아니라 카메라와 연결 부품의 무게도 함께 고려했다.
+              충분한 지지 여유를 확보하는 동시에 운반, 조립, 균형 조정에 필요한 작업량도 예상해야 했다.
+              결국 거리와 시야, 회전 속도, 하중과 이동성을 묶어서 두 장비의 역할을 정했다.
+            </p>
+            <h4>선택한 제품과 배율</h4>
+            <div class="diagnostic-table-wrap">
+              <table class="diagnostic-table">
+                <thead><tr><th>항목</th><th>Celestron NexStar 4SE</th><th>Celestron C11 + CGE Pro</th></tr></thead>
+                <tbody>
+                  <tr><td>광학 방식</td><td>막스토프 카세그레인</td><td>슈미트 카세그레인</td></tr>
+                  <tr><td>구경</td><td>102mm · 4인치</td><td>279.4mm · 11인치</td></tr>
+                  <tr><td>초점거리 / 초점비</td><td>1,325mm / F13</td><td>2,800mm / F10</td></tr>
+                  <tr><td>기본 접안렌즈 / 관측 배율</td><td>25mm / 53배</td><td>40mm / 70배</td></tr>
+                  <tr><td>자료상 유효 배율 범위</td><td>15–241배</td><td>40–660배</td></tr>
+                  <tr><td>마운트</td><td>싱글 포크 경위대 · 상하/좌우 구동</td><td>CGE Pro 적도의 · RA/DEC축 구동</td></tr>
+                  <tr><td>중량</td><td>본체 4.99kg + 삼각대 4.54kg</td><td>경통 12.4kg + 마운트·삼각대·무게추 구성 약 70kg</td></tr>
+                  <tr><td>준비한 규모</td><td>약 100만원</td><td>약 1,100만원</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              접안렌즈로 눈으로 볼 때의 배율은 망원경 초점거리를 접안렌즈 초점거리로 나눈 값이다.
+              4SE는 <code>1,325 ÷ 25 = 53배</code>, C11은 <code>2,800 ÷ 40 = 70배</code>이다.
+              표의 유효 배율 범위는 제품 자료의 광학 관측 기준이며, 실제로 세부가 보이는 정도는 대기 상태와 흔들림에도 영향을 받는다.
+              이번처럼 접안렌즈 대신 카메라를 직접 연결하면 53배나 70배를 그대로 촬영 배율로 쓰지 않고, 초점거리와 센서 크기로 시야를 판단한다.
+            </p>
+            <p>
+              4SE의 경위대는 상하와 좌우로 방향을 움직이는 구조라 화면을 보며 방향 조작을 익히기에 직관적이었다.
+              CGE Pro는 적경(RA)과 적위(DEC) 두 축을 사용하는 적도의이다.
+              천체 추적에서는 지구 자전에 맞춘 축 정렬이 중요하지만, 이번 준비에서는 카메라가 바라보는 방향과 각 축의 움직임을 연결해 이해하는 데 초점을 두었다.
+              큰 C11 경통을 안정적으로 지지하면서 원하는 방향으로 움직일 수 있는지까지 광학계와 마운트를 한 조합으로 검토했다.
             </p>
           </section>
 
@@ -58,6 +130,11 @@
               서류 준비와 결제 진행, 배송 일정 확인을 이어서 처리한 뒤 장비를 직접 수령했다.
               구매 과정에서도 촬영에 필요한 조건을 문서상의 구성과 맞춰 확인해야 했다.
             </p>
+            <p>
+              구매 전에는 카메라를 가져가 미리 결합해 볼 수 있는지, 조작 방법을 배울 수 있는지도 문의했다.
+              사전 실물 시험과 별도 교육은 어려워, 매뉴얼과 구성 자료를 먼저 비교하고 수령 후 직접 조립·연결을 확인하는 방식으로 진행했다.
+              국내 재고와 배송 일정을 확인한 것도 촬영 준비 기간 안에 장비를 받고, 어댑터 제작과 조작 연습 시간을 확보하기 위해서였다.
+            </p>
           </section>
 
           <section class="doc-section searchable-section" id="assembly" data-search-title="망원경 수령 조립과 조작 방법 학습">
@@ -70,11 +147,11 @@
             <div class="telescope-photo-grid">
               <figure class="doc-figure">
                 <img src="../../assets/dataset/telescope-light-assembly.jpg" alt="삼각대 위에 조립한 경량 망원경과 카메라" loading="lazy" />
-                <figcaption>이동과 설치를 고려한 가벼운 구성. 카메라 연결과 PC 조작을 먼저 확인한 장비이다.</figcaption>
+                <figcaption>NexStar 4SE. 이동과 설치를 고려한 구성으로, 카메라 연결과 PC 조작을 먼저 확인했다.</figcaption>
               </figure>
               <figure class="doc-figure">
                 <img src="../../assets/dataset/telescope-heavy-assembly.jpg" alt="대형 경통과 구동 마운트를 삼각대에 설치한 망원경" loading="lazy" />
-                <figcaption>고배율 촬영을 위해 준비한 구성. 경통을 지지하는 마운트까지 함께 조립했다.</figcaption>
+                <figcaption>C11 경통과 CGE Pro 마운트. 고배율 촬영을 위해 경통을 지지하는 마운트까지 함께 조립했다.</figcaption>
               </figure>
             </div>
             <p>
@@ -87,16 +164,50 @@
 
           <section class="doc-section searchable-section" id="adapter" data-search-title="카메라 마운트 어댑터 3D 설계 프린팅과 장착 확인">
             <h3>4. 카메라 어댑터 제작</h3>
+            <h4>두 연결부를 맞추는 설계</h4>
             <p>
               망원경을 눈으로 보는 것과 카메라로 촬영하는 것은 연결 방식부터 달랐다.
               카메라 렌즈를 분리하고 망원경의 광학계를 이용하려면, 카메라를 접안부에 고정하면서 빛이 센서로 들어오도록 연결해야 했다.
               이를 위해 망원경 쪽 결합부와 카메라 마운트에 맞는 어댑터를 직접 3D 모델링하고 프린터로 출력했다.
             </p>
             <p>
+              설계는 망원경 쪽 연결 규격과 카메라 쪽 나사 규격을 나누어 정리하는 데서 시작했다.
+              망원경 쪽은 1.25인치 접안부에 끼우는 방식과 NexStar 4SE 후면의 1-3/8-24 TPI 나사에 체결하는 방식으로 구분했다.
+              카메라 쪽은 M12×0.5와 C-mount를 각각 연결할 수 있도록 구성해 총 네 종류의 모델을 만들었다.
+              TPI는 인치당 나사산 수를 뜻하므로, 단순히 지름만 비슷하게 만드는 것이 아니라 나사 간격과 암수 방향까지 맞춰야 했다.
+            </p>
+            <div class="telescope-photo-grid telescope-render-grid">
+              <figure class="doc-figure"><img src="../../assets/dataset/adapter-render-01-1p25-to-m12.png" alt="1.25인치 접안부와 M12 카메라를 연결하는 어댑터 CAD 렌더링" loading="lazy" /><figcaption>1.25인치 접안부 → M12 카메라</figcaption></figure>
+              <figure class="doc-figure"><img src="../../assets/dataset/adapter-render-02-1p25-to-cmount.png" alt="1.25인치 접안부와 C-mount 카메라를 연결하는 어댑터 CAD 렌더링" loading="lazy" /><figcaption>1.25인치 접안부 → C-mount 카메라</figcaption></figure>
+              <figure class="doc-figure"><img src="../../assets/dataset/adapter-render-03-tpi-to-m12.png" alt="망원경 후면 나사와 M12 카메라를 연결하는 어댑터 CAD 렌더링" loading="lazy" /><figcaption>1-3/8-24 TPI 후면 나사 → M12 카메라</figcaption></figure>
+              <figure class="doc-figure"><img src="../../assets/dataset/adapter-render-04-tpi-to-cmount.png" alt="망원경 후면 나사와 C-mount 카메라를 연결하는 어댑터 CAD 렌더링" loading="lazy" /><figcaption>1-3/8-24 TPI 후면 나사 → C-mount 카메라</figcaption></figure>
+            </div>
+            <p>
+              접안부에 끼우는 부분은 원통 형상으로 만들고, 카메라 쪽에는 해당 마운트의 나사를 배치했다.
+              가운데에는 빛이 통과하는 공간을 두었다. 외형을 연결하는 것뿐 아니라 센서 앞의 통로와 카메라 주변 간섭도 함께 생각해야 했다.
+              또한 기계적으로 체결되는지와 실제로 초점을 맞출 수 있는지는 별개이므로, 출력물을 장착한 다음 영상으로 확인하는 단계까지 필요했다.
+            </p>
+            <h4>출력과 실제 장착</h4>
+            <p>
+              FreeCAD 원본은 치수와 형상을 다시 수정할 수 있도록 보관하고, 3D 프린팅용 STL을 따로 내보냈다.
+              네 부품을 한 번에 배치한 출력용 파일도 함께 정리했다. 출력에는 PLA와 0.05mm 레이어 높이를 사용했다.
+              나사와 끼워 맞추는 부분은 화면의 모델만으로 확인하기 어려우므로, 실제 출력물로 체결 상태를 확인하는 과정이 중요했다.
+            </p>
+            <p>
               먼저 1.25인치 접안부에 카메라를 연결하는 어댑터를 제작해 실제로 장착했다.
               출력물과 카메라를 조립해 결합과 고정 상태를 확인하고, PC에 영상이 들어오는 것까지 이어서 점검했다.
               이후 연결 방식에 따라 사용할 수 있도록 M12와 C-mount용 모델을 정리해
               <a href="https://github.com/jaypark0115/celestron-camera-mount-adapters" target="_blank" rel="noopener noreferrer">망원경 카메라 마운트 어댑터 저장소</a>에 설계 파일과 출력 파일을 공개했다.
+            </p>
+            <p>
+              사진의 흰색 출력물은 형상과 장착 상태를 확인한 부품이다. 광학 경로 주변의 재질은 내부 반사에도 영향을 줄 수 있어,
+              저장소에는 검은색 필라멘트 사용을 권장하는 이유도 정리했다.
+              출력 색상만으로 반사가 모두 없어지는 것은 아니므로 내부 표면과 빛이 들어오는 통로를 함께 고려해야 한다는 점도 알게 됐다.
+            </p>
+            <p>
+              <a href="https://github.com/jaypark0115/celestron-camera-mount-adapters/tree/main/cad/freecad" target="_blank" rel="noopener noreferrer">FreeCAD 설계 원본</a>과
+              <a href="https://github.com/jaypark0115/celestron-camera-mount-adapters/tree/main/models/stl" target="_blank" rel="noopener noreferrer">STL 출력 파일</a>은 저장소에서 확인할 수 있다.
+              렌더링과 실제 장착 사진을 함께 올려 모델이 어떤 연결부에 쓰이는지 비교할 수 있도록 했다.
             </p>
             <div class="telescope-photo-grid">
               <figure class="doc-figure">
@@ -113,7 +224,7 @@
           <section class="doc-section searchable-section" id="remote-control" data-search-title="컴퓨터 연결 키보드 제어와 원거리 촬영">
             <h3>5. PC 원격 조작</h3>
             <p>
-              카메라 장착 후에는 경량 구성부터 컴퓨터에 연결했다.
+              카메라 장착 후에는 NexStar 4SE부터 컴퓨터에 연결했다.
               회사에 있던 외부 전원 장치를 활용하고, 핸드 컨트롤러와 PC를 USB로 연결해 키보드로 망원경 방향을 움직일 수 있게 했다.
               카메라 영상도 PC에서 실시간으로 확인해, 망원경을 직접 들여다보지 않고 화면을 보면서 조작할 수 있도록 구성했다.
             </p>
@@ -121,6 +232,12 @@
               이때 카메라와 마운트는 역할이 다르다. 카메라는 관측한 영상을 PC로 보내고, 마운트는 PC에서 내린 방향 명령에 따라 망원경을 움직인다.
               두 연결을 함께 사용하면 화면에서 대상의 위치를 확인하고 키보드로 방향을 보정할 수 있다.
               약 2km 떨어진 대상을 보며 영상 확인과 방향 조작을 시험했으며, 글 처음의 데모 영상에 그 동작을 담았다.
+            </p>
+            <p>
+              원격 조작에서 중요한 것은 명령이 전달되는지뿐 아니라 그 결과를 화면에서 바로 판단할 수 있는지였다.
+              먼저 대상을 화면 안에 넣고 초점을 맞춘 다음, 방향을 움직였을 때 영상 속 대상이 어떻게 이동하는지 확인했다.
+              고배율 화면에서는 짧은 조작으로도 대상이 크게 이동할 수 있어, 화면을 보며 움직이는 양을 익히는 과정이 필요했다.
+              이 연결 시험을 통해 망원경의 기구 조작과 카메라의 영상 확인을 PC에서 함께 수행하는 기본 운용을 마련했다.
             </p>
             <figure class="doc-figure telescope-connection-photo">
               <img src="../../assets/dataset/telescope-pc-controller.jpg" alt="PC 연결에 사용한 망원경 핸드 컨트롤러와 USB 케이블" loading="lazy" />
