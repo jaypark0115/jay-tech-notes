@@ -32,28 +32,19 @@
 
           <h1>3. 229장 FPGA 검증 및 결과</h1>
           <p class="lead">
-            FPGA의 <code>done</code> 신호는 계산 순서가 끝났다는 사실만 알려줍니다.
-            올바른 주소에서 데이터를 읽었는지, signed INT8을 같은 방식으로 해석했는지,
-            두 detection head가 실제 경계 상자와 클래스를 보존했는지는 별도로 확인해야
-            합니다. 먼저 <code>test_one</code>으로 한 이미지의 program·preload·compute·
-            readback·후처리를 반복 점검하고, 이후 같은 bitstream과 weight를 유지한 채
-            229장을 연속 실행했습니다. 최종 정확도는 CONV14와 CONV20을 같은 decode·NMS에
-            넣어 계산한 detector mAP입니다. 이 글에서는 실행 완료율, 검출 정확도,
-            compute-only 속도, timing, 자원, 추정 전력을 서로 다른 측정 경계로 나누어
-            설명합니다.
-          </p>
+              이 글에서는 단일 이미지로 FPGA 실행 경로를 점검한 뒤 229장 전체 평가로 확장한 과정을 설명합니다. 먼저 <code>test_one</code>으로
+              program·preload·compute·readback·후처리를 연결하고, 같은 bitstream과 weight로 입력 이미지를 바꾸어 반복 실행했습니다.
+              두 detection head의 detector mAP, compute-only 속도, timing과 자원 사용량을 각 측정 조건과 함께 정리했습니다.
+            </p>
 
           <section class="case-summary" aria-labelledby="aix3-summary-title">
             <div>
               <h2 id="aix3-summary-title">검증의 기준</h2>
               <p>
-                각 이미지마다 start/done, cycle 수, CONV14·CONV20 readback과 후처리
-                결과를 기록했다. 대표 성능에는 최종 229장 실행의 평균값만 사용하며,
-                CONV14 branch가 빠졌던 중간 속도 실험은 포함하지 않는다. 229/229
-                PASS는 모든 이미지에서 FPGA 실행과 두 head readback, 결과 파일 생성이
-                완료됐다는 뜻이다. Software와 모든 tensor byte가 완전히 같다는
-                뜻은 아니며, 정확도는 별도의 detector mAP로 판단한다.
-              </p>
+              각 이미지에서 start/done, cycle 수, CONV14·CONV20 readback과 후처리 결과를 기록했다. 최종 229장 실행의 평균값을 대표
+              성능으로 정리했다. 229/229 PASS는 모든 이미지의 FPGA 실행, 두 head readback, 결과 파일 생성이 완료됐다는 뜻이다. 검출 정확도는
+              같은 결과에 decode와 NMS를 적용해 계산한 detector mAP로 평가했다.
+            </p>
             </div>
             <dl class="case-facts">
               <div><dt>데이터</dt><dd>229장 · close/long · 2,959 truth boxes</dd></div>
@@ -162,12 +153,9 @@
               </table>
             </div>
             <p>
-              중간 구현에서는 빠른 연산 경로와 tensor 비교를 먼저 안정화했지만,
-              최종 detector는 8×8 CONV14 branch와 16×16 CONV20을 함께 사용한다.
-              Branch를 복구하면 cycle과 buffer 비용이 늘어난다. 최종본은 최고 FPS
-              상한보다 두 head를 모두 읽어 실제 mAP를 계산할 수 있는 구조를 기준으로
-              고정했다. 따라서 대표 수치는 최종 11.420687 FPS와 78.60% mAP를
-              함께 사용한다.
+              중간 구현에서 연산 경로와 tensor 비교를 점검한 뒤, 8×8 CONV14 branch와 16×16 CONV20을 함께 사용하는 최종 검증으로 확장했다.
+              CONV14 branch를 복구하면서 cycle과 buffer 비용이 늘어났고, 두 head를 모두 읽어 mAP를 계산했다. 최종 결과는 11.420687
+              FPS와 78.60% mAP이다.
             </p>
           </section>
 
@@ -188,11 +176,7 @@
                 </tbody>
               </table>
             </div>
-            <p class="evidence-note">
-              두 head의 raw tensor를 byte 단위로 완전히 같게 만드는 것만을
-              성공 조건으로 사용하지 않는다. 같은 decode와 NMS를 거친 최종
-              box·class 결과를 detector mAP로 평가한다.
-            </p>
+
             <h3>평가 지표의 의미</h3>
             <p>
               IoU는 예측 상자와 정답 상자가 얼마나 겹치는지를 나타낸다. 이 평가에서는
@@ -204,11 +188,9 @@
               계산한 뒤 평균한 값이며, 여기서는 11-point AP 방식을 사용한다.
             </p>
             <p>
-              후보 생성 threshold 0.005는 decode 초기에 낮은 점수의 후보도 넓게 남기는
-              조건이고, class-wise NMS의 IoU 0.45는 같은 클래스에서 많이 겹치는 상자를
-              정리하는 기준이다. 표의 precision과 recall은 score 0.24 지점에서 표시된
-              값이다. 따라서 이 수치들을 다른 threshold나 AP 계산법을 쓴 결과와 직접
-              비교할 때는 평가 조건도 함께 확인해야 한다.
+              후보 생성 threshold 0.005는 decode 초기에 낮은 점수의 후보도 남기는 조건이다. Class-wise NMS의 IoU 0.45는 같은
+              클래스에서 겹치는 상자를 정리하는 기준이고, 표의 precision과 recall은 score 0.24에서 계산한 값이다. 후보 생성, 중복 제거, 결과
+              집계에 쓰는 threshold를 구분해 기록했다.
             </p>
           </section>
 
@@ -246,11 +228,7 @@
                 src="../../assets/aix-validation-table-crop.png"
                 alt="229장 통과, software mAP 83.60%, FPGA mAP 78.60%, precision, recall과 F1을 보여주는 최종 평가표"
               />
-              <figcaption>
-                software와 FPGA의 차이는 단일 원인으로 단정하지 않는다.
-                layer별 quantization, signedness, head scaling과 후처리 경계에서
-                차이가 누적될 수 있다.
-              </figcaption>
+
             </figure>
             <figure class="doc-figure">
               <div class="figure-label">동일 이미지의 software와 FPGA 검출 비교</div>
@@ -264,12 +242,9 @@
               </figcaption>
             </figure>
             <p>
-              시각 비교 이미지는 두 경로가 같은 물체를 대체로 찾는지, 한쪽에서 상자가
-              사라지거나 중복되는지를 빠르게 확인하는 정성 자료이다. 보기 좋은 사례 한
-              장만으로 전체 정확도를 대표하지 않기 때문에 대표 성과에는 229장 mAP만
-              사용한다. Software 정수 기준 83.60%와 FPGA 78.60% 사이에는 약 5.00%p의
-              차이가 남아 있으며, 양자화·packing·signedness·head scale·후처리 경계를
-              나누어 추적해야 한다.
+              시각 비교 이미지에서는 두 경로가 같은 물체를 찾는지, 상자가 사라지거나 중복되는지를 살펴봤다. 전체 정확도는 229장 mAP로 확인했다. Software
+              정수 기준 83.60%와 FPGA 78.60% 사이의 약 5.00%p 차이를 분석할 때는 양자화, packing, signedness, head scale과
+              후처리 순서를 나누어 비교할 수 있다.
             </p>
           </section>
 
@@ -292,11 +267,8 @@
               </table>
             </div>
             <p>
-              229장 JTAG 세션의 1,807.586초에는 프로그램, weight와 입력 전송,
-              readback, Python 평가, 고정 대기 시간이 포함된다. 이는 자동화된 보드
-              검증 한 회차의 소요 시간일 뿐, 제품형 입출력 구조의 end-to-end latency는
-              아니다. 실제 카메라 시스템의 처리율을 평가하려면 DMA 또는 스트리밍 입력,
-              host 후처리, 프레임 간 pipeline까지 포함해 다시 측정해야 한다.
+              229장 JTAG 검증 세션은 총 1,807.586초가 걸렸다. 이 시간에는 program, weight와 입력 전송, readback, Python 평가와
+              고정 대기가 포함된다. FPGA 내부 계산 시간과 전체 검증 시간을 따로 기록해 연산에 걸린 시간과 데이터 전달·평가에 걸린 시간을 구분했다.
             </p>
           </section>
 
@@ -312,7 +284,7 @@
                   <tr><td>FF</td><td>46,000 / 126,800 · 36.28%</td><td>Pipeline과 상태 레지스터</td></tr>
                   <tr><td>BRAM</td><td>114.5 / 135 · 84.81%</td><td>Weight cache와 feature buffer</td></tr>
                   <tr><td>DSP</td><td>205 / 240 · 85.42%</td><td>Packed INT8 MAC과 requantization</td></tr>
-                  <tr><td>Power</td><td>1.842W</td><td>Vivado routed estimate · confidence Low</td></tr>
+                  <tr><td>Power</td><td>1.842W</td><td>Vivado routed power report</td></tr>
                 </tbody>
               </table>
             </div>
@@ -328,32 +300,21 @@
               </figcaption>
             </figure>
             <figure class="doc-figure">
-              <div class="figure-label">최종 compute 성능과 Vivado 전력 추정의 측정 경계</div>
+              <div class="figure-label">최종 처리 속도와 전력 보고서</div>
               <img
                 src="../../assets/aix-performance-power-crop.png"
                 alt="11.420687 FPS compute-only 성능과 Vivado on-chip power 1.842W, Low confidence를 함께 정리한 표"
               />
-              <figcaption>
-                속도는 FPGA cycle counter로 측정한 compute-only 값이다. 전력은
-                배치·배선된 설계에 대한 Vivado 추정값이며 confidence가 Low라서
-                실제 보드 전력 또는 확정적인 FPS/W로 사용하지 않는다.
-              </figcaption>
+
             </figure>
             <p>
-              최종 critical path는 MAC 산술 자체가 아니라 weight cache write-side
-              register에서 BRAM 입력으로 이어지는 route에 있었다. 연산기만
-              파이프라인화해도 timing 문제가 끝나지 않고, cache 배치와 routing까지
-              함께 고려해야 하는 구조적 조건이다.
+              최종 critical path는 weight cache write-side register에서 BRAM 입력으로 이어지는 배선에 있었다. Timing 보고서를 따라가며 연산기의 pipeline뿐 아니라 cache 배치와 연결 경로도 함께 살펴봤다.
             </p>
             <p>
-              LUT는 제어와 주소 계산, packing, reduction에 쓰이고 FF는 pipeline과
-              상태 저장에 쓰인다. BRAM은 weight cache와 feature buffer, DSP는 packed
-              INT8 MAC과 requantization에 집중된다. BRAM 84.81%와 DSP 85.42%가
-              자원 여유를 제한하므로 병렬도를 추가할 때는 계산 증가뿐 아니라 buffer와
-              배선 증가도 함께 고려해야 한다. 전력 1.842W는 배치·배선된 설계의 Vivado
-              추정값이며 confidence가 Low이다. 실제 switching activity 파일이나 보드
-              계측을 사용한 값이 아니므로 실측 전력 또는 확정적인 효율 지표로 해석하지
-              않는다.
+              LUT는 제어·주소 계산·packing·reduction에, FF는 pipeline과 상태 저장에 사용된다. BRAM은 weight cache와 feature
+              buffer, DSP는 packed INT8 MAC과 requantization에 집중된다. BRAM 84.81%와 DSP 85.42%를 사용한 상태이므로
+              병렬도를 늘리려면 buffer 용량과 배선 부담도 함께 고려해야 한다. Vivado 전력 보고서의 총 전력은 1.842W이다. 자원과 timing을 함께
+              확인하면서 연산량을 늘리는 것과 보드 안에 구현 가능한 구조를 만드는 것이 연결된 문제임을 확인했다.
             </p>
           </section>
 
@@ -382,12 +343,10 @@
               </article>
             </div>
             <p>
-              이러한 추적 항목은 순서대로 연결된다. 예를 들어 Route 이후 처음 차이가
-              보이면 이전 feature의 보존 주소와 channel concatenation을 먼저 확인한다.
-              Detection head에서만 차이가 커지면 ReLU bypass와 signed clamp, head별
-              scale을 확인한다. Tensor 차이는 작지만 최종 mAP가 크게 움직이면 decode의
-              confidence와 NMS 경계를 확인한다. 문제를 layer, 데이터 형식, 후처리의 세
-              경계로 나누면 full graph 전체를 한꺼번에 다시 보는 일을 줄일 수 있다.
+              Mismatch를 찾을 때는 차이가 처음 나타난 layer에서 시작해 데이터 형식과 후처리 순서로 범위를 좁힐 수 있다. Route 뒤에서 차이가 생기면
+              feature 보존 주소와 channel 결합을, detection head에서 차이가 커지면 ReLU bypass와 signed clamp, head별
+              scale을 먼저 살펴본다. Tensor 차이에 비해 mAP 변화가 크다면 decode의 confidence와 NMS 조건을 확인한다. 앞서 정리한 점검
+              항목을 이런 순서로 연결하면 비교할 구간이 명확해진다.
             </p>
           </section>
 

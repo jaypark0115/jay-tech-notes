@@ -32,15 +32,10 @@
 
           <h1>2. YOLOv2 Full-Graph FPGA 구조</h1>
           <p class="lead">
-            YOLOv2를 FPGA로 옮길 때 가장 어려운 일은 곱셈기를 만드는 것보다 모든
-            layer가 같은 데이터 규칙을 공유하도록 연결하는 것입니다. 각 convolution의
-            출력 크기와 주소는 달라지고, Pool은 해상도를 줄이며, Route는 앞서 저장한
-            feature map을 다시 읽고, Upsample은 두 번째 detection head를 위해 공간 크기를
-            두 배로 만듭니다. 이 구현은 DDR을 전체 모델의 공용 workspace로 사용하고,
-            22개 descriptor가 layer의 종류·shape·주소를 바꾸며 그래프를 진행합니다.
-            144-lane packed MAC은 계산의 중심이지만, 실제 처리 속도는 weight 공급,
-            feature 재사용, requantization, write-back, scheduler 대기까지 합친 결과로 결정됩니다.
-          </p>
+              이 글에서는 YOLOv2의 각 layer를 하나의 FPGA 실행 경로로 연결한 구조를 설명합니다. DDR을 공용 workspace로 사용하고, 22개
+              descriptor로 연산 종류와 데이터 크기·주소를 지정했습니다. 144-lane packed MAC의 계산뿐 아니라 weight 공급, feature
+              재사용, requantization과 write-back까지 함께 살펴보며 전체 처리 흐름을 정리했습니다.
+            </p>
 
           <section class="case-summary" aria-labelledby="aix2-summary-title">
             <div>
@@ -86,13 +81,9 @@
           <section class="doc-section searchable-section" id="host-fpga" data-search-title="Host FPGA 역할">
             <h2>Host–FPGA 역할</h2>
             <p>
-              host는 bitstream program, 입력 전처리, weight·input DDR preload,
-              시작 명령, 완료 polling을 수행한다. FPGA scheduler는 layer descriptor를
-              따라 22개 단계를 실행하고 두 detection head를 DDR에 기록한다. host는
-              두 출력을 읽어 box decode, class score, NMS를 수행한다. 여기서
-              full graph는 학습이나 최종 NMS까지 모두 FPGA에서 처리한다는 뜻이 아니라,
-              두 detection head를 만드는 신경망 연산 그래프 전체가 FPGA에서 실행된다는
-              뜻이다.
+              Host는 bitstream program, 입력 전처리, weight·input DDR preload, 시작 명령과 완료 polling을 담당한다. FPGA
+              scheduler는 descriptor를 따라 22개 단계를 실행하고 두 detection head를 DDR에 기록한다. Host가 이 출력을 읽어 box
+              decode, class score 계산과 NMS를 수행하면 최종 검출 결과가 나온다.
             </p>
             <figure class="doc-figure">
               <div class="figure-label">Host·DDR·FPGA의 역할 분리</div>
@@ -134,24 +125,18 @@
               </div>
             </div>
             <p>
-              Host와 FPGA의 역할을 나눈 구조는 개발 과정에서 관찰할 수 있는 범위를 넓힌다.
-              Host는 특정 DDR 주소에 입력과 weight를 넣고, 실행 후 원하는 layer나 head를
-              읽어 software reference와 비교할 수 있다. 반면 JTAG-to-AXI는 검증을 위한
-              편리한 통로일 뿐, 실시간 카메라 입력 인터페이스는 아니다. 따라서 보드 검증의
-              JTAG 전체 소요 시간과 FPGA 내부 cycle counter로 계산한 추론 시간은 서로
-              다른 지표로 구분한다.
+              Host에서는 DDR의 지정 주소에 입력과 weight를 넣고, 실행 후 layer 출력이나 head를 읽어 software reference와 비교할 수
+              있다. JTAG-to-AXI를 이런 데이터 전달과 점검에 사용했다. 실행 시간도 host의 전체 검증 시간과 FPGA 내부 cycle counter로 측정한
+              계산 시간으로 나누어 기록했다.
             </p>
           </section>
 
           <section class="doc-section searchable-section" id="frame-walkthrough" data-search-title="한 프레임의 실행 순서">
             <h2>한 프레임이 두 detection head가 되기까지</h2>
             <p>
-              보드 실행은 입력을 DDR에 쓰는 순간부터 시작하지 않는다. Bitstream이
-              program된 뒤 quantized weight 전체와 256×256×3 입력이 정해진 base
-              address에 먼저 적재된다. Host가 control register의 start bit를 올리면
-              scheduler가 0번 descriptor를 읽고 첫 convolution을 시작한다. 이후 각
-              단계가 끝날 때 출력 주소와 완료 상태를 확인하고 다음 descriptor로
-              넘어간다. 이 과정에서 host는 layer마다 개입하지 않는다.
+              실행 준비 단계에서는 bitstream을 program하고, quantized weight와 256×256×3 입력을 정해진 DDR base address에
+              적재한다. Host가 control register의 start bit를 올리면 scheduler가 0번 descriptor를 읽고 첫 convolution을
+              시작한다. 이후 각 단계의 출력 저장과 완료 상태를 확인하며 다음 descriptor로 넘어간다. Layer 사이의 실행 순서는 FPGA 내부에서 관리한다.
             </p>
             <div class="signal-table-wrap">
               <table class="signal-table">
@@ -166,10 +151,8 @@
               </table>
             </div>
             <p>
-              첫 head는 해상도가 낮고 의미적으로 깊은 feature를 사용하고, 두 번째
-              head는 upsample한 feature와 앞쪽의 고해상도 feature를 Route로 결합한다.
-              둘 중 하나만 계산하면 YOLOv2 detector의 전체 경로를 평가할 수 없다.
-              최종 구현이 CONV14 branch와 CONV20을 모두 DDR에 남긴 이유가 여기에 있다.
+              첫 head는 낮은 해상도에서 추출한 깊은 특징을 사용한다. 두 번째 head는 upsample한 feature와 앞쪽의 고해상도 feature를 Route로
+              결합한다. 최종 구현에서는 CONV14와 CONV20 출력을 모두 DDR에 보존해 두 해상도의 검출 결과를 함께 평가했다.
             </p>
           </section>
 
@@ -233,12 +216,10 @@
               <a href="../../code/competitions/aix/fastv2_network_desc_rom.v">fastv2_network_desc_rom.v</a>
             </div>
             <p>
-              Descriptor 0–13은 입력 해상도를 줄이며 특징을 추출하는 backbone이다.
-              14번은 8×8×195 첫 head를 계산하고 15번이 그 결과를 보존한다. 16번은
-              분기에 사용할 feature를 복사하고, 17번의 1×1 convolution과 18번의
-              upsample을 거쳐 19번에서 16×16×384 feature를 만든다. 마지막으로 20번이
-              16×16×195 두 번째 head를 계산하고 21번이 출력을 보존한다. 중간 발표의
-              이 글의 구조와 수치는 최종 RTL에 구현된 22개 descriptor를 기준으로 설명한다.
+              Descriptor 0–13은 입력 해상도를 줄이며 특징을 추출하는 backbone이다. 14번에서 8×8×195 첫 head를 계산하고 15번에서 그 결과를
+              보존한다. 16번에서는 분기에 사용할 feature를 복사한다. 이어 17번의 1×1 convolution, 18번의 upsample, 19번의 Route를
+              거쳐 16×16×384 feature를 만든다. 마지막으로 20번에서 16×16×195 두 번째 head를 계산하고 21번에서 출력을 보존한다. 이렇게 최종
+              RTL의 22개 descriptor가 전체 실행 순서를 구성한다.
             </p>
           </section>
 
@@ -265,11 +246,7 @@
               <article><strong>2×144</strong><span>Accepted cycle의 구조적 scalar products</span></article>
               <article><strong>205 / 240</strong><span>최종 설계 전체 DSP</span></article>
             </div>
-            <p class="evidence-note">
-              2×144는 packed datapath가 만드는 구조적 연산 수이다. descriptor
-              전환, DDR 대기, Pool·Route·Upsample과 write-back까지 포함한
-              지속 처리량은 최종 cycle counter로 평가한다.
-            </p>
+
             <div class="code-links" aria-label="AIX MAC Verilog 파일">
               <a href="../../code/competitions/aix/fastv2_mac_array_packed_pair.v">fastv2_mac_array_packed_pair.v</a>
             </div>
@@ -290,19 +267,15 @@
               </table>
             </div>
             <p>
-              병목 개선은 MAC 사용률만 높이는 문제가 아니다. 입력 window와 weight가
-              준비되기 전에는 MAC을 시작할 수 없고, 출력 FIFO나 AXI write가 막히면 계산도
-              멈춘다. 초반 layer는 feature map이 커서 메모리 이동 비중이 높고, 후반
-              layer는 channel 수가 많아 누산량과 weight 공급 부담이 크다. 구간마다
-              병목 형태가 달라 line reuse, weight prefetch, burst 길이, pipeline 위치를
-              함께 조정했다.
+              데이터 경로를 살펴보면 MAC 앞뒤에도 대기 구간이 있다. 입력 window와 weight가 준비되어야 계산을 시작할 수 있고, 출력 FIFO나 AXI
+              write가 막히면 다음 계산도 대기한다. 초반 layer는 큰 feature map의 메모리 이동 비중이 높고, 후반 layer는 많은 channel의
+              누산과 weight 공급 부담이 크다. 이 차이를 반영해 line reuse, weight prefetch, burst 길이와 pipeline 위치를 함께
+              조정했다.
             </p>
             <p>
-              최종 timing의 critical route는 MAC 곱셈 자체가 아니라 weight cache의
-              write data register에서 BRAM 입력으로 이어지는 배선 경로였다. 이는 RTL의
-              논리 단계가 짧아도 BRAM 위치와 연결 fanout이 timing을 제한할 수 있음을
-              보여준다. 최종 구현은 100MHz에서 WNS +0.111ns를 만족했으며, 두 detection
-              head readback과 229장 detector 검증까지 같은 bitstream으로 수행했다.
+              최종 timing 보고서의 critical route는 weight cache의 write data register에서 BRAM 입력으로 이어지는 배선
+              경로였다. 논리 단계 수뿐 아니라 BRAM의 배치와 fanout도 timing에 영향을 준다는 점을 확인했다. 최종 구현은 100MHz에서 WNS
+              +0.111ns를 만족했고, 같은 bitstream으로 두 detection head readback과 229장 detector 검증을 진행했다.
             </p>
             <div class="code-links" aria-label="AIX 공개 Verilog 파일">
               <a href="../../code/competitions/aix/fastv2_network_desc_rom.v">Descriptor ROM</a>

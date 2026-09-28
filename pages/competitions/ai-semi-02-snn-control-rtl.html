@@ -32,27 +32,20 @@
 
           <h1>2. SNN 제어 회로와 RTL 구성</h1>
           <p class="lead">
-            SNN 회로의 핵심은 뉴런 수보다 시간에 따라 상태가 변한다는 점에 있습니다.
-            입력 spike가 들어오면 가중합이 막전위에 더해지고, 입력이 없더라도 누설이
-            적용되며, 임계값을 넘은 순간에만 1-bit spike가 발생합니다. 이 동작을 RTL로
-            옮기려면 산술식뿐 아니라 막전위 레지스터, time-step counter, 발화 판정과
-            reset 순서까지 정의해야 합니다. 이 글에서는 최종 발표의 99→32→4 실험망과
-            공개 저장소의 4채널 output-layer RTL을 구분한 뒤, 한 번의 clock에서 어떤
-            값을 읽고 다음 상태를 언제 저장하는지 코드와 파형을 통해 설명합니다.
-          </p>
+              이 글에서는 LIF 뉴런의 상태 갱신을 RTL로 표현하고, 입력부터 네 방향 spike 출력까지 연결한 과정을 설명합니다. 99→32→4 실험망의 계층 구조와
+              시간 단계 FSM을 먼저 살펴본 뒤, 공개한 4채널 출력 제어 모듈을 코드와 파형으로 읽어봅니다. 막전위를 언제 읽고 갱신하는지, 발화와 reset이 어떤
+              순서로 일어나는지를 중심으로 정리했습니다.
+            </p>
 
           <section class="case-summary" aria-labelledby="ai2-summary-title">
             <div>
               <h2 id="ai2-summary-title">네트워크와 RTL 모듈</h2>
               <p>
-                최종 발표의 실험 네트워크는 위치 입력 99개, 은닉 뉴런 32개, 방향
-                출력 4개로 이루어진 계층 구조이다. 저장소에 공개한 <code>error_encoder.v</code>,
-                <code>lif_neuron.v</code>, <code>controller_top.v</code>는 이 전체망의
-                독립 빌드가 아니라 signed 위치 오차를 네 방향으로 나누어 LIF spike로
-                내보내는 출력 제어 경로이다. 발표의 실험망은 weight 파일과 100개
-                time step을 포함한 계층 계산을 설명하고, 공개 RTL은 최종 인터페이스와
-                상태 갱신 방식을 코드 수준에서 보여준다.
-              </p>
+              최종 실험 네트워크는 위치 입력 99개, 은닉 뉴런 32개, 방향 출력 4개로 구성했다. 이 계층형 실험망은 weight 파일과 100개 time step을
+              사용해 계산한다. 공개한 <code>error_encoder.v</code>, <code>lif_neuron.v</code>,
+              <code>controller_top.v</code>에서는 signed 위치 오차를 네 방향으로 나누고 LIF spike를 생성하는 출력 제어 경로를 살펴볼
+              수 있다.
+            </p>
             </div>
             <dl class="case-facts">
               <div><dt>뉴런</dt><dd>LIF: 누적 · 누설 · 임계값 · reset</dd></div>
@@ -112,10 +105,8 @@
                 alt="입력 spike, 가중합, 막전위 적분, 막전위 레지스터와 출력 spike로 이어지는 LIF 뉴런 데이터 경로"
               />
               <figcaption>
-                발표자료는 reset-to-zero와 shift 기반 누설을 사용한다. 가중치와
-                임계값은 실험 네트워크의 파라미터이며, 참고 모듈의 기본 파라미터와
-                동일한 값으로 해석하지 않는다.
-              </figcaption>
+              발표자료의 Baby Neuron은 reset-to-zero와 shift 기반 누설을 사용한다. 아래에서는 이 동작을 먼저 살펴보고, 공개 출력 모듈의 subtractive reset과 비교한다.
+            </figcaption>
             </figure>
             <div class="signal-table-wrap">
               <table class="signal-table">
@@ -129,11 +120,7 @@
                 </tbody>
               </table>
             </div>
-            <p class="evidence-note">
-              두 자료는 같은 LIF 개념을 사용하지만 동일한 모듈이나 동일한 파라미터가
-              아니다. 공개 코드의 기본값을 전체 네트워크의 학습·실험 조건으로 대입하지
-              않는 것이 구현 범위를 정확히 읽는 방법이다.
-            </p>
+
             <figure class="doc-figure">
               <div class="figure-label">뉴런 상태와 weight를 확인한 회로 시뮬레이션 파형</div>
               <img
@@ -203,10 +190,7 @@
               </figcaption>
             </figure>
             <p>
-              FSM은 time step별 입력과 상태 갱신의 경계를 제공한다. 병렬 뉴런 수와
-              cycle 수는 별도의 구현·합성 조건으로 해석한다. 100 time step은 생물학적
-              시간 100ms를 의미하는 값이 아니라, 입력 rate와 막전위 반응을 관찰하기
-              위해 정한 디지털 시뮬레이션 창이다.
+              FSM을 읽을 때는 한 time step 안에서 입력 생성과 상태 갱신에 각각 몇 clock이 필요한지 살펴봐야 한다. 이 실험에서 100 time step은 입력 rate와 막전위 반응을 관찰하기 위해 정한 반복 횟수이다.
             </p>
           </section>
 
@@ -242,11 +226,9 @@
           <section class="doc-section searchable-section" id="rtl" data-search-title="Verilog 출력 경로">
             <h2>네 방향 출력 RTL</h2>
             <p>
-              <code>error_encoder</code>는 signed X·Y 값을 부호에 따라 네 개의
-              양수 크기로 변환한다. <code>controller_top</code>은
-              <code>lif_neuron</code> 네 개를 배치해 각 spike를 방향 신호에
-              연결한다. 세 모듈은 전체 99→32→4 실험망이 아니라, 출력 계층의
-              인터페이스와 상태 갱신을 다루는 참고 코드이다.
+              <code>error_encoder</code>는 signed X·Y 값을 부호에 따라 네 방향의 양수 크기로 나눈다.
+              <code>controller_top</code>은 <code>lif_neuron</code> 네 개를 배치하고 각 spike를 방향 신호에 연결한다. 이 세
+              모듈을 따라가면 좌표 오차가 출력 이벤트로 바뀌는 과정을 확인할 수 있다.
             </p>
             <p>
               <code>error_encoder</code>는 중앙 목표가 0이라는 조건을 이용해
@@ -283,8 +265,11 @@
               <table class="signal-table">
                 <thead><tr><th>모듈</th><th>입력</th><th>내부 동작</th><th>출력</th></tr></thead>
                 <tbody>
-                  <tr><td><code>error_encoder</code></td><td>signed <code>x</code>, <code>y</code></td><td>중앙 오차의 부호와 크기를 네 채널로 분리</td><td>X/Y pull·push magnitude</td></tr>
-                  <tr><td><code>lif_neuron</code></td><td><code>X_in</code>, <code>v_abs</code></td><td>leak, 입력 gain, 속도항, threshold, reset</td><td>1-bit spike</td></tr>
+              <tr><td><code>error_encoder</code></td><td>signed <code>x</code>,
+              <code>y</code></td><td>중앙 오차의 부호와 크기를 네 채널로 분리</td><td>X/Y pull·push magnitude</td></tr>
+              <tr><td><code>lif_neuron</code></td><td><code>X_in</code>,
+              <code>v_abs</code></td><td>leak, 입력 gain, 속도항, threshold, reset</td><td>1-bit
+              spike</td></tr>
                   <tr><td><code>controller_top</code></td><td>위치와 축별 속도항</td><td>encoder 1개와 LIF 4개 연결</td><td>4방향 motor event</td></tr>
                 </tbody>
               </table>
@@ -307,67 +292,54 @@
               </table>
             </div>
             <p>
-              공개 RTL의 <code>lif_neuron</code>은 발화했을 때 막전위를 0으로 만드는
-              reset-to-zero가 아니라, 임계값만큼 빼는 subtractive reset을 사용한다.
-              남아 있는 막전위가 다음 clock으로 이어지므로 강한 입력에서는 연속 발화가
-              가능하다. 반면 최종 발표의 계층형 Baby Neuron 설명은 reset-to-zero를
-              중심으로 한다. 두 방식을 같은 구현으로 섞지 않고, 발표 실험망과 공개
-              출력 모듈의 차이로 명시한 이유이다.
+              공개 RTL의 <code>lif_neuron</code>은 발화할 때 막전위에서 임계값을 빼는 subtractive reset을 사용한다. 남은 막전위가 다음
+              clock으로 이어지므로 강한 입력에서는 연속 발화가 가능하다. 발표자료의 계층형 Baby Neuron은 발화 후 막전위를 0으로 초기화한다. 두 reset
+              방식을 비교하면 발화 뒤 남는 상태가 다음 출력에 어떤 영향을 주는지 이해할 수 있다.
             </p>
             <div class="code-links" aria-label="AI 반도체 경진대회 Verilog 파일">
               <a href="../../code/competitions/ai-semi/error_encoder.v">error_encoder.v</a>
               <a href="../../code/competitions/ai-semi/lif_neuron.v">lif_neuron.v</a>
               <a href="../../code/competitions/ai-semi/controller_top.v">controller_top.v</a>
             </div>
-            <p class="evidence-note">
-              저장소에는 출력 경로를 설명하는 세 모듈만 포함한다. 전체 네트워크의
-              가중치 파일, 테스트 데이터와 Vivado 프로젝트는 포함하지 않는다.
-            </p>
+
           </section>
 
-          <section class="doc-section searchable-section" id="design-takeaway" data-search-title="인터페이스와 검증 경계">
-            <h2>인터페이스와 검증 경계</h2>
+          <section class="doc-section searchable-section" id="design-takeaway" data-search-title="RTL을 읽으며 확인한 핵심">
+            <h2>RTL을 읽으며 확인한 핵심</h2>
             <div class="case-grid">
               <article class="case-card">
                 <span>상태와 인터페이스</span>
                 <h3>뉴런 출력과 모터 구동 신호</h3>
                 <p>
-                  출력 spike는 제어 의도를 나타내는 이벤트이다. 실제 모터의
-                  PWM, pulse width, 기구부 응답은 별도 변환 계층의 범위이다.
-                </p>
+              출력 spike는 방향과 반응량을 전달하는 이벤트이다. 이후 모터를 연결할 때는 spike count를 구동 시간이나 PWM으로 대응시키는 규칙이 필요하다.
+            </p>
               </article>
               <article class="case-card">
                 <span>검증 가능성</span>
                 <h3>time step과 상태 갱신 순서</h3>
                 <p>
-                  입력 생성, 막전위 갱신과 출력 집계의 순서를 FSM으로 나누면
-                  파형에서 최초 오차가 발생한 지점의 추적 기준이 된다.
-                </p>
+              입력 생성, 막전위 갱신, 출력 집계 순서를 FSM으로 나누었다. 파형에서도 이 순서대로 신호를 따라가면 값이 처음 어긋난 구간을 찾기 쉽다.
+            </p>
               </article>
               <article class="case-card">
-                <span>입력 경계</span>
+                <span>입력 신호</span>
                 <h3>좌표와 속도항</h3>
                 <p>
-                  RTL은 위치와 축별 속도항이 이미 디지털 값으로 제공된다고 가정한다.
-                  센서 취득과 좌표 추정은 모듈 바깥의 기능이다.
-                </p>
+              RTL 입력에는 위치와 축별 속도항이 디지털 값으로 들어온다. 위치 오차의 부호는 방향을 나누고, 축별 속도항은 해당 LIF 채널에 연결된다.
+            </p>
               </article>
               <article class="case-card">
-                <span>파라미터 경계</span>
+                <span>발화 조건</span>
                 <h3>leak·threshold·gain</h3>
                 <p>
-                  파라미터는 발화 빈도와 안정성에 직접 영향을 준다. 합성 가능한 값과
-                  물리 제어에 적합한 값은 별도의 tuning과 폐루프 검증이 필요하다.
-                </p>
+              leak, threshold, gain은 막전위가 누적되는 속도와 발화 빈도에 영향을 준다. 입력 자극이 같아도 이 값에 따라 spike count가 달라지므로 실험 조건과 함께 기록했다.
+            </p>
               </article>
             </div>
             <p>
-              이 코드에서 직접 확인할 수 있는 것은 signed 위치 오차가 네 방향으로
-              분리되고, 각 방향 LIF가 clock에 맞춰 상태를 갱신하며, spike가 1-bit
-              출력으로 전달되는 과정이다. 실제 공의 좌표를 다시 측정해 오차를 갱신하는
-              sensor feedback loop, 모터 driver, 보드 기울기와 공의 운동은 포함하지
-              않는다. 따라서 이 구현은 SNN 기반 제어 파이프라인의 output layer로
-              정의하는 것이 정확하다.
+              출력 경로를 살펴보며 signed 오차의 방향 분리, LIF 상태 갱신, 1-bit spike 전달을 하나의 흐름으로 정리했다. 특히 수식의 계산 순서와
+              레지스터가 갱신되는 clock을 함께 읽어야 파형을 이해할 수 있었다. 다음 글에서는 입력 방식과 뉴런 설정을 바꿨을 때 방향별 출력이 어떻게 달라졌는지
+              살펴본다.
             </p>
           </section>
 
