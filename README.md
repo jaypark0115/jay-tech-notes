@@ -91,6 +91,8 @@ FPGA 실시간 스테레오 정렬·보정과 이벤트 카메라·LiDAR·RGB �
    - 초기 3D 모델과 실제 FX10 PCB로 조립 조건을 검토하고, 제작 담당자들과 의견을 주고받으며 Delta10 카메라의 금속 케이스와 최종 조립까지 참여한 기록입니다.
 5. [ov9281-camera-module-3d-model](https://github.com/jaypark0115/ov9281-camera-module-3d-model)
    - 케이스와 케이지 장착부 설계를 위해 실제 OV9281 모듈을 측정해 만든 3D 기준 모델과 렌더·실물 비교 자료입니다.
+6. [celestron-camera-mount-adapters](https://github.com/jaypark0115/celestron-camera-mount-adapters)
+   - 원거리 데이터셋 촬영을 위해 Celestron 망원경과 M12·C-mount 카메라를 연결하도록 직접 제작한 3D 프린팅 어댑터 4종입니다.
 
 ### 8. SoC/FPGA 학습 노트
 
