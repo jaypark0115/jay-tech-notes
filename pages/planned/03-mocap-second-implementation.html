@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="4카메라 IR 모션캡처를 Crazyflie에 연결해 3차원 위치 추정, BLE 외부 위치 전달, 호버·착륙과 직각 경로 추종 비행까지 구현한 2차 개발 기록." />
+    <meta name="description" content="4카메라 IR 모션캡처를 Crazyflie에 연결해 3차원 위치 추정, BLE 외부 위치 전달, 호버와 경로 추종 비행까지 구현한 2차 개발 기록." />
     <meta property="og:title" content="4카메라 모션캡처 시스템 2차 구현 — Jay Tech Notes" />
-    <meta property="og:description" content="체커보드 추적 시스템을 실제 드론의 IR 마커 추적과 직각 경로 추종 비행으로 확장한 과정." />
+    <meta property="og:description" content="체커보드 추적 시스템을 실제 드론의 IR 마커 추적과 경로 추종 비행으로 확장한 과정." />
     <meta property="og:image" content="https://jaypark0115.github.io/jay-tech-notes/assets/drone-mocap-second-implementation.png" />
     <title>4카메라 모션캡처 시스템 2차 구현 — Jay Tech Notes</title>
     <link rel="stylesheet" href="../../styles.css?v=20260930-path-flight" />
@@ -31,29 +31,29 @@
 
           <h1>4카메라 모션캡처 시스템 2차 구현</h1>
           <p class="lead">
-            1차 구현에서는 Jetson과 동기화 카메라 4대를 연결하고 체커보드의 3차원 이동을
-            추적했습니다. 이번에는 직접 선정·조립한 Crazyflie에 IR Active Marker를 장착하고,
-            네 카메라가 계산한 위치를 BLE로 다시 기체에 전달해 호버와 착륙에 이어, 미리 설정한
-            직각 형태의 경로를 따라 비행하도록 구성했습니다. 다중 카메라 추적에서 3차원 위치
-            계산, 외부 위치 전달, 드론 경로 비행까지 전체 시스템을 실제 비행으로 연결한 과정입니다.
+            1차 구현에서 구축한 4카메라 모션캡처 시스템을 실제 드론 제어로 확장했습니다.
+            직접 선정·조립한 Crazyflie에 IR 마커를 장착하고, 카메라로 추정한 3차원 위치를
+            기체에 전달해 호버와 경로 추종 비행으로 연결했습니다. 이 글에서는 움직임을
+            추적하는 시스템이 실제 드론을 제어하기까지의 구현 과정과, 영상 처리·통신·제어를
+            연결한 시스템 구성을 정리합니다.
           </p>
 
           <figure class="doc-figure mocap-demo-figure mocap-v2-video mocap-v2-path-video">
             <div class="mocap-video">
-              <iframe src="https://www.youtube.com/embed/ytdF98-wu0A" title="4카메라 IR 모션캡처 기반 드론 직각 경로 추종 비행" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+              <iframe src="https://www.youtube.com/embed/ytdF98-wu0A" title="4카메라 IR 모션캡처 기반 드론 경로 추종 비행" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
             </div>
             <figcaption>
-              네 카메라의 위치 피드백으로 미리 설정한 직각 경로를 따라 비행하는 영상입니다.
+              4카메라 IR 모션캡처의 위치 피드백을 이용한 드론 경로 추종 실험의 한 예입니다.
               <a href="https://www.youtube.com/shorts/ytdF98-wu0A" target="_blank" rel="noopener noreferrer">YouTube에서 보기 ↗</a>
             </figcaption>
           </figure>
 
           <figure class="doc-figure mocap-demo-figure mocap-v2-video">
             <div class="mocap-video">
-              <iframe src="https://www.youtube.com/embed/WfmFeZM3hkg" title="4카메라 IR LED 모션캡처 기반 Crazyflie 호버와 착륙" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+              <iframe src="https://www.youtube.com/embed/WfmFeZM3hkg" title="4카메라 IR LED 모션캡처 기반 Crazyflie 호버" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
             </div>
             <figcaption>
-              네 카메라의 위치 피드백을 이용해 드론이 상승한 뒤 중심을 잡고 착륙하는 동작입니다.
+              네 카메라의 위치 피드백으로 드론이 중심을 유지하는 호버 실험 영상입니다.
               <a href="https://www.youtube.com/watch?v=WfmFeZM3hkg" target="_blank" rel="noopener noreferrer">YouTube에서 보기 ↗</a>
             </figcaption>
           </figure>
@@ -259,10 +259,10 @@
               이용해 여러 목표점을 잇는 경로 추종 비행으로 확장했습니다.
             </p>
             <p>
-              이번 경로 비행에서는 미리 설정한 직각 형태의 경로 테두리를 따라 목표점을 순서대로
-              이동시켰습니다. 외부 카메라 시스템이 드론의 3차원 위치를 실시간으로 추정하고,
+              경로 추종 실험에서는 경로를 구성하는 목표점을 순서대로 이동시켰습니다.
+              외부 카메라 시스템이 드론의 3차원 위치를 실시간으로 추정하고,
               해당 위치 정보를 기체에 전달해 각 구간의 목표를 따라가도록 구성했습니다. 도입부의
-              영상은 이 추적·위치 계산·전달·경로 비행의 전체 흐름이 실제 기체 동작으로 이어진 결과입니다.
+              영상은 이 추적·위치 계산·전달·경로 비행의 전체 흐름이 실제 기체 동작으로 이어진 예입니다.
               경로 추종 정확도와 반복성은 목표 궤적과 실제 측정 궤적을 비교해 정량적으로 평가할 예정입니다.
             </p>
           </section>
