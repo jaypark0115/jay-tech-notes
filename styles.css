@@ -5331,6 +5331,14 @@ body.competition-page .page-footer a {
   margin-inline: auto;
 }
 
+.mocap-second-page .mocap-v2-path-video {
+  width: min(100%, 380px);
+}
+
+.mocap-second-page .mocap-v2-path-video .mocap-video {
+  aspect-ratio: 9 / 16;
+}
+
 .mocap-second-page .mocap-v2-compact-photo {
   width: min(100%, 680px);
   margin-inline: auto;

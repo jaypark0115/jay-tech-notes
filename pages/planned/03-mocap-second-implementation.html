@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="4카메라 IR LED 모션캡처를 직접 조립한 Crazyflie에 연결해 위치 추정, BLE 외부 위치 전달, 폐루프 호버와 착륙까지 구현한 2차 개발 기록." />
+    <meta name="description" content="4카메라 IR 모션캡처를 Crazyflie에 연결해 3차원 위치 추정, BLE 외부 위치 전달, 호버·착륙과 직각 경로 추종 비행까지 구현한 2차 개발 기록." />
     <meta property="og:title" content="4카메라 모션캡처 시스템 2차 구현 — Jay Tech Notes" />
-    <meta property="og:description" content="체커보드 추적 시스템을 실제 드론의 IR 마커 추적과 폐루프 호버 제어로 확장한 과정." />
+    <meta property="og:description" content="체커보드 추적 시스템을 실제 드론의 IR 마커 추적과 직각 경로 추종 비행으로 확장한 과정." />
     <meta property="og:image" content="https://jaypark0115.github.io/jay-tech-notes/assets/drone-mocap-second-implementation.png" />
     <title>4카메라 모션캡처 시스템 2차 구현 — Jay Tech Notes</title>
-    <link rel="stylesheet" href="../../styles.css?v=20260926-mocap-v2c" />
+    <link rel="stylesheet" href="../../styles.css?v=20260930-path-flight" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="planned-detail-page drone-mocap-page mocap-second-page">
@@ -33,10 +33,20 @@
           <p class="lead">
             1차 구현에서는 Jetson과 동기화 카메라 4대를 연결하고 체커보드의 3차원 이동을
             추적했습니다. 이번에는 직접 선정·조립한 Crazyflie에 IR Active Marker를 장착하고,
-            네 카메라가 계산한 위치를 BLE로 다시 기체에 전달해 상승·중심 유지·착륙까지 하나의
-            폐루프로 연결했습니다. 화면에서 점을 찾는 단계가 실제 드론을 제어하는 시스템으로
-            확장된 과정입니다.
+            네 카메라가 계산한 위치를 BLE로 다시 기체에 전달해 호버와 착륙에 이어, 미리 설정한
+            직각 형태의 경로를 따라 비행하도록 구성했습니다. 다중 카메라 추적에서 3차원 위치
+            계산, 외부 위치 전달, 드론 경로 비행까지 전체 시스템을 실제 비행으로 연결한 과정입니다.
           </p>
+
+          <figure class="doc-figure mocap-demo-figure mocap-v2-video mocap-v2-path-video">
+            <div class="mocap-video">
+              <iframe src="https://www.youtube.com/embed/ytdF98-wu0A" title="4카메라 IR 모션캡처 기반 드론 직각 경로 추종 비행" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+            <figcaption>
+              네 카메라의 위치 피드백으로 미리 설정한 직각 경로를 따라 비행하는 영상입니다.
+              <a href="https://www.youtube.com/shorts/ytdF98-wu0A" target="_blank" rel="noopener noreferrer">YouTube에서 보기 ↗</a>
+            </figcaption>
+          </figure>
 
           <figure class="doc-figure mocap-demo-figure mocap-v2-video">
             <div class="mocap-video">
@@ -245,14 +255,15 @@
             <p>
               이번 구현에서는 이 과정이 실제로 연결됐는지 확인할 수 있도록 목표 위치, 실제 MoCap
               위치, 기체의 추정 위치와 자세, 비행 단계를 한 실험 기록에 함께 남겼습니다. 첫 검증은
-              상승 후 중심을 유지하고 제어된 하강으로 착륙하는 동작이었으며, 앞으로 여러 목표점을
-              잇는 경로 제어로 확장할 때도 같은 제어 흐름을 사용합니다.
+              상승 후 중심을 유지하고 제어된 하강으로 착륙하는 동작이었으며, 이후 같은 위치 피드백을
+              이용해 여러 목표점을 잇는 경로 추종 비행으로 확장했습니다.
             </p>
             <p>
-              현재 프로그램에는 고정 중심 유지뿐 아니라 목표점을 이동하는 왕복 실험 경로도 분리되어
-              있습니다. 다음 단계에서는 높이와 이동 시간을 단계적으로 넓히고, 직선·왕복·원과
-              특정 모양 경로의 목표값과 실제 경로를 같은 좌표계에서 비교할 예정입니다. 이를 통해
-              “떠 있었는가”보다 “명령한 형상을 얼마나 정확하고 반복 가능하게 따라갔는가”를 평가합니다.
+              이번 경로 비행에서는 미리 설정한 직각 형태의 경로 테두리를 따라 목표점을 순서대로
+              이동시켰습니다. 외부 카메라 시스템이 드론의 3차원 위치를 실시간으로 추정하고,
+              해당 위치 정보를 기체에 전달해 각 구간의 목표를 따라가도록 구성했습니다. 도입부의
+              영상은 이 추적·위치 계산·전달·경로 비행의 전체 흐름이 실제 기체 동작으로 이어진 결과입니다.
+              경로 추종 정확도와 반복성은 목표 궤적과 실제 측정 궤적을 비교해 정량적으로 평가할 예정입니다.
             </p>
           </section>
 
@@ -332,24 +343,23 @@
           </section>
 
           <section class="doc-section searchable-section" id="next-step" data-search-title="정확도 측정과 논문 마무리">
-            <h3>8. 고정형 측정 환경에서 경로 제어 검증으로</h3>
+            <h3>8. 더 긴 경로 비행과 최종 설치 환경의 정확도 평가</h3>
             <p>
-              현재까지 카메라 입력, 보정·원점, Active Marker 위치 추정, BLE 외부 위치 전달과
-              실제 드론 제어를 하나의 실험 흐름으로 연결했습니다. 케이지와 카메라 고정 구조가
-              완성되면 네 카메라의 위치가 반복 실험 중에도 유지되므로, 같은 조건에서 다시 보정하고
-              기준 위치에 대한 오차와 반복성을 정량적으로 비교할 수 있습니다.
+              현재는 다중 카메라 추적, 3차원 위치 계산, 외부 위치 전달과 드론 경로 비행까지
+              전체 시스템을 실제 비행으로 연결했습니다. 다음 단계에서는 경로 생성과 구간 전환
+              방식을 다듬어 경로 추종 정확도와 비행 안정성을 높이고, 더 긴 경로 비행을 진행할
+              예정입니다. 전체 소프트웨어 구조와 구현 내용도 정리해 코드를 공개할 계획입니다.
             </p>
             <p>
-              이후에는 정지 위치뿐 아니라 직선·왕복·원·지정 모양 경로의 목표와 실제 비행 궤적을
-              비교합니다. 고정된 카메라 환경에서 얻은 오차, 응답 시간과 재현성 자료를 바탕으로
-              시스템의 성능을 정리하고 논문 작성까지 마무리할 계획입니다. 즉 다음 단계는 기능을
-              더 붙이는 것보다, 지금 완성한 폐루프가 여러 경로에서도 얼마나 정확하게 반복되는지를
-              측정 가능한 결과로 만드는 과정입니다.
+              완성된 비행 케이지에는 카메라 시스템을 정식 설치한 뒤 전체 시스템을 다시 보정하고,
+              기준 위치에 대한 측정 정확도와 반복성을 평가합니다. 최종 설치 환경에서 보다 긴
+              경로 추종 실험을 진행하며 목표와 실제 궤적, 응답 시간과 재현성을 비교하고,
+              그 결과를 시스템 성능 평가와 논문으로 정리할 예정입니다.
             </p>
             <div class="mocap-v2-next-grid" aria-label="다음 연구 개발 단계">
-              <article><span>01</span><strong>고정·재보정</strong><p>케이지에 네 카메라를 고정하고 기준 좌표를 다시 설정합니다.</p></article>
-              <article><span>02</span><strong>정확도·반복성 측정</strong><p>기준 위치와 반복 경로에서 오차와 재현성을 수치화합니다.</p></article>
-              <article><span>03</span><strong>경로 제어·논문</strong><p>지정 형상 비행의 목표·실제 궤적을 비교해 결과를 정리합니다.</p></article>
+              <article><span>01</span><strong>경로 추종 개선</strong><p>경로 생성과 구간 전환을 다듬고 더 긴 비행을 진행합니다.</p></article>
+              <article><span>02</span><strong>구현 정리·코드 공개</strong><p>전체 소프트웨어 구조와 구현 내용을 정리해 공개합니다.</p></article>
+              <article><span>03</span><strong>최종 설치·정량 평가</strong><p>케이지 설치·재보정 후 위치 정확도와 긴 경로 추종 성능을 평가합니다.</p></article>
             </div>
           </section>
 
