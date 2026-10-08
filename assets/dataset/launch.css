@@ -1,3 +1,49 @@
+/* Show the camera panels without the captured video's title and timestamp bars. */
+#event-camera-dataset .launch-preview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+}
+
+.launch-preview-panel {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Center each camera view on the rocket and fill the existing 4:3 card. */
+.launch-preview-panel img {
+  position: absolute;
+  top: -25.454545%;
+  left: -50.227273%;
+  width: 396.818182%;
+  max-width: none;
+  height: auto;
+}
+
+.launch-preview-cis img {
+  left: -248.863636%;
+}
+
+.launch-frame-crop {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 873 / 330;
+  overflow: hidden;
+}
+
+.launch-frame-crop > img,
+.launch-page .launch-wide-photo .launch-frame-crop > img {
+  position: absolute;
+  top: -25.454545%;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: none;
+}
+
 /* Field photographs and video players for the Nuri launch article. */
 .launch-page .launch-video-figure,
 .launch-page .launch-wide-photo {
