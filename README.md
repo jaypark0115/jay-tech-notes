@@ -63,15 +63,15 @@ NRV DVS 캘리브레이션 구현에 이어, 보정 파라미터를 영상에 �
 
 ### 5. 이벤트 카메라 데이터셋 (진행중)
 
-장시간 녹화 환경 개선을 시작으로 망원경 촬영 준비, 발사체 DVS·CIS 촬영, 이벤트·LiDAR·RGB 융합 데이터셋으로 이어지는 과정과 배운 내용을 정리합니다.
+장시간 녹화 환경 개선을 시작으로 망원경 촬영 준비, 누리호 DVS·CIS 촬영, 이벤트·LiDAR·RGB 융합 데이터셋으로 이어지는 과정과 배운 내용을 정리합니다.
 
 1. [DVS 장시간 녹화 개선](https://jaypark0115.github.io/jay-tech-notes/pages/dataset/01-long-duration-dvs-recording.html)
    - 직접 녹화 실험을 하며 저장 속도·용량·프로그램 문제를 차례로 확인하고, 촬영 프로그램 개선과 장비 요청을 거쳐 20여 분 고속 녹화 환경을 마련한 과정입니다. 묶음 쓰기와 지속 처리량, 큐 상한을 검토하고 선임들과 수정 방향을 공유하며 배운 내용도 담았습니다.
 
 2. [망원경 연동과 원격 촬영](https://jaypark0115.github.io/jay-tech-notes/pages/dataset/02-telescope-remote-capture.html)
    - 촬영 조건 검토와 구매·조립부터 어댑터 설계·출력, PC 키보드 원격 조작까지 직접 준비한 과정을 정리했습니다.
-3. [발사체 DVS·CIS 촬영](https://jaypark0115.github.io/jay-tech-notes/pages/dataset/03-launch-dvs-cis-capture.html)
-   - 촬영 장소와 숙소를 사전에 선정하고, 대표님·선임연구원과 함께 낭도에서 전날 현장 데모와 누리호 5차 발사 촬영을 진행했습니다. 미리 준비한 펑션 제너레이터·동축 케이블·외부 트리거 구성을 실제 촬영 연구에 사용하고, 데모 후 펜션에서는 전압과 프로그램을 미세 조정했습니다. 두 망원경의 시야 운용과 빔스플리터 촬영, 픽셀 크기에 맞춘 DVS 960×720·CIS 1920×1440 ROI 설정, 직접 제작한 4K·60 FPS 영상과 다음 복합 주행 장면 데이터셋으로 이어지는 경험을 설명합니다.
+3. [누리호 DVS·CIS 촬영](https://jaypark0115.github.io/jay-tech-notes/pages/dataset/03-launch-dvs-cis-capture.html)
+   - 누리호 5차 발사를 DVS 2000 FPS·CIS 100 FPS로 촬영했습니다. 현장 촬영 과정과 직접 제작한 4K·60 FPS 비교 영상을 담았습니다.
 4. 이벤트 카메라·LiDAR·RGB 융합 데이터셋
    - 발사체 DVS·CIS 현장 촬영에서 얻은 경험을 바탕으로, 팀원으로 참여 중인 주행·동적 장면의 이벤트·LiDAR 거리·RGB 동기화 기록으로 확장할 계획입니다. 이 데이터셋은 스테레오 Depth와 제로샷 위치 추정 기능 개발에 활용할 계획입니다.
 
