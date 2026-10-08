@@ -1,0 +1,97 @@
+/* Field photographs and video players for the Nuri launch article. */
+.launch-page .launch-video-figure,
+.launch-page .launch-wide-photo {
+  width: min(100%, 960px);
+  margin: 1.6rem auto 2.4rem;
+}
+
+.launch-page .launch-video {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #111827;
+}
+
+.launch-page .launch-video iframe {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.launch-page .launch-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  width: min(100%, 960px);
+  margin-inline: auto;
+  align-items: start;
+}
+
+.launch-page .launch-photo-grid .doc-figure {
+  min-width: 0;
+  margin: 1.5rem 0;
+}
+
+.launch-page .launch-photo-grid img {
+  width: 100%;
+  height: 320px;
+  object-fit: contain;
+  background: #f8fafc;
+}
+
+.launch-page .launch-location-grid img {
+  height: 460px;
+}
+
+.launch-page .launch-wide-photo img {
+  width: 100%;
+  height: auto;
+  max-height: 620px;
+  object-fit: contain;
+}
+
+.launch-page .launch-portrait-photo {
+  width: min(100%, 560px);
+  margin-inline: auto;
+}
+
+.launch-page .launch-portrait-photo img {
+  max-height: 620px;
+  width: 100%;
+  object-fit: contain;
+}
+
+.launch-page .launch-location-note {
+  padding: 18px 22px;
+  border: 1px solid #dfe6f0;
+  border-left: 4px solid var(--nrv-red);
+  background: #f8fafc;
+  overflow-wrap: anywhere;
+}
+
+.launch-page .launch-location-note p {
+  margin: 0 0 8px;
+}
+
+.launch-page .launch-location-note p:last-child {
+  margin-bottom: 0;
+}
+
+.launch-page .launch-location-source {
+  font-size: 0.9rem;
+}
+
+@media (max-width: 680px) {
+  .launch-page .launch-photo-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .launch-page .launch-photo-grid img {
+    height: auto;
+    max-height: 480px;
+  }
+}
