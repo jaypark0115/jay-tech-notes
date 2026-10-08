@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="누리호 5차 발사 DVS·CIS 촬영 기록. 사전 장소·숙소 선정, 전날 현장 데모, 외부 트리거 테스트와 두 망원경 운용, 빔스플리터를 이용한 센서 비교와 4K 60 FPS 영상 제작까지." />
+    <meta name="description" content="누리호 5차 발사 DVS·CIS 촬영 기록. 사전 준비한 외부 트리거의 현장 적용, 전날 데모와 전압·프로그램 미세 조정, 빔스플리터와 센서 ROI 설정, 두 망원경 촬영과 4K 60 FPS 영상 제작까지." />
     <title>발사체 DVS·CIS 촬영 — Jay Tech Notes</title>
     <link rel="stylesheet" href="../../styles.css" />
     <link rel="stylesheet" href="../../assets/dataset/launch.css?v=20261008-2" />
@@ -31,8 +31,9 @@
           <p class="lead">
             누리호 5차 발사를 DVS 이벤트 카메라와 CIS 카메라로 촬영하기 위해 대표님, 선임연구원 한 분,
             그리고 저까지 총 세 명이 여수 낭도로 갔습니다. 촬영 장소와 숙소는 출발 전에 직접 선정했고,
-            발사 전날에는 현장에서 데모를 진행했습니다. 펑션 제너레이터와 동축 케이블로 외부 트리거를 시험하고,
-            미리 계산한 시야에 맞춰 두 망원경을 운용했습니다. 빔스플리터로 같은 장면을 두 센서에 담은 촬영 결과와
+            발사 전날에는 현장에서 데모를 진행하고, 펜션에서는 전압과 프로그램을 미세 조정했습니다.
+            사전에 준비한 펑션 제너레이터와 동축 케이블, 외부 트리거 구성을 실제 촬영 연구에 사용하고,
+            미리 계산한 시야에 맞춰 두 망원경을 운용했습니다. 빔스플리터와 센서 ROI 설정으로 같은 장면을 두 센서에 담은 촬영 결과와
             직접 제작한 4K·60 FPS 영상을 함께 정리합니다.
           </p>
 
@@ -68,6 +69,11 @@
               <a href="02-telescope-remote-capture.html">망원경 연동과 원격 촬영</a>을 준비하며 구매하고 조립한 두 망원경,
               직접 설계하고 출력한 카메라 어댑터를 이번 촬영에 사용했다.
               PC 화면을 보며 키보드로 망원경 방향을 움직이는 기능도 미리 준비해 두었다.
+            </p>
+            <p>
+              펑션 제너레이터와 동축 케이블을 이용한 외부 트리거 구성도 출장 전에 준비했다.
+              EXTTRG 관련 설정과 신호 연결 방법을 미리 확인해 두었고,
+              현장에서는 이 구성을 망원경과 카메라, 저장 프로그램에 연결해 실제 발사체 촬영 연구에 사용했다.
             </p>
             <p>
               사무실에서 조립할 때는 각 부품과 프로그램에 집중했다면, 출장을 준비할 때는 장비 전체를 한꺼번에 생각해야 했다.
@@ -148,33 +154,33 @@
             </p>
           </section>
 
-          <section class="doc-section searchable-section" id="lodging-test" data-search-title="펜션 숙소 펑션 제너레이터 동축 케이블 coaxial cable EXTTRG 외부 트리거 설정 테스트">
-            <h3>5. 펑션 제너레이터와 외부 트리거 테스트</h3>
+          <section class="doc-section searchable-section" id="lodging-test" data-search-title="사전 준비 펑션 제너레이터 동축 케이블 coaxial cable EXTTRG 외부 트리거 현장 연구 적용 펜션 전압 프로그램 미세 조정">
+            <h3>5. 외부 트리거의 현장 적용과 미세 조정</h3>
             <p>
-              전날 현장 데모에서 확인한 문제는 사전에 예약한 펜션에서도 이어서 점검했다.
-              노트북과 펑션 제너레이터를 꺼내 연결하고, 외부 트리거인 EXTTRG 설정과 신호 연결 방법을 찾아보며 시험했다.
-              펑션 제너레이터에서 만든 신호는 동축 케이블(coaxial cable)로 연결했다.
-              카메라에 영상이 들어오는 것에 더해, 외부에서 넣은 신호에 맞춰 촬영 구성이 동작하는지도 확인해야 했다.
+              사전에 준비해 둔 외부 트리거 구성을 현장에 가져가 실제 촬영에 적용했다.
+              펑션 제너레이터에서 만든 신호를 동축 케이블(coaxial cable)로 카메라 입력부에 전달하고,
+              준비한 EXTTRG 설정을 사용했다. 카메라와 광학계, 트리거 장비, 저장 프로그램을 함께 운용하며
+              누리호를 촬영하는 연구에 이 구성을 활용했다.
             </p>
-            <figure class="doc-figure launch-portrait-photo">
-              <a href="../../assets/dataset/nuriho/3.jpg" target="_blank" rel="noopener noreferrer"><img src="../../assets/dataset/nuriho/3.jpg" alt="펜션 실내에 펼친 노트북과 펑션 제너레이터 테스트 장비" loading="lazy" /></a>
-              <figcaption>전날 데모 후 펜션에서 이어 간 테스트. 펑션 제너레이터와 노트북을 연결해 외부 트리거 설정을 점검했다.</figcaption>
-            </figure>
             <p>
               외부 트리거는 카메라가 외부에서 받은 전기 신호를 기준으로 동작하게 하는 기능이다.
               이때 펑션 제너레이터는 시험 신호를 만들고, 동축 케이블은 그 신호를 입력부까지 전달한다.
-              영상 데이터를 PC로 받는 연결과 트리거 신호를 넣는 연결의 역할을 구분하며 장비를 구성했다.
+              영상 데이터를 PC로 받는 연결과 트리거 신호를 넣는 연결은 각각의 역할에 맞춰 사전에 구성해 두었다.
             </p>
             <p>
-              설정을 찾아보면서 Trigger source는 사용할 입력을, Trigger edge는 신호의 어느 변화를 기준으로 삼을지를,
-              Trigger mode는 트리거에 대한 동작 방식을 정하는 항목이라는 점을 확인했다.
-              펑션 제너레이터의 출력 신호와 카메라 입력 설정을 함께 살펴야 했다.
-              케이블을 연결한 뒤 설정을 적용하고 실제 입력에 반응하는지 확인하면서 문제를 좁혀 갔다.
+              준비 단계에서 확인한 Trigger source는 사용할 입력을, Trigger edge는 신호의 어느 변화를 기준으로 삼을지를,
+              Trigger mode는 트리거에 대한 동작 방식을 정한다.
+              현장 데모에서는 이 설정과 펑션 제너레이터의 신호를 실제 장비에 적용해 카메라 입력과 프로그램 동작을 함께 확인했다.
             </p>
             <p>
-              다음 날 발사 촬영에 사용할 장비였기 때문에, 전날 데모와 숙소 테스트에서 연결과 설정을 미리 점검한 것이 중요했다.
-              이번에는 광학계와 저장 프로그램뿐 아니라 외부 신호를 넣는 방법까지 찾아 익히며 촬영을 준비했다.
+              데모를 마치고 펜션으로 돌아와서는 전압 설정과 촬영 프로그램을 미세 조정했다.
+              현장에서 확인한 동작을 바탕으로 필요한 부분을 조정하고 다시 시험하며 다음 날 촬영을 준비했다.
+              미리 만들어 둔 구성을 실제 촬영 장소에서 운용하고, 그 결과에 맞춰 세부 설정을 조정하는 과정이었다.
             </p>
+            <figure class="doc-figure launch-portrait-photo">
+              <a href="../../assets/dataset/nuriho/3.jpg" target="_blank" rel="noopener noreferrer"><img src="../../assets/dataset/nuriho/3.jpg" alt="전날 현장 데모 후 펜션에서 전압과 촬영 프로그램을 미세 조정하는 데 사용한 노트북과 펑션 제너레이터" loading="lazy" /></a>
+              <figcaption>전날 현장 데모 후 펜션에서 전압과 촬영 프로그램을 미세 조정했다.</figcaption>
+            </figure>
           </section>
 
           <section class="doc-section searchable-section" id="field-assembly" data-search-title="망원경 설치 삼각대 C11 NexStar 4SE 어댑터 카메라 직접 연결">
@@ -212,13 +218,21 @@
             </p>
           </section>
 
-          <section class="doc-section searchable-section" id="final-setup" data-search-title="누리호 전체 촬영 최종 관찰 장비 빔스플리터 NRV DVS CIS 센서 화염 비교">
+          <section class="doc-section searchable-section" id="final-setup" data-search-title="누리호 전체 촬영 빔스플리터 NRV DVS CIS 센서 ROI 960 720 1920 1440 픽셀 크기 화염 비교">
             <h3>7. 같은 장면을 두 센서로 기록하다</h3>
             <p>
               최종 구성에는 두 망원경, 카메라, 노트북과 펑션 제너레이터가 함께 들어갔다.
               광학계의 방향과 초점을 맞추고, 카메라 영상과 트리거 연결을 점검한 뒤 발사 장면을 기록했다.
               빔스플리터를 이용한 DVS·CIS 촬영에서는 같은 관측 장면의 빛을 두 센서로 나누어 받았다.
               광학계, 신호 설정, 데이터 저장까지 준비했던 요소들이 실제 촬영에 함께 쓰였다.
+            </p>
+            <h4>픽셀 크기에 맞춰 직접 조정한 센서 ROI</h4>
+            <p>
+              DVS는 960×720 해상도로 촬영했다. CIS의 픽셀 간격은 회사의 DVS 픽셀 간격보다 약 절반 정도로 작아서,
+              같은 크기의 센서 영역을 사용하려면 가로와 세로에 각각 두 배의 픽셀이 필요했다.
+              이에 맞춰 CIS 센서의 ROI(사용할 센서 영역)를 직접 1920×1440으로 조정했다.
+              센서별 픽셀 크기를 고려해 실제로 사용하는 영역의 크기를 맞춘 뒤,
+              빔스플리터로 들어온 같은 장면을 일반 영상과 이벤트 영상으로 기록했다.
             </p>
             <div class="launch-photo-grid">
               <figure class="doc-figure"><a href="../../assets/dataset/nuriho/8.jpg" target="_blank" rel="noopener noreferrer"><img src="../../assets/dataset/nuriho/8.jpg" alt="두 망원경과 노트북, 펑션 제너레이터를 연결한 최종 누리호 관찰 장비" loading="lazy" /></a><figcaption>최종 촬영 구성. 두 망원경과 카메라, 노트북, 펑션 제너레이터를 함께 연결했다.</figcaption></figure>
@@ -248,8 +262,8 @@
               <table class="diagnostic-table">
                 <thead><tr><th>구분</th><th>촬영·제작 조건</th><th>의미</th></tr></thead>
                 <tbody>
-                  <tr><td>DVS 촬영</td><td>2000 FPS</td><td>이벤트 데이터를 얻을 때 사용한 카메라 조건</td></tr>
-                  <tr><td>CIS 촬영</td><td>100 FPS</td><td>일반 영상의 촬영 속도</td></tr>
+                  <tr><td>DVS 촬영</td><td>960×720 · 2000 FPS</td><td>NRV DVS의 촬영 해상도와 속도</td></tr>
+                  <tr><td>CIS 촬영</td><td>1920×1440 · 100 FPS</td><td>픽셀 크기를 고려해 직접 조정한 센서 ROI와 촬영 속도</td></tr>
                   <tr><td>공개용 영상</td><td>4K · 60 FPS</td><td>촬영 데이터를 누적 표시·구성한 비교 영상의 출력 조건</td></tr>
                   <tr><td>영상 제작</td><td>직접 처리·제작</td><td>DVS와 CIS 결과를 함께 볼 수 있도록 영상화</td></tr>
                 </tbody>
@@ -276,7 +290,8 @@
             </p>
             <p>
               작은 망원경에 누리호 전체가 들어오는 것을 확인하면서 사전 시야 계산이 실제 촬영으로 이어지는 경험을 했다.
-              외부 트리거 테스트에서는 신호를 만드는 장비와 전달하는 케이블, 신호를 받는 카메라 설정을 함께 이해해야 했다.
+              외부 트리거는 사전에 준비한 구성을 실제 촬영 연구에 사용했고, 데모 결과에 맞춰 전압과 프로그램을 미세 조정했다.
+              두 센서의 픽셀 크기에 맞춰 ROI를 직접 조정하면서 광학계와 센서 설정을 함께 맞추는 경험도 했다.
               대표님, 선임연구원과 장비를 연결하고 결과를 확인하며, 미리 계산하고 준비한 내용도 현장 데모로 검증해야 한다는 점을 배웠다.
             </p>
             <p>
