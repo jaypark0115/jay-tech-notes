@@ -13,7 +13,7 @@ https://jaypark0115.github.io/jay-tech-notes/
 
 ### 1. LED 모션캡처 기반 드론 비행경로 제어 시스템 (진행중)
 
-다중 카메라 측위를 드론 제어에 연결하는 연구입니다. 연구 계획, 체커보드 기반 초기 구현, IR Active Marker 드론의 호버·경로 추종 구현, 경기XR센터에서의 최종 케이지 운용과 위치 정확도 평가 순서로 정리합니다. 중앙대학교 전자전기공학부 제어 및 로봇SLAM연구실 심덕선 교수님의 지도 아래 진행하고 있습니다.
+Jetson과 OV9281 카메라 4대로 드론의 위치를 추정하고, 원하는 경로를 비행하는 제어 시스템을 구현했습니다. OptiTrack을 직접 운용해 자체 시스템의 위치·자세 정확도를 비교했습니다. 중앙대학교 전자전기공학부 제어 및 로봇SLAM연구실 심덕선 교수님의 지도 아래 진행하고 있습니다.
 
 1. [LED 모션캡처 기반 드론 비행경로 제어 연구 계획](https://jaypark0115.github.io/jay-tech-notes/pages/planned/01-led-motion-capture-drone.html)
    - 연구 목표, 시스템 구성, 역할과 단계별 검증 계획입니다.
@@ -22,7 +22,7 @@ https://jaypark0115.github.io/jay-tech-notes/
 3. [4카메라 모션캡처 시스템 2차 구현](https://jaypark0115.github.io/jay-tech-notes/pages/planned/03-mocap-second-implementation.html)
    - 직접 조립한 Crazyflie와 IR Active Marker를 4카메라 추적에 연결해 BLE 외부 위치 전달, 호버와 경로 추종 비행까지 확장한 과정, 모니터링 웹앱, 시스템 구조, GitHub PR 협업과 케이지·카메라 케이스 제작을 함께 정리했습니다.
 4. [드론 경로 제어와 모션캡처 정확도 검증](https://jaypark0115.github.io/jay-tech-notes/pages/planned/04-mocap-flight-validation.html)
-   - 케이지와 4카메라 제어 시스템을 완성하고 경기XR센터에서 원형 비행·호버 복귀를 확인했습니다. OptiTrack과 동시에 기록한 네 시험의 위치 정확도, 비교 그래프와 원자료 다운로드를 함께 정리했습니다.
+   - 여러 경로 기능을 구현한 뒤 원형 비행·호버를 시연하고, OptiTrack을 직접 운용해 자체 4카메라 시스템의 위치·자세 정확도를 평가했습니다. 네 시험의 비교 그래프와 원자료를 함께 공개합니다.
 
 ### 2. SNN 연구 노트
 
