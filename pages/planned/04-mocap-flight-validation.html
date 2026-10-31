@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="완성한 4카메라 드론 제어 시스템을 경기XR센터에서 운용하고, 원형 비행·호버 복귀와 OptiTrack 기준 위치 정확도를 평가한 기록." />
     <meta property="og:title" content="드론 경로 제어와 모션캡처 정확도 검증 — Jay Tech Notes" />
-    <meta property="og:image" content="https://jaypark0115.github.io/jay-tech-notes/assets/mocap-validation/cage-demo.png" />
+    <meta property="og:image" content="https://jaypark0115.github.io/jay-tech-notes/assets/mocap-validation/cage-tracking.jpg" />
     <title>드론 경로 제어와 모션캡처 정확도 검증 — Jay Tech Notes</title>
     <link rel="stylesheet" href="../../styles.css?v=20260926-mocap-v2c" />
     <link rel="stylesheet" href="../../assets/mocap-validation/article.css?v=20261031-setup" />
@@ -32,18 +32,18 @@
           <div class="validation-demos">
             <figure class="doc-figure">
               <div class="mocap-video"><iframe src="https://www.youtube.com/embed/5zSrsVFdaUA" title="케이지 안에서 원형 경로를 세 바퀴 비행하는 드론" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
-              <figcaption>설정한 원형 경로를 세 바퀴 따라가는 실제 비행 모습. <a href="https://www.youtube.com/watch?v=5zSrsVFdaUA" target="_blank" rel="noopener noreferrer">YouTube에서 보기 ↗</a></figcaption>
+              <figcaption>두 지점을 직접 지정하고 반복 횟수를 3회로 입력해 원형 경로를 비행하는 모습. <a href="https://www.youtube.com/watch?v=5zSrsVFdaUA" target="_blank" rel="noopener noreferrer">YouTube에서 보기 ↗</a></figcaption>
             </figure>
             <figure class="doc-figure">
               <div class="mocap-video"><iframe src="https://www.youtube.com/embed/eGyZYMUTxk4" title="호버 중 기체를 건드린 뒤 위치를 다시 잡는 드론" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
-              <figcaption>호버 중 기체에 외란을 가하고 다시 위치를 잡는 동작을 확인했다. <a href="https://www.youtube.com/watch?v=eGyZYMUTxk4" target="_blank" rel="noopener noreferrer">YouTube에서 보기 ↗</a></figcaption>
+              <figcaption>직접 지정한 지점에서 호버하는 기체를 건드린 뒤, 같은 목표 위치로 복귀하는 모습을 확인했다. <a href="https://www.youtube.com/watch?v=eGyZYMUTxk4" target="_blank" rel="noopener noreferrer">YouTube에서 보기 ↗</a></figcaption>
             </figure>
           </div>
 
           <section class="doc-section searchable-section" id="cage" data-search-title="최종 케이지와 카메라 설치">
             <h3>1. 실험 장치와 카메라 배치</h3>
             <p>앞선 개발에서는 책상 주변에서 카메라 입력과 IR 마커 추적, 드론의 호버를 순서대로 연결했다. 이번에는 케이지와 카메라 장착부까지 완성해 실험 공간을 고정했다. 카메라 위치가 바뀔 때마다 추적 조건도 달라지므로, 프로그램을 완성하는 일과 장치를 일정하게 설치하는 일을 함께 진행했다.</p>
-            <p>케이지는 한 변이 2m인 정사각형 구조로 만들었다. 네 카메라는 천장 정사각형의 각 변 중앙에 하나씩 배치하고, 케이지 안쪽을 향해 수평 기준 약 30° 아래로 기울여 설치했다. 서로 다른 네 방향에서 같은 비행 공간을 보도록 배치한 것이다.</p>
+            <p>케이지는 한 변이 2m인 정사각형 구조로 만들었다. 천장 중앙에 Jetson과 카메라 연결부를 두고, 그곳에서 네 방향으로 케이블을 뻗어 각 변 중앙에 설치한 카메라에 연결했다. 네 카메라는 케이지 안쪽을 향해 수평 기준 약 30° 아래로 기울여, 서로 다른 방향에서 같은 비행 공간을 보도록 배치했다.</p>
             <div class="validation-table validation-setup"><table>
               <caption>실험 장치와 설치 조건</caption>
               <tbody>
@@ -57,7 +57,7 @@
             <p>여러 영상에서 같은 마커를 찾으면 각 카메라의 관측 방향을 이용한 <strong>삼각측량(triangulation)</strong>으로 3차원 위치를 구할 수 있다. 이때 중요한 설치 조건은 마커를 함께 볼 수 있는 공통 시야와 가림(occlusion)이다. 관측 방향이 충분히 다른 카메라에서 같은 점이 보여야 깊이를 안정적으로 구할 수 있으므로, 케이지 내부의 겹치는 시야를 확보하는 데 신경 썼다.</p>
             <div class="validation-gallery">
               <figure class="doc-figure"><a href="../../assets/mocap-validation/camera-clamps.jpg"><img src="../../assets/mocap-validation/camera-clamps.jpg" width="2714" height="2052" alt="직접 만든 OV9281 케이스에 각도 조절 마운트와 클램프를 결합한 네 카메라" loading="lazy" /></a><figcaption>카메라 케이스·각도 조절부·클램프를 결합한 설치 구성.</figcaption></figure>
-              <figure class="doc-figure"><a href="../../assets/mocap-validation/cage-tracking.jpg"><img src="../../assets/mocap-validation/cage-tracking.jpg" width="4032" height="2268" alt="완성된 케이지에 네 카메라를 설치하고 웹 화면에서 관측을 확인하는 모습" loading="lazy" /></a><figcaption>케이지에 설치한 카메라의 화면을 함께 확인했다.</figcaption></figure>
+              <figure class="doc-figure"><a href="../../assets/mocap-validation/cage-tracking.jpg"><img src="../../assets/mocap-validation/cage-tracking.jpg" width="4032" height="2268" alt="천장 중앙의 Jetson에서 네 방향으로 케이블을 연결하고 각 변 중앙에 카메라를 설치한 케이지" loading="lazy" /></a><figcaption>중앙 Jetson에서 각 변 중앙의 카메라로 케이블을 연결한 구성. 아래 화면에서 네 카메라의 관측을 함께 확인했다.</figcaption></figure>
               <figure class="doc-figure"><a href="../../assets/mocap-validation/camera-angles.jpg"><img src="../../assets/mocap-validation/camera-angles.jpg" width="4032" height="2268" alt="네 카메라 영상에서 케이지와 관측 방향을 점검하는 화면" loading="lazy" /></a><figcaption>실제 영상으로 카메라 각도와 겹치는 관측 범위를 맞췄다.</figcaption></figure>
               <figure class="doc-figure"><a href="../../assets/mocap-validation/floor-coverage.jpg" aria-label="바닥 마커 관측 사진 원본 보기"><svg class="validation-annotated-photo" viewBox="0 0 4032 2268" role="img" aria-labelledby="floor-marker-title"><title id="floor-marker-title">빨간 원으로 바닥의 마커를 표시한 케이지 설치 사진</title><image href="../../assets/mocap-validation/floor-coverage.jpg" width="4032" height="2268" /><circle cx="1407" cy="2190" r="63" fill="none" stroke="white" stroke-width="20" /><circle cx="1407" cy="2190" r="63" fill="none" stroke="#e11d2e" stroke-width="13" /><path d="M1454 2148 L1540 2050" fill="none" stroke="white" stroke-width="18" /><path d="M1454 2148 L1540 2050" fill="none" stroke="#e11d2e" stroke-width="11" /><text x="1510" y="2018" fill="#e11d2e" stroke="white" stroke-width="14" paint-order="stroke" font-family="Malgun Gothic, sans-serif" font-size="110" font-weight="700">마커</text></svg></a><figcaption>빨간 원은 바닥의 마커이다. 얇은 파이프 구조로 케이지 설치 후에도 모든 카메라에서 관측됐다.</figcaption></figure>
             </div>
@@ -66,7 +66,7 @@
 
           <section class="doc-section searchable-section" id="mission" data-search-title="프로그램 경로 지정과 비행 제어">
             <h3>2. 지정한 좌표를 비행 경로로 연결</h3>
-            <p>프로그램의 <strong>World Missions</strong> 화면에서 모드를 고르고, 좌표와 방문 순서, 이동 속도, 머무는 시간과 반복 횟수를 정하도록 구성했다. 한 점에서 호버하거나 여러 점을 순서대로 방문할 수 있고, 두 지점을 지정해 왕복 경로나 원형 경로를 만들 수 있다. 저장한 경로를 다시 불러오면 같은 조건의 실험을 반복할 수 있다. 화면에는 계획 경로와 실제 모션캡처 궤적을 함께 표시하고 위치를 CSV로 기록한다.</p>
+            <p>프로그램의 경로 설정 화면에서 모드를 고르고, 좌표와 방문 순서, 이동 속도, 머무는 시간과 반복 횟수를 정하도록 구성했다. 한 점에서 호버하거나 여러 점을 순서대로 방문할 수 있고, 두 지점을 지정해 왕복 경로나 원형 경로를 만들 수 있다. 저장한 경로를 다시 불러오면 같은 조건의 실험을 반복할 수 있다. 화면에는 계획 경로와 실제 모션캡처 궤적을 함께 표시하고 위치를 CSV로 기록한다.</p>
             <p>경로를 따라가면서 방향이나 속도가 갑자기 바뀌지 않도록 목표 움직임을 부드럽게 연결했다. 카메라로 측정한 실제 위치는 드론에 계속 전달해 목표 경로를 따라가도록 했다. 화면에 경로를 그리는 기능에서 나아가, 위치 측정과 비행 제어가 함께 동작하도록 연결한 것이다.</p>
             <p>Jetson은 영상 처리와 위치 추정, 목표 경로 생성을 맡고, 기체의 비행 제어기는 센서 처리와 모터 제어를 맡는다. 사용한 Crazyflie 2.1+는 STM32F405가 비행 연산을, nRF51822가 무선 통신을 담당하는 구조이다. 프로그램에서는 카메라로 구한 위치를 BLE로 전달하고, 기체의 Kalman 상태 추정기와 PID 제어기를 사용하도록 설정했다.</p>
             <p>여기서 <strong>목표값(setpoint)</strong>과 <strong>외부 위치 피드백</strong>은 역할이 다르다. 목표값은 기체가 가야 할 위치이고, 피드백은 현재 어디에 있는지를 알려주는 관측값이다. 기체의 상태 추정기는 IMU와 외부 위치 관측을 이용해 상태를 갱신하고, 제어기는 목표 상태와의 차이를 줄이는 출력을 만든다. 이 흐름에 맞춰 위치를 보내는 기능과 경로 명령을 보내는 기능을 구분해 연결했다.</p>
@@ -76,8 +76,9 @@
 
           <section class="doc-section searchable-section" id="flight" data-search-title="원형 비행과 외란 후 호버 복귀">
             <h3>3. 원형 비행과 호버 복귀</h3>
-            <p>완성한 프로그램으로 원을 두 바퀴 도는 비행과 세 바퀴 도는 비행을 진행했다. 경로 수행 전후의 상승과 착륙도 함께 기록해, 일정 높이에서 원을 도는 구간뿐 아니라 높이가 바뀌는 과정까지 비교할 수 있게 했다. 상단의 첫 번째 영상은 이 중 세 바퀴 비행을 실제 공간에서 촬영한 것이다.</p>
-            <p>두 번째 영상에서는 목표 위치에서 호버하는 기체를 직접 건드려 위치가 벗어나게 한 뒤, 다시 위치를 잡는 모습을 확인했다. 목표점을 유지하는 동안 관측된 위치가 달라지면 기체가 오차를 줄이는 방향으로 반응한다. 이렇게 경로를 따라가는 동작과 외란 후의 복귀 동작을 나누어 보면서, 위치 추정부터 무선 전달과 제어까지 연결한 시스템의 반응을 확인했다.</p>
+            <p>실험에서는 직접 만든 경로 설정 기능으로 드론이 움직일 위치와 비행 방식을 정했다. 원하는 한 지점에서 호버하거나 여러 지점을 정한 순서대로 방문할 수 있고, 두 지점을 이용한 왕복·원형 비행도 선택할 수 있다. 이동 속도와 각 지점에서 머무는 시간, 반복 횟수를 바꿀 수 있어 같은 장치로 서로 다른 비행 조건을 구성했다.</p>
+            <p>상단의 첫 번째 영상은 두 지점을 직접 지정해 원형 경로를 만들고, 반복 횟수에 3회를 입력해 비행시킨 모습이다. 같은 기능으로 반복 횟수를 바꿔 두 바퀴와 세 바퀴 비행을 각각 진행했다. 경로 수행 전후의 상승과 착륙도 함께 기록해, 일정 높이에서 원을 도는 구간뿐 아니라 높이가 바뀌는 과정까지 비교할 수 있게 했다.</p>
+            <p>두 번째 영상에서는 호버할 목표 지점을 직접 지정했다. 해당 위치를 유지하는 기체를 손으로 건드려 벗어나게 한 뒤, 다시 지정한 지점으로 돌아와 위치를 잡는 모습을 확인했다. 목표점을 유지하는 동안 관측된 위치가 달라지면 기체가 오차를 줄이는 방향으로 반응한다. 이렇게 경로를 따라가는 동작과 외란 후의 복귀 동작을 나누어 보면서, 위치 추정부터 무선 전달과 제어까지 연결한 시스템의 반응을 확인했다.</p>
             <p>이 동작은 측정 결과를 다시 제어 입력에 반영하는 <strong>폐루프 제어(closed-loop control)</strong>이다. 경로 비행에서는 시간에 따라 바뀌는 목표를 따라가는 추종 성능을 보고, 호버 시험에서는 목표를 고정한 상태에서 외란을 받은 뒤 복귀하는 응답을 살폈다. 두 시험을 통해 위치를 추정하는 기능이 실제 기체의 움직임을 보정하는 데까지 이어지는지 확인했다.</p>
             <figure class="doc-figure validation-media"><a href="../../assets/mocap-validation/cage-demo.png"><img src="../../assets/mocap-validation/cage-demo.png" width="2388" height="1337" alt="경기XR센터에서 케이지와 자체 카메라 시스템을 설치하고 드론 실험을 진행하는 모습" loading="lazy" /></a><figcaption>완성된 케이지와 4카메라 시스템을 센터에 설치하고 비행·기록을 진행했다.</figcaption></figure>
           </section>
