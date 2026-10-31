@@ -13,6 +13,9 @@
 .mocap-validation-page .validation-table td { padding: .75rem; }
 .mocap-validation-page .validation-table caption { text-align: left; font-weight: 600; padding-bottom: .7rem; }
 .mocap-validation-page .validation-table td { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.mocap-validation-page .validation-setup table { min-width: 0; }
+.mocap-validation-page .validation-setup th { width: 8rem; }
+.mocap-validation-page .validation-setup td { text-align: left; white-space: normal; }
 .mocap-validation-page .validation-download { display: inline-block; padding: .85rem 1.1rem; border: 1px solid var(--accent); color: var(--accent); font-weight: 700; text-decoration: none; }
 .mocap-validation-page .validation-download:hover { background: var(--accent-soft); }
 .mocap-validation-page .validation-method { border: 1px solid var(--line); padding: 1rem 1.2rem; margin: 1rem 0; }
