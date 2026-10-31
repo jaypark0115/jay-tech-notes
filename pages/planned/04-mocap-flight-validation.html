@@ -50,16 +50,14 @@
               <figure class="doc-figure"><a href="../../assets/mocap-validation/camera-angles.jpg"><img src="../../assets/mocap-validation/camera-angles.jpg" width="4032" height="2268" alt="네 카메라 영상에서 케이지와 관측 방향을 점검하는 화면" loading="lazy" /></a><figcaption>실제 영상으로 카메라 각도와 겹치는 관측 범위를 맞췄다.</figcaption></figure>
               <figure class="doc-figure"><a href="../../assets/mocap-validation/floor-coverage.jpg"><img src="../../assets/mocap-validation/floor-coverage.jpg" width="4032" height="2268" alt="바닥의 마커와 모션캡처 화면을 함께 확인하는 설치 환경" loading="lazy" /></a><figcaption>비행 높이뿐 아니라 바닥 가까운 표적의 관측도 확인했다.</figcaption></figure>
             </div>
-            <p>장착을 마친 뒤에는 카메라 캘리브레이션과 월드 원점 설정을 다시 수행했다. 캘리브레이션은 각 영상의 점을 공간의 위치로 바꾸는 기준이고, 월드 원점은 그 위치와 목표 경로를 같은 좌표로 표현하는 기준이다. 카메라를 고정한 상태에서 이 두 기준을 준비해야 화면에 지정한 점이 실제 케이지 안의 같은 위치를 뜻한다.</p>
+            <p>카메라를 고정한 뒤 캘리브레이션과 원점 설정을 마치고, 화면에서 지정한 위치가 케이지 안의 실제 위치와 맞는지 확인했다.</p>
           </section>
 
           <section class="doc-section searchable-section" id="mission" data-search-title="프로그램 경로 지정과 비행 제어">
             <h3>2. 지정한 좌표를 비행 경로로 연결</h3>
             <p>프로그램의 <strong>World Missions</strong> 화면에서 모드를 고르고, 좌표와 방문 순서, 이동 속도, 머무는 시간과 반복 횟수를 정하도록 구성했다. 한 점에서 호버하거나 여러 점을 순서대로 방문할 수 있고, 두 지점을 지정해 왕복 경로나 원형 경로를 만들 수 있다. 저장한 경로를 다시 불러오면 같은 조건의 실험을 반복할 수 있다. 화면에는 계획 경로와 실제 모션캡처 궤적을 함께 표시하고 위치를 CSV로 기록한다.</p>
-            <p>원형 경로는 두 지점을 지름의 양 끝으로 받아 중심과 반지름을 계산한다. 코드에서는 한 바퀴를 여덟 구간으로 나누고, 그 사이를 연속적인 곡선으로 연결한다. 점 목록만 차례로 보내면 구간이 바뀔 때마다 목표 속도가 급변할 수 있어, <code>world_missions.py</code>에서는 구간의 위치와 접선 속도를 함께 사용해 다항식 궤적을 만든다.</p>
-            <p>멈췄다가 출발하는 구간에는 시작과 끝의 속도·가속도를 0으로 맞춘 7차 다항식을, 연속해서 통과하는 곡선 구간에는 접선 속도를 연결하는 5차 다항식을 사용했다. 생성된 궤적의 속도와 가속도, 가속도의 변화율인 jerk를 확인하고, 설정한 제한을 넘으면 이동 시간을 늘린다. 경로의 모양을 유지하면서 급격한 명령 변화를 줄이기 위한 처리이다.</p>
-            <p>이 과정에서 고정된 실험 공간의 좌표와 이륙점을 기준으로 하는 비행 좌표를 구분했다. 사용자가 저장한 목표는 월드 좌표에 남겨 두고, 비행을 시작할 때 이륙 위치와 축 방향을 기준으로 변환한다. 목표점을 지정하는 기능, 카메라 보정, 위치 피드백이 같은 기준으로 연결되면서 케이지 안에서 원형 비행을 반복할 수 있게 됐다.</p>
-            <p>직접 연결해 보니 경로가 화면에서 매끄럽게 그려지는 것과 기체가 그 경로를 따라가는 것은 서로 이어서 풀어야 할 문제였다. 목표 궤적을 만드는 단계에서는 구간 경계의 움직임을 다루고, 실행 중에는 최신 위치가 들어오는지와 기체의 상태를 확인해야 했다. 카메라가 계산한 위치를 외부 관측값으로 전달하고 기체의 상태 추정기와 제어기가 반응하는 구조는 <a href="https://www.bitcraze.io/documentation/repository/crazyflie-firmware/master/functional-areas/crtp/crtp_localization/" target="_blank" rel="noopener noreferrer">Crazyflie의 외부 위치 입력 문서</a>와 함께 살펴보며 구현을 정리했다.</p>
+            <p>경로를 따라가면서 방향이나 속도가 갑자기 바뀌지 않도록 목표 움직임을 부드럽게 연결했다. 카메라로 측정한 실제 위치는 드론에 계속 전달해 목표 경로를 따라가도록 했다. 화면에 경로를 그리는 기능에서 나아가, 위치 측정과 비행 제어가 함께 동작하도록 연결한 것이다.</p>
+            <p>목표 경로는 케이지를 기준으로 저장하고, 비행할 때 드론의 이륙 위치에 맞춰 전달하도록 구성했다. 이 기능을 이용해 같은 경로를 반복해서 비행시키며 화면의 목표 궤적과 실제 움직임을 함께 확인했다.</p>
           </section>
 
           <section class="doc-section searchable-section" id="flight" data-search-title="원형 비행과 외란 후 호버 복귀">
@@ -72,7 +70,7 @@
           <section class="doc-section searchable-section" id="studio" data-search-title="경기XR센터 OptiTrack 모션캡처 기준 장비">
             <h3>4. 같은 움직임을 두 시스템으로 기록</h3>
             <p>비행 동작과 함께 위치 정확도도 평가하기 위해 경기XR센터의 크로마키·모션캡처 스튜디오를 대여했다. 처음 계획했던 리니어 모터 스테이지 대신, 실제 드론과 자유롭게 움직이는 표적을 상용 모션캡처 시스템과 동시에 관측하는 방식으로 검증 환경을 구성했다.</p>
-            <p><a href="https://ggxr.or.kr/?idx=52&amp;menuno=235&amp;month=2&amp;year=2000" target="_blank" rel="noopener noreferrer">센터 공식 시설 안내</a>에는 <strong>OptiTrack Prime 22 12대와 Prime 13 12대</strong>, 모션캡처 소프트웨어와 운용 PC가 소개돼 있다. 여러 방향에서 표적을 보는 센터의 시스템을 기준 기록(GT)으로 삼고, 직접 만든 OV9281 4카메라·Jetson 시스템의 기록과 비교했다. 이번에 받은 GT CSV의 기록 주기는 240Hz, 약 4.17ms이다.</p>
+            <p>센터의 <a href="https://ggxr.or.kr/?idx=52&amp;menuno=235&amp;month=2&amp;year=2000" target="_blank" rel="noopener noreferrer"><strong>OptiTrack Prime 22 12대와 Prime 13 12대, 총 24대의 카메라로 구성된 모션캡처 시스템</strong></a>을 정확도 평가의 기준 장비(GT)로 사용했다. 센터의 운용 PC에서 모션캡처 프로그램을 직접 조작해 움직임을 240Hz로 기록하고, 자체 제작한 OV9281 4카메라·Jetson 시스템으로 같은 표적을 동시에 추적했다.</p>
             <figure class="doc-figure validation-media">
               <video class="validation-video" controls muted playsinline preload="metadata" poster="../../assets/mocap-validation/studio-video-poster.jpg"><source src="../../assets/mocap-validation/studio-operation-muted.mp4" type="video/mp4" />브라우저에서 영상을 재생할 수 없으면 <a href="../../assets/mocap-validation/studio-operation-muted.mp4">영상 파일을 열어주세요.</a></video>
               <figcaption>센터의 모션캡처 시스템으로 표적을 관측하고 기록하는 실제 운용 모습. 음성 없이 볼 수 있도록 편집했다.</figcaption>
@@ -88,8 +86,7 @@
 
           <section class="doc-section searchable-section" id="accuracy" data-search-title="GT 비교 위치 RMSE와 측정 주기">
             <h3>5. GT와 비교한 위치 정확도</h3>
-            <p>두 장비는 기록을 시작한 시각과 좌표축이 다르다. 먼저 높이와 이동 궤적이 대응하는 구간을 찾고, 시간차와 하나의 고정 회전·이동을 맞췄다. 원형 시험은 이륙·원형 비행·착륙을 포함하는 50초씩, 자유 경로는 각각 62초와 70.1초를 사용했다. 그래프의 시간은 각 비교 구간의 시작을 0초로 두었다.</p>
-            <p>코드가 출력하는 드론 위치는 세 LED의 단순 평균이 아니라 <strong>마커 장착판의 중심</strong>이다. 따라서 GT의 세 점도 코드의 LED 배치에 맞춰 장착판 중심으로 복원했다. 자유 경로는 양쪽에서 관측한 동일한 LED 한 점을 비교했다. 이렇게 비교 대상을 맞춘 뒤, 같은 시각의 두 위치 사이 3차원 거리를 계산하고 RMSE로 요약했다.</p>
+            <p>원형 비행과 자유 경로 실험에서 직접 기록한 데이터를 바탕으로 자체 시스템의 위치 정확도를 평가했다. 센터의 GT와 자체 시스템이 측정한 위치를 비교하고, 위치 오차와 추적이 유지된 비율을 함께 확인했다.</p>
             <div class="validation-table"><table>
               <thead><tr><th>시험</th><th>구간</th><th>GT 이동거리</th><th>위치 RMSE</th><th>유효 기록 행</th></tr></thead>
               <tbody>
@@ -99,22 +96,18 @@
                 <tr><th>자유 경로 2</th><td>70.1초</td><td>42.279m</td><td>33.453mm</td><td>80.522%</td></tr>
               </tbody>
             </table></div>
-            <p>원형 두 시험의 위치 RMSE는 약 19mm로 비슷했다. 자체 CSV의 기록 간격 중앙값은 원형에서 약 22.23ms, 자유 경로에서 약 44.5ms였다. GT의 4.17ms 기록을 자체 측정 시각에 맞춰 비교했으며, 유효 위치가 없는 행은 오차 계산에서 제외하고 위 표의 유효 기록 비율에 반영했다. 그래프에서도 해당 구간은 선을 끊어 표시했다.</p>
+            <p>원형 두 시험의 위치 RMSE는 약 19mm로 비슷했다. 자유 경로에서는 각각 약 24mm와 33mm였다. 위치 오차는 추적이 유지된 데이터로 계산했고, 추적이 끊긴 부분은 유효 기록 비율과 그래프의 빈 구간으로 표시했다.</p>
             <figure class="doc-figure validation-media"><a href="../../assets/mocap-validation/circle-2-comparison.png"><img src="../../assets/mocap-validation/circle-2-comparison.png" width="2210" height="1275" alt="2회전 원형 50초의 3차원 궤적, XYZ 좌표와 GT 대비 위치 오차" loading="lazy" /></a><figcaption>2회전 원형 · 50초. 왼쪽은 궤적, 오른쪽은 XYZ 좌표와 위치 오차이다.</figcaption></figure>
             <figure class="doc-figure validation-media"><a href="../../assets/mocap-validation/circle-3-comparison.png"><img src="../../assets/mocap-validation/circle-3-comparison.png" width="2210" height="1275" alt="3회전 원형 50초의 궤적과 좌표, GT 대비 위치 오차" loading="lazy" /></a><figcaption>3회전 원형 · 50초. 상승과 착륙을 포함해 같은 기준으로 비교했다.</figcaption></figure>
-            <p>자유 경로 1과 2의 GT 평균 속력은 각각 0.386m/s와 0.603m/s였고, 100ms 구간으로 계산한 최고 속력은 1.062m/s와 1.568m/s였다. 더 빠르고 방향 변화가 큰 자유 경로 2에서 위치 오차와 무효 기록 비율이 함께 증가했다. 이동 속도가 높아지면 작은 시간차도 더 큰 위치 차이로 나타나고, 급격한 표적 이동은 영상에서의 점 대응과 관측 유지에도 부담을 준다. 이 결과를 보며 위치 오차 하나뿐 아니라 움직임의 속도와 추적이 유지된 비율을 함께 살펴야 한다는 점을 배웠다.</p>
+            <p>자유 경로의 평균 속력은 첫 번째 시험에서 약 0.39m/s, 두 번째에서 약 0.60m/s였다. 더 빠르게 움직인 두 번째 시험에서 위치 오차가 커지고 추적이 끊기는 구간도 늘었다. 일정한 원형 비행뿐 아니라 손으로 표적의 높이와 방향을 바꾸는 실험을 함께 진행하면서, 움직임에 따른 추적 안정성의 차이도 확인할 수 있었다.</p>
             <figure class="doc-figure validation-media"><a href="../../assets/mocap-validation/free-1-comparison.png"><img src="../../assets/mocap-validation/free-1-comparison.png" width="2210" height="1275" alt="자유 경로 1의 62초 궤적, 좌표와 위치 오차" loading="lazy" /></a><figcaption>자유 경로 1 · 62초. 단일 LED의 움직임을 비교했다.</figcaption></figure>
             <figure class="doc-figure validation-media"><a href="../../assets/mocap-validation/free-2-comparison.png"><img src="../../assets/mocap-validation/free-2-comparison.png" width="2210" height="1275" alt="자유 경로 2의 70.1초 궤적, 좌표와 위치 오차" loading="lazy" /></a><figcaption>자유 경로 2 · 70.1초. 높이와 방향이 크게 바뀌는 구간까지 포함했다.</figcaption></figure>
-            <details class="validation-method"><summary>거리·자세와 정렬 기준</summary>
-              <p>정렬에는 각 기록의 동작 구간을 사용했고, 그 기록 안의 위 비교 구간에서 오차를 평가했다. 모든 표본에 하나의 시간차·회전·이동을 적용하며 거리 스케일은 1로 유지했다. GT 총 이동거리 약 1m의 부분 구간마다 상대 변위 차이를 길이로 나눈 평균은 2회전 원형 16.09mm/m, 3회전 원형 14.84mm/m, 자유 경로 1은 24.61mm/m, 자유 경로 2는 43.52mm/m였다.</p>
-              <p>원형 시험의 GT 자세는 LED 세 점으로 복원했다. 가장 먼 두 점을 좌우로 두고, 좌우 이름의 두 후보는 측정 자세와 비교해 선택했다. 전체 회전각 오차의 중앙값은 각각 2.129°와 1.986°, RMSE는 10.216°와 10.627°였다. 일부 roll·pitch가 크게 튀는 구간이 있어 중앙값과 RMSE의 차이가 컸다. 위치 추정과 자세 추정을 따로 확인하면서 다음 개선 대상을 구체화했다.</p>
-            </details>
           </section>
 
           <section class="doc-section searchable-section" id="closing" data-search-title="실험을 통해 배운 점과 다음 글">
             <h3>6. 장치 연결에서 실험 가능한 시스템으로</h3>
-            <p>이번 단계에서는 카메라와 드론을 연결한 뒤, 좌표가 어디를 가리키는지와 명령이 어떤 움직임으로 이어지는지를 끝까지 따라가 보았다. 카메라 각도를 바꾸면 보정 기준이 달라지고, 월드 원점이 달라지면 같은 숫자의 목표점도 다른 장소를 뜻한다. 또 목표 경로의 모양이 같아도 구간을 연결하는 속도와 이동 시간에 따라 기체의 반응은 달라진다. 장착부, 보정, 경로 생성과 피드백을 따로 보던 단계에서 각 부분이 서로에게 주는 영향을 이해하게 됐다.</p>
-            <p>센터에서 두 시스템을 함께 운용하며 비교하는 과정도 중요했다. 같은 드론을 보고 있어도 장착판 중심과 LED 한 점은 다른 위치이고, 기록 주기와 시작 시각도 서로 다르다. 실험 조건을 맞추고 원자료를 남겨야 나중에 그래프가 어긋나는 이유를 다시 확인할 수 있었다. 직접 설치하고 조작하며 얻은 기록을 코드의 좌표 정의까지 되짚어 비교한 과정이 이번 작업의 핵심이다.</p>
+            <p>직접 만든 시스템을 실험실 밖으로 옮겨 설치하면서, 프로그램과 장착 구조를 함께 다뤄야 한다는 점을 배웠다. 카메라가 필요한 공간을 볼 수 있도록 각도를 맞추고, 보정을 마친 뒤, 지정한 경로를 실제 드론이 따라가는지 확인하는 과정까지 이어갔다. 케이스와 클램프를 제작한 작업도 이런 설치와 반복 실험을 위한 것이었다.</p>
+            <p>또 센터의 모션캡처 장비를 직접 운용하고 자체 시스템과 동시에 기록하면서, 비행이 되는 모습을 확인하는 데서 한 걸음 더 나아가 위치 정확도까지 평가할 수 있었다. 직접 설계한 장치와 프로그램이 실제 공간에서 함께 동작하는지 확인하고, 움직임이 빨라질 때 추적이 어떻게 달라지는지도 실험으로 살펴봤다.</p>
             <p>이 연구는 중앙대학교 전자전기공학부 <a href="https://kite.cau.ac.kr/research/researchRoom/355" target="_blank" rel="noopener noreferrer">제어 및 로봇SLAM연구실 심덕선 교수님</a>의 지도 아래 팀원들과 진행하고 있다. 케이지 제작과 설치, 비행 제어 시스템 구현, 현장 검증과 정확도 평가까지 마쳤고, 다음 글에서 졸업논문 작업을 마무리할 예정이다. 논문과 최종 데모 발표 영상을 함께 정리하고, 프로그램을 오픈소스로 공개하면서 저장소 링크도 그 글에 모아둘 계획이다.</p>
           </section>
 
