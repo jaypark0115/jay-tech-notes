@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="styles.css?v=20260926-drone-mocap-v2" />
     <link rel="stylesheet" href="assets/dataset/recording.css" />
     <link rel="stylesheet" href="assets/dataset/launch.css?v=20261008-2" />
+    <link rel="stylesheet" href="assets/home.css?v=20261031" />
     <script src="script.js" defer></script>
   </head>
   <body class="home-page">
@@ -25,12 +26,16 @@
 
           <p class="lead">
             제가 직접 정리한 기술 글, 실험 기록, 논문 메모를 모아두는 개인 페이지입니다.
-            상세 페이지가 준비된 카드는 클릭해 각 글과 자료를 확인할 수 있으며,
-            아직 정리 중인 일부 연구 카드는 현재 방향과 목표를 보여주는 진입점으로
-            구성했습니다.
+            카드를 클릭하면 각 글과 자료를 확인할 수 있습니다.
           </p>
 
-          <div class="home-panels" aria-label="페이지 소개">
+          <details class="collection-overview">
+            <summary>
+              글묶음 한눈에 보기
+              <span class="overview-expand" aria-hidden="true">펼치기</span>
+              <span class="overview-collapse" aria-hidden="true">접기</span>
+            </summary>
+          <div class="home-panels" aria-label="글묶음 요약과 바로가기">
             <a class="home-panel" href="#drone-motion-capture">
               <span>진행 중인 연구 묶음</span>
               <h2>LED 모션캡처 드론 제어</h2>
@@ -112,6 +117,41 @@
               </p>
             </a>
           </div>
+          </details>
+
+          <section class="doc-section visible latest-posts" id="latest-posts" aria-labelledby="latest-posts-title">
+            <h2 id="latest-posts-title">최신 글</h2>
+            <div class="latest-post-grid">
+              <a class="latest-post-card" href="pages/planned/04-mocap-flight-validation.html">
+                <div class="latest-post-thumb">
+                  <img src="assets/mocap-validation/cage-tracking.jpg" alt="케이지에 설치한 4카메라와 모션캡처 제어 화면" width="4032" height="2268" />
+                </div>
+                <div class="latest-post-copy">
+                  <h3>드론 경로 제어와 모션캡처 정확도 검증</h3>
+                  <p>직접 구현한 드론 제어와 OptiTrack 기반 위치·자세 정확도 평가.</p>
+                </div>
+              </a>
+              <a class="latest-post-card" href="pages/dataset/03-launch-dvs-cis-capture.html">
+                <div class="latest-post-thumb launch-preview">
+                  <div class="launch-preview-panel"><img src="assets/dataset/nuriho/launch-video-frame.jpg" alt="DVS로 촬영한 누리호 화염의 윤곽" width="873" height="491" /></div>
+                  <div class="launch-preview-panel launch-preview-cis"><img src="assets/dataset/nuriho/launch-video-frame.jpg" alt="CIS로 촬영한 누리호의 불꽃" width="873" height="491" /></div>
+                </div>
+                <div class="latest-post-copy">
+                  <h3>누리호 DVS·CIS 촬영</h3>
+                  <p>망원경과 카메라를 직접 설치하고 누리호 발사를 촬영한 과정.</p>
+                </div>
+              </a>
+              <a class="latest-post-card" href="pages/planned/03-camera-module-case.html">
+                <div class="latest-post-thumb">
+                  <img src="assets/camera-module-case-final-front.jpg" alt="금속 케이스와 렌즈를 조립한 Delta10 카메라 완성품" />
+                </div>
+                <div class="latest-post-copy">
+                  <h3>신규 카메라 모듈 케이스 완성품</h3>
+                  <p>3D 시제품부터 금속 케이스 제작과 최종 카메라 조립까지.</p>
+                </div>
+              </a>
+            </div>
+          </section>
 
           <section class="doc-section visible" id="drone-motion-capture">
             <h2>LED 모션캡처 기반 드론 비행경로 제어 시스템 (진행중)</h2>
@@ -699,7 +739,8 @@
           </section>
         </article>
         <aside class="page-toc home-page-toc" aria-label="대표 페이지 바로가기">
-          <strong>기술 노트와 진행 계획</strong>
+          <strong>글묶음 바로가기</strong>
+          <a href="#latest-posts">최신 글</a>
           <a href="#drone-motion-capture">LED 모션캡처 드론 제어</a>
           <a href="#snn-research">SNN 연구 노트</a>
           <a href="#nrv-dvs-calibration">NRV DVS 캘리브레이션 설명</a>
