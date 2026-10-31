@@ -4,12 +4,15 @@
 .mocap-validation-page .validation-gallery figure,
 .mocap-validation-page .validation-demos figure { margin: 0; min-width: 0; }
 .mocap-validation-page .validation-gallery img { width: 100%; height: 310px; object-fit: contain; background: #f6f8fa; }
+.mocap-validation-page .validation-annotated-photo { display: block; width: 100%; height: 310px; background: #f6f8fa; }
 .mocap-validation-page .validation-media img { width: 100%; height: auto; }
 .mocap-validation-page .validation-video { display: block; width: 100%; aspect-ratio: 16/9; background: #111; }
 .mocap-validation-page .validation-table { overflow-x: auto; margin: 1.4rem 0; }
 .mocap-validation-page .validation-table table { width: 100%; min-width: 620px; }
 .mocap-validation-page .validation-table th,
 .mocap-validation-page .validation-table td { padding: .75rem; }
+.mocap-validation-page .validation-table caption { text-align: left; font-weight: 600; padding-bottom: .7rem; }
+.mocap-validation-page .validation-table td { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .mocap-validation-page .validation-download { display: inline-block; padding: .85rem 1.1rem; border: 1px solid var(--accent); color: var(--accent); font-weight: 700; text-decoration: none; }
 .mocap-validation-page .validation-download:hover { background: var(--accent-soft); }
 .mocap-validation-page .validation-method { border: 1px solid var(--line); padding: 1rem 1.2rem; margin: 1rem 0; }
@@ -18,4 +21,5 @@
   .mocap-validation-page .validation-gallery,
   .mocap-validation-page .validation-demos { grid-template-columns: 1fr; }
   .mocap-validation-page .validation-gallery img { height: auto; max-height: 390px; }
+  .mocap-validation-page .validation-annotated-photo { height: auto; max-height: 390px; }
 }
