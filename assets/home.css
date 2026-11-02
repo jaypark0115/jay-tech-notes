@@ -132,6 +132,45 @@ body.home-page .home-page-toc a {
   font-size: 0.96rem;
 }
 
+/* One preview treatment across all homepage article collections. */
+body.home-page #top :is(.project-card, .sitemap-card, .competition-card) {
+  position: relative;
+}
+
+body.home-page #top :is(.project-card, .sitemap-card, .competition-card) > .sitemap-number {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  margin: 18px 20px 12px;
+  font-size: 0.82rem;
+}
+
+/* Text-only cards keep the badge in the normal flow. */
+body.home-page #top :is(.project-card, .sitemap-card, .competition-card) > :is(h2, h4) {
+  margin: 0 20px 10px;
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+body.home-page #top :is(.project-card, .sitemap-card, .competition-card) > p {
+  margin: 0 20px;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+body.home-page #top :is(.project-card, .sitemap-card):has(> :is(.project-thumb, .calibration-card-thumb)) > .sitemap-number {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1;
+  margin: 0;
+  box-shadow: 0 2px 8px rgb(15 23 42 / 12%);
+}
+
+body.home-page #top :is(.project-card, .sitemap-card):has(> :is(.project-thumb, .calibration-card-thumb)) > h2 {
+  margin-top: 18px;
+}
+
 @media (max-width: 700px) {
   body.home-page .latest-post-grid {
     grid-template-columns: 1fr;

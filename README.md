@@ -61,12 +61,12 @@ NRV DVS 캘리브레이션 구현에 이어, 보정 파라미터를 영상에 �
 
 ### 5. NRV Viewer 개발 노트
 
-팀원들과 DELTA 카메라와 Viewer 연동을 진행하고, 센서 설명 시트를 검토해 Viewer에 없던 제어 기능을 직접 추가했습니다. 데이터 수신과 표시·저장의 연결부터 센서 기능 확장, 공식 사용 문서와 제품 홈페이지 개선까지 세 편으로 정리했습니다.
+팀원들과 DELTA 카메라와 Viewer 연동을 진행하고, 센서 데이터시트를 검토해 Viewer에 없던 제어 기능을 직접 추가했습니다. 데이터 수신과 표시·저장의 연결부터 센서 기능 확장, 공식 사용 문서와 제품 홈페이지 개선까지 세 편으로 정리했습니다.
 
 1. [DELTA 카메라와 Viewer 연동](https://jaypark0115.github.io/jay-tech-notes/pages/viewer/01-camera-viewer-integration.html)
    - 팀원들과 진행한 고속 수신·이벤트 해석·표시·기록의 연결 구조와 보정·파일 재생 연동을 설명합니다.
 2. [센서 제어 기능 확장](https://jaypark0115.github.io/jay-tech-notes/pages/viewer/02-sensor-controls.html)
-   - 센서 설명 시트를 바탕으로 반전·이벤트 극성·ROI와 외부 신호 제어를 직접 추가하고, 레지스터 적용과 UI 상태를 연결한 과정입니다.
+   - 센서 데이터시트를 바탕으로 반전·이벤트 극성·ROI와 외부 신호 제어를 직접 추가하고, 레지스터 적용과 UI 상태를 연결한 과정입니다.
 3. [기술 문서와 제품 홈페이지 개선](https://jaypark0115.github.io/jay-tech-notes/pages/viewer/03-documentation-and-website.html)
    - 직접 작성한 공식 기술 소개·사용 문서·고속 촬영 안내와 홈페이지 애니메이션·제품 사양 정리 작업을 담았습니다.
 
