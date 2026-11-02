@@ -3,12 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="드론 모션캡처, SNN 연구, NRV DVS 캘리브레이션·Rectify, 이벤트 카메라 데이터셋 구축, 스테레오 Depth와 FPGA 기술 노트 모음." />
+    <meta name="description" content="드론 모션캡처, SNN 연구, NRV DVS 캘리브레이션·Rectify, Viewer 연동과 센서 기능 확장, 이벤트 카메라 데이터셋, 스테레오 Depth와 FPGA 기술 노트 모음." />
     <title>Jay Tech Notes</title>
     <link rel="stylesheet" href="styles.css?v=20260926-drone-mocap-v2" />
     <link rel="stylesheet" href="assets/dataset/recording.css" />
     <link rel="stylesheet" href="assets/dataset/launch.css?v=20261008-2" />
     <link rel="stylesheet" href="assets/home.css?v=20261031" />
+    <link rel="stylesheet" href="assets/viewer/viewer.css" />
     <script src="script.js" defer></script>
   </head>
   <body class="home-page">
@@ -67,6 +68,12 @@
                 정렬이 필요한 이유부터 좌표 보정 원리, Viewer에서 사용하는 절차까지
                 세 편의 한글 문서로 정리했습니다.
               </p>
+            </a>
+            <a class="home-panel" href="#nrv-viewer">
+              <span>개발 기록 묶음</span>
+              <h2>NRV Viewer 개발 노트</h2>
+              <p>팀원들과 진행한 카메라·Viewer 연동과 직접 구현한 센서 제어 기능,
+                공식 문서·제품 홈페이지 개선 과정을 정리했습니다.</p>
             </a>
             <a class="home-panel" href="#event-camera-dataset">
               <span>진행 중인 데이터셋 묶음</span>
@@ -399,6 +406,38 @@
                 <small class="entry-card-kicker">VIEWER WORKFLOW</small>
                 <h2>Viewer에서 정렬 사용하기</h2>
                 <p>Viewer에서 캘리브레이션 파일을 불러오고, 실시간 Rectify 결과를 확인하는 절차를 설명합니다.</p>
+              </a>
+            </div>
+          </section>
+
+          <section class="doc-section visible" id="nrv-viewer">
+            <h2>NRV Viewer 개발 노트</h2>
+            <p>
+              팀원들과 DELTA 카메라와 Viewer 연동을 진행하고, 센서 설명 시트를 검토해
+              Viewer에 없던 제어 기능을 직접 추가했습니다. 데이터 수신과 표시·저장의 연결부터
+              센서 기능 확장, 공식 사용 문서와 제품 홈페이지 개선까지 세 편으로 정리했습니다.
+            </p>
+            <div class="sitemap-grid">
+              <a class="sitemap-card calibration-preview-card" href="pages/viewer/01-camera-viewer-integration.html">
+                <img class="calibration-card-thumb" src="assets/viewer/delta-capture-setup.jpg" alt="DELTA 카메라와 이벤트 영상을 표시하는 Viewer 촬영 구성" loading="lazy" />
+                <span class="sitemap-number">01</span>
+                <small class="entry-card-kicker">Camera &amp; Viewer</small>
+                <h2>DELTA 카메라와 Viewer 연동</h2>
+                <p>팀원들과 데이터 수신·해석·표시·기록을 연결하고, 보정과 파일 재생까지 통합한 구조를 설명합니다.</p>
+              </a>
+              <a class="sitemap-card calibration-preview-card" href="pages/viewer/02-sensor-controls.html">
+                <img class="calibration-card-thumb" src="assets/viewer/sensor-region-controls.png" alt="센서 ROI 선택과 좌표 입력을 구현한 Viewer 조작부" loading="lazy" />
+                <span class="sitemap-number">02</span>
+                <small class="entry-card-kicker">Sensor Controls</small>
+                <h2>센서 제어 기능 확장</h2>
+                <p>센서 설명 시트를 바탕으로 반전·이벤트 극성·ROI와 외부 신호 제어를 직접 추가한 과정을 정리했습니다.</p>
+              </a>
+              <a class="sitemap-card calibration-preview-card" href="pages/viewer/03-documentation-and-website.html">
+                <img class="calibration-card-thumb" src="assets/viewer/nrv-homepage.png" alt="카메라 제품 소개와 애니메이션을 보완한 NRV 홈페이지" loading="lazy" />
+                <span class="sitemap-number">03</span>
+                <small class="entry-card-kicker">Documentation &amp; Website</small>
+                <h2>기술 문서와 제품 홈페이지 개선</h2>
+                <p>직접 작성한 연결·센서 기능 설명과 고속 촬영 안내, 홈페이지 애니메이션·제품 사양 정리 작업을 담았습니다.</p>
               </a>
             </div>
           </section>
@@ -745,6 +784,7 @@
           <a href="#snn-research">SNN 연구 노트</a>
           <a href="#nrv-dvs-calibration">NRV DVS 캘리브레이션 설명</a>
           <a href="#nrv-dvs-rectify">NRV DVS Rectify 설명</a>
+          <a href="#nrv-viewer">NRV Viewer 개발 노트</a>
           <a href="#event-camera-dataset">이벤트 카메라 데이터셋</a>
           <a href="#event-stereo-depth">이벤트 비전 스테레오 Depth</a>
           <a href="#nrv-fpga-troubleshooting">NRV FPGA 트러블슈팅 노트</a>

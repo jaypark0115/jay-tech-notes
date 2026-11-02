@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="550" viewBox="0 0 1000 550" role="img" aria-labelledby="title desc">
+  <title id="title">External trigger capture modes</title>
+  <desc id="desc">Rising-edge examples of Single, Burst single with four frames per trigger, and Burst continuous capture.</desc>
+  <rect width="1000" height="550" fill="#fff"/>
+  <g font-family="Arial, sans-serif" fill="#172033">
+    <text x="28" y="34" font-size="21" font-weight="700">Mode</text>
+    <text x="202" y="34" font-size="21" font-weight="700">Trigger input and scan starts</text>
+    <path d="M20 54H980M20 218H980M20 380H980M20 538H980M180 54V538" stroke="#cbd5e1" fill="none"/>
+    <g font-size="20" font-weight="700">
+      <text x="28" y="124">Single</text>
+      <text x="28" y="282">Burst single</text>
+      <text x="28" y="443">Burst</text>
+    </g>
+    <g font-size="16" fill="#64748b">
+      <text x="28" y="151">1 frame / edge</text>
+      <text x="28" y="309">N = 4 / edge</text>
+      <text x="28" y="470">Continuous</text>
+    </g>
+    <g font-size="17">
+      <text x="202" y="108">Trigger In</text>
+      <text x="202" y="168">Scan start</text>
+      <text x="202" y="268">Trigger In</text>
+      <text x="202" y="328">Scan start</text>
+      <text x="202" y="428">Trigger In</text>
+      <text x="202" y="488">Scan start</text>
+    </g>
+    <g fill="none" stroke="#d50f34" stroke-width="3" stroke-linejoin="round">
+      <path d="M320 115H350V85H430V115H560V85H640V115H770V85H850V115H960"/>
+      <path d="M320 275H350V245H430V275H560V245H640V275H770V245H850V275H960"/>
+      <path d="M320 435H350V405H430V435H960"/>
+    </g>
+    <g fill="none" stroke="#172033" stroke-width="2.5">
+      <path d="M320 175H960M350 175V148M560 175V148M770 175V148"/>
+      <path d="M320 335H960M350 335V308M375 335V308M400 335V308M425 335V308M560 335V308M585 335V308M610 335V308M635 335V308M770 335V308M795 335V308M820 335V308M845 335V308"/>
+      <path d="M320 495H960M350 495V468M375 495V468M400 495V468M425 495V468M450 495V468M475 495V468M500 495V468M525 495V468M550 495V468M575 495V468M600 495V468M625 495V468M650 495V468M675 495V468M700 495V468M725 495V468M750 495V468M775 495V468M800 495V468M825 495V468M850 495V468M875 495V468M900 495V468M925 495V468"/>
+      <path d="M951 488L960 495L951 502"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,110 @@
+/* Only the Viewer collection and its three articles use these rules. */
+#nrv-viewer .sitemap-card {
+  min-height: 0;
+  padding: 0 0 20px;
+  overflow: hidden;
+}
+
+#nrv-viewer .calibration-card-thumb {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  margin: 0;
+  object-fit: contain;
+  background: #f5f7f9;
+}
+
+#nrv-viewer .sitemap-number {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  margin: 18px 20px 12px;
+  font-size: 0.82rem;
+}
+
+#nrv-viewer .entry-card-kicker {
+  margin: 0 20px 8px;
+  font-size: 0.66rem;
+}
+
+#nrv-viewer .sitemap-card h2 {
+  margin: 0 20px 10px;
+  font-size: 1.05rem;
+}
+
+#nrv-viewer .sitemap-card p {
+  margin: 0 20px;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+body.viewer-doc-page .doc-figure {
+  width: min(100%, 820px);
+}
+
+body.viewer-doc-page .doc-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+body.viewer-doc-page .figure-wide {
+  width: min(100%, 1000px);
+}
+
+body.viewer-doc-page .figure-control {
+  width: min(100%, 400px);
+}
+
+body.viewer-doc-page .figure-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin: 1.5rem auto 2rem;
+  max-width: 1000px;
+}
+
+body.viewer-doc-page .figure-pair .doc-figure {
+  margin: 0;
+}
+
+body.viewer-doc-page .viewer-table {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 1.4rem 0 2rem;
+}
+
+body.viewer-doc-page .viewer-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+body.viewer-doc-page .viewer-table th,
+body.viewer-doc-page .viewer-table td {
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+body.viewer-doc-page .viewer-table th {
+  background: var(--panel);
+}
+
+body.viewer-doc-page .viewer-code {
+  overflow-x: auto;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  font-size: 0.82rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 680px) {
+  body.viewer-doc-page .figure-pair {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="직접 구현한 센서 제어 기능을 NRV 공식 사용 문서와 고속 촬영 안내로 정리하고, 홈페이지 애니메이션과 제품 사양 구성을 개선한 기록." />
+    <title>기술 문서와 제품 홈페이지 개선 — Jay Tech Notes</title>
+    <link rel="stylesheet" href="../../styles.css" />
+    <link rel="stylesheet" href="../../assets/viewer/viewer.css" />
+    <script src="../../script.js" defer></script>
+  </head>
+  <body class="troubleshooting-page viewer-doc-page">
+    <div class="site-shell"><main class="content-wrap" id="top"><article class="content">
+      <div class="document-kicker"><span>NRV Viewer 개발 노트</span><div class="kicker-actions"><span class="draft-label">Viewer · 03</span></div></div>
+      <a class="home-link" href="../../index.html#nrv-viewer">← NRV Viewer 개발 노트로 돌아가기</a>
+      <nav class="chapter-switcher" aria-label="Viewer 개발 글 이동"><span class="chapter-switcher-label">Viewer 개발 글 목록</span><div>
+        <a href="01-camera-viewer-integration.html">1. DELTA 카메라와 Viewer 연동</a>
+        <a href="02-sensor-controls.html">2. 센서 제어 기능 확장</a>
+        <a class="current" aria-current="page" href="03-documentation-and-website.html">3. 기술 문서와 제품 홈페이지 개선</a>
+      </div></nav>
+      <h1>기술 문서와 제품 홈페이지 개선</h1>
+      <p class="lead">센서 기능을 구현한 뒤, 처음 사용하는 사람도 카메라를 연결하고 설정할 수 있도록 NRV 공식 설명과 사용 문서를 직접 작성했습니다. 홈페이지에는 애니메이션과 제품 소개를 보완하고 사양을 정리해, 제품을 살펴보는 단계에서 실제 촬영까지 이어지도록 개선했습니다.</p>
+
+      <section class="doc-section searchable-section" id="documentation" data-search-title="기능 구현을 실제 사용 문서로 연결">
+        <h3>1. 사용 순서에 맞춘 문서 구성</h3>
+        <p>개발할 때는 어떤 레지스터를 바꾸는지가 중요하지만, 카메라를 처음 연결하는 사람에게는 케이블을 어디에 꽂고 어떤 항목을 선택해야 하는지가 먼저 필요하다. 구현 내용을 그대로 나열하면 기능을 이해해도 실제 촬영을 시작하기 어렵다. 그래서 연결 준비, Viewer 조작, 동작 원리 순서로 설명을 다시 구성했다.</p>
+        <p>문서는 제품 연결 위치를 다루는 Camera Interfaces, 외부 장치와의 촬영 시점을 다루는 External Signals, 영상 방향과 이벤트·영역 선택을 다루는 Sensor Controls로 나눴다. 화면에서 쓰는 항목 이름과 문서의 이름을 맞추고, 설정 전 정지와 적용 후 재시작처럼 실제 조작 순서에 필요한 내용도 해당 단계에 넣었다.</p>
+        <figure class="doc-figure"><a href="https://nrvcorp.github.io/docs/software/sensor-features/" target="_blank" rel="noopener noreferrer"><img src="../../assets/viewer/sensor-controls-docs.jpg" width="1265" height="712" alt="Sensor Flip, Event Output, Sensor Region으로 나누어 작성한 NRV 공식 Sensor Controls 문서" loading="lazy" /></a><figcaption>직접 작성한 Sensor Controls 문서. 기능별로 사용 목적을 먼저 보여주고 상세 조작 설명으로 이동하도록 구성했다.</figcaption></figure>
+      </section>
+
+      <section class="doc-section searchable-section" id="technology" data-search-title="이벤트 프레임 Group AER Global Reset Hold 설명">
+        <h3>2. NRV 기술을 설명하는 기준</h3>
+        <p><a href="https://nrvcorp.github.io/docs/about-NRV/" target="_blank" rel="noopener noreferrer">About NRV</a>에는 이벤트 비전을 처음 접하는 사람이 제품의 동작을 이해할 수 있도록 기술 소개를 작성했다. 밝기 변화를 이벤트로 표현한다는 출발점에서, NRV의 이벤트 프레임과 Group AER, Global Reset·Global Hold로 설명을 이어갔다.</p>
+        <p>이벤트 프레임은 픽셀의 밝기 변화 정보를 프레임 시간과 함께 다루는 방식이고, Group AER는 여러 픽셀 이벤트를 한 패킷으로 묶는 전송 형식이다. 시간 정보를 공유하는 것과 좌표·이벤트를 묶는 것은 서로 다른 역할이므로 구분해 설명했다. Global Reset과 Global Hold도 단순히 “동기화 기능”이라고 묶기보다 밝기 기준을 갱신하는 시점과 측정 결과를 붙잡는 시점으로 나눴다.</p>
+        <figure class="doc-figure"><a href="https://nrvcorp.github.io/docs/about-NRV/" target="_blank" rel="noopener noreferrer"><img src="../../assets/viewer/about-nrv-docs.jpg" width="1265" height="712" alt="이벤트 비전과 NRV의 이벤트 프레임 처리 방식을 설명한 About NRV 문서" loading="lazy" /></a><figcaption>기술 소개에서도 기능 이름보다 어떤 정보를 다루고 왜 필요한지부터 설명했다.</figcaption></figure>
+        <p>센서 기능을 직접 연결해 본 경험이 설명의 기준이 됐다. 독자가 기술 용어를 외우는 대신, Viewer에서 바꾼 설정이 출력 데이터와 측정 시점에 어떤 영향을 주는지 연결해 읽을 수 있도록 했다.</p>
+      </section>
+
+      <section class="doc-section searchable-section" id="connection-guides" data-search-title="카메라 인터페이스 외부 신호와 센서 조작 문서">
+        <h3>3. 연결과 조작을 따라갈 수 있는 문서</h3>
+        <p>카메라 연결 문서에서는 모델별 단자 위치와 신호 방향을 먼저 구분했다. DELTA 01의 SMA와 DELTA 10의 M8 단자는 형태뿐 아니라 연결할 수 있는 신호도 다르다. 사진과 핀 배치를 함께 놓고 Trigger In, Trigger Out, 외부 클럭을 각각 어디에 연결하는지 확인할 수 있도록 작성했다.</p>
+        <p>외부 신호 문서에는 트리거 모드별 타이밍 도식을 넣었다. Single, Burst single, Burst의 차이는 메뉴 이름만으로 이해하기 어렵기 때문이다. 입력 에지와 프레임 시작을 나란히 보여주고, 한 번의 입력 뒤 몇 프레임이 이어지는지를 설명했다. 또 센서의 타임스탬프와 프레임 인덱스는 각각 시간과 순서를 나타내므로, 기록에서 무엇을 읽어야 하는지도 구분했다.</p>
+        <p>Sensor Controls에는 실제 Viewer 화면을 사용했다. 반전은 화면 표시와 센서 출력의 차이를, Event output은 극성 선택과 변환의 차이를, ROI는 스캔 범위와 출력 범위의 차이를 중심으로 설명했다. 한 페이지에 모든 설정을 모으기보다 필요한 기능을 찾아 들어가도록 구성했다.</p>
+        <ul>
+          <li><a href="https://nrvcorp.github.io/docs/software/camera-interfaces/" target="_blank" rel="noopener noreferrer">Camera Interfaces</a> — 카메라별 연결 단자, 핀과 케이블 배치.</li>
+          <li><a href="https://nrvcorp.github.io/docs/software/external-signals/" target="_blank" rel="noopener noreferrer">External Signals</a> — 트리거 입력, 센서 타이밍 출력과 외부 클럭.</li>
+          <li><a href="https://nrvcorp.github.io/docs/software/sensor-features/" target="_blank" rel="noopener noreferrer">Sensor Controls</a> — 센서 반전, 이벤트 출력과 ROI 조작.</li>
+        </ul>
+      </section>
+
+      <section class="doc-section searchable-section" id="high-speed" data-search-title="고속 촬영 업데이트와 프리셋 다운로드 안내">
+        <h3>4. 업데이트와 설정 파일 연결</h3>
+        <p>고속 촬영 기능은 지원 사실을 알리는 뉴스와 실제 설정을 적용하는 문서의 역할을 나눴다. 뉴스에서는 어떤 촬영 조건을 사용할 수 있게 됐는지 소개하고, 상세 문서에서는 해상도·FPS별 프리셋 파일과 적용 순서를 제공했다. 사용자가 소식을 읽은 뒤 다시 설정 파일을 찾아 헤매지 않도록 서로 연결했다.</p>
+        <p>프리셋 목록에는 속도뿐 아니라 센서 영역 크기를 같이 표시했다. 같은 카메라라도 넓은 장면을 보면서 촬영하는 조건과 작은 영역을 아주 빠르게 읽는 조건은 쓰임이 다르다. 설정 파일을 내려받고, 촬영을 멈춘 상태에서 적용한 뒤 다시 시작하는 절차까지 작성해 실제 Viewer 조작으로 이어지도록 했다.</p>
+        <p><a href="https://nrv.kr/news/2026-10-27-high-speed-capture-support-update/" target="_blank" rel="noopener noreferrer">고속 촬영 지원 업데이트</a>에서 변경 내용을 소개하고, <a href="https://nrvcorp.github.io/docs/software/high-speed-presets/" target="_blank" rel="noopener noreferrer">High-Speed Preset Downloads</a>에 설정 파일과 사용 방법을 정리했다.</p>
+      </section>
+
+      <section class="doc-section searchable-section" id="website" data-search-title="NRV 홈페이지 애니메이션 제품 사양 정리">
+        <h3>5. 홈페이지와 제품 사양 개선</h3>
+        <p>공식 홈페이지의 첫 화면에는 카메라 이미지와 애니메이션을 추가하고, 제품을 살펴보거나 동작 원리를 읽는 경로를 보완했다. 처음 방문한 사람이 어떤 카메라인지 빠르게 파악한 뒤 제품 소개와 개발 문서로 이동하도록 구성했다.</p>
+        <div class="figure-pair">
+          <figure class="doc-figure"><a href="https://nrv.kr/" target="_blank" rel="noopener noreferrer"><img src="../../assets/viewer/nrv-homepage.png" width="1913" height="1510" alt="DELTA 01과 DELTA 10 카메라 이미지, 기술 소개와 제품 이동 버튼을 배치한 NRV 홈페이지" loading="lazy" /></a><figcaption>애니메이션과 제품 소개를 보완한 <a href="https://nrv.kr/" target="_blank" rel="noopener noreferrer">NRV 홈페이지</a>.</figcaption></figure>
+          <figure class="doc-figure"><a href="https://nrv.kr/products/" target="_blank" rel="noopener noreferrer"><img src="../../assets/viewer/nrv-products.png" width="1744" height="1641" alt="DELTA 제품 카드와 해상도, 프레임 속도, 연결 방식, 크기 및 무게를 비교하는 제품 사양표" loading="lazy" /></a><figcaption>제품별 정보를 같은 항목으로 정리한 <a href="https://nrv.kr/products/" target="_blank" rel="noopener noreferrer">제품 페이지</a>.</figcaption></figure>
+        </div>
+        <p>제품 페이지에서는 해상도, 프레임 속도, 인터페이스, 외형 크기와 무게 등을 같은 항목으로 비교할 수 있게 정리했다. 기술 소개에서 설명한 특성이 제품을 선택할 때 어떤 조건으로 나타나는지 연결하는 작업이었다. 홈페이지는 제품을 이해하는 입구로, 공식 문서는 실제 연결과 운용을 돕는 자료로 역할을 나눴다.</p>
+      </section>
+
+      <section class="doc-section searchable-section" id="closing" data-search-title="기능 구현과 문서화에서 배운 점">
+        <h3>6. 구현과 설명을 함께 정리하기</h3>
+        <p>센서 기능을 구현한 뒤 문서로 설명하면서, 코드에서 알고 있던 조건을 사용자의 관점으로 다시 점검했다. 기능 이름이 비슷해도 적용되는 위치가 다를 수 있고, 설정값을 바꾸는 것과 촬영을 다시 시작하는 순서도 구분해야 했다. 문서에 사용할 화면과 타이밍 도식을 정리하는 과정이 조작 흐름을 다듬는 작업으로 이어졌다.</p>
+        <p>팀원들과 진행한 Viewer 연동을 기반으로 센서 제어 기능을 확장하고, 그 기능을 사용할 때 필요한 설명과 홈페이지 구성을 직접 정리했다. 카메라를 연결한 뒤 데이터를 얻는 단계에서 더 나아가, 다른 사용자가 같은 기능을 이해하고 적용할 수 있는 형태로 전달하는 과정까지 경험했다.</p>
+      </section>
+
+      <nav class="chapter-switcher chapter-switcher-bottom" aria-label="Viewer 개발 글 이동 하단"><span class="chapter-switcher-label">Viewer 개발 글 목록</span><div>
+        <a href="01-camera-viewer-integration.html">1. DELTA 카메라와 Viewer 연동</a>
+        <a href="02-sensor-controls.html">2. 센서 제어 기능 확장</a>
+        <a class="current" aria-current="page" href="03-documentation-and-website.html">3. 기술 문서와 제품 홈페이지 개선</a>
+      </div></nav>
+      <nav class="article-pager" aria-label="이전 다음 글"><a class="pager-link pager-prev" href="02-sensor-controls.html">← 이전 글: 센서 제어 기능 확장</a><a class="pager-link pager-next" href="../../index.html#nrv-viewer">글묶음으로 →</a></nav>
+      <div class="bottom-author">by jy</div>
+      <footer class="page-footer"><span>Jay Tech Notes · NRV Viewer 개발 노트</span><a href="#top">맨 위로 ↑</a></footer>
+    </article></main></div>
+  </body>
+</html>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="팀원들과 진행한 DELTA 카메라와 Viewer 연동. 고속 수신, 이벤트 해석, 화면 표시와 기록·재생을 연결한 통합 운용 구조를 설명합니다." />
+    <title>DELTA 카메라와 Viewer 연동 — Jay Tech Notes</title>
+    <link rel="stylesheet" href="../../styles.css" />
+    <link rel="stylesheet" href="../../assets/viewer/viewer.css" />
+    <script src="../../script.js" defer></script>
+  </head>
+  <body class="troubleshooting-page viewer-doc-page">
+    <div class="site-shell">
+      <main class="content-wrap" id="top">
+        <article class="content">
+          <div class="document-kicker"><span>NRV Viewer 개발 노트</span><div class="kicker-actions"><span class="draft-label">Viewer · 01</span></div></div>
+          <a class="home-link" href="../../index.html#nrv-viewer">← NRV Viewer 개발 노트로 돌아가기</a>
+          <nav class="chapter-switcher" aria-label="Viewer 개발 글 이동">
+            <span class="chapter-switcher-label">Viewer 개발 글 목록</span>
+            <div>
+              <a class="current" aria-current="page" href="01-camera-viewer-integration.html">1. DELTA 카메라와 Viewer 연동</a>
+              <a href="02-sensor-controls.html">2. 센서 제어 기능 확장</a>
+              <a href="03-documentation-and-website.html">3. 기술 문서와 제품 홈페이지 개선</a>
+            </div>
+          </nav>
+          <h1>DELTA 카메라와 Viewer 연동</h1>
+          <p class="lead">DELTA 이벤트 카메라를 연결해 촬영하고, 기록한 데이터를 다시 살펴볼 수 있도록 팀원들과 Viewer 연동을 진행했습니다. 고속 수신부터 이벤트 해석, 화면 표시와 저장·재생까지 이어지는 구조를 설명하고, 제가 구현한 캘리브레이션과 좌표 보정 기능이 이 흐름에 어떻게 연결되는지 정리합니다.</p>
+
+          <figure class="doc-figure">
+            <a href="../../assets/viewer/delta-capture-setup.jpg"><img src="../../assets/viewer/delta-capture-setup.jpg" width="3743" height="1409" alt="DELTA 카메라로 모니터의 문자를 촬영하고 Viewer에서 이벤트 영상을 확인하는 구성" /></a>
+            <figcaption>DELTA 카메라, 촬영 대상 모니터와 Viewer를 연결한 운용 예시. 오른쪽의 문자 장면이 왼쪽 화면에서 이벤트 영상으로 표시된다.</figcaption>
+          </figure>
+
+          <section class="doc-section searchable-section" id="integration" data-search-title="카메라와 Viewer 통합 운용">
+            <h3>1. 촬영부터 재생까지 연결하기</h3>
+            <p>이벤트 카메라는 밝기 변화를 감지한 위치와 극성 정보를 보낸다. 일반 카메라처럼 완성된 컬러 영상을 받아 곧바로 보여주는 것과 달리, 호스트 프로그램에서 센서의 데이터 형식을 해석하고 관찰할 시간 범위의 이벤트를 모아야 한다. 카메라를 USB로 인식하는 것에서 끝나는 작업이 아니라, 수신한 데이터를 어떤 기준으로 화면에 표시하고 저장할지까지 연결해야 했다.</p>
+            <p>팀원들과 기존 카메라·SDK 구조를 바탕으로 C++ 처리부와 Qt 기반 Viewer를 연동했다. 실시간 촬영, 센서 설정, 파일 기록과 재생이 같은 프로그램 안에서 이어지도록 구성하고, 각 기능이 주고받는 데이터와 실행 상태를 맞췄다. 이 글에서는 함께 구성한 처리 구조를 먼저 설명한 뒤, 그 안에서 직접 진행한 보정 기능 연동과 운용 작업을 다룬다.</p>
+            <p>촬영 중에는 감도와 센서 출력 속도를 조절하면서 이벤트 영상을 확인한다. 필요한 장면은 이벤트 데이터로 저장하고, 촬영을 마친 뒤에는 같은 파일을 다시 열어 누적 조건을 바꿔 살펴본다. 센서 설정부터 자료 재활용까지 한 흐름으로 이어지는 것이 통합 운용의 목표였다.</p>
+          </section>
+
+          <section class="doc-section searchable-section" id="data-flow" data-search-title="USB 수신과 저장 표시 스레드 분리">
+            <h3>2. 수신·표시·기록의 분리</h3>
+            <p>USB 수신, 이벤트 해석, 화면 갱신과 디스크 쓰기는 처리 시간과 실행 주기가 서로 다르다. 이 작업들을 순서대로 기다리게 하면 파일 쓰기가 잠시 늦어지는 동안 다음 데이터도 받지 못하는 구조가 된다. 따라서 카메라에서 받아들이는 단계와, 받은 데이터를 소비하는 단계를 분리했다.</p>
+            <figure class="doc-figure figure-wide">
+              <a href="../../assets/viewer/viewer-data-flow.png"><img src="../../assets/viewer/viewer-data-flow.png" alt="USB 수신에서 표시용 패킷 버퍼와 RAW 기록으로 분기하고 파일 재생이 공통 이벤트 처리부로 들어가는 구성도" loading="lazy" /></a>
+              <figcaption>수신 데이터는 표시와 기록으로 나뉜다. 실시간 입력과 파일 재생은 패킷 해석·이벤트 누적 과정을 공유한다.</figcaption>
+            </figure>
+            <p>DELTA 10 수신부는 여러 비동기 USB 요청을 대기시킨다. 완료된 요청의 데이터를 처리용 버퍼에 전달하고 다음 수신을 이어가며, 해석과 기록은 각각의 스레드가 담당한다. 생산자·소비자 구조로 보면 카메라 수신부가 생산자이고, 표시 처리부와 파일 기록부가 서로 다른 소비자이다. 두 소비자의 처리 속도가 달라도 수신 단계가 매번 화면 표시나 파일 쓰기의 완료를 기다리지 않도록 한 것이다.</p>
+            <p>여기서 중요한 것은 스레드 개수보다 데이터가 어느 단계에서 분기되는가이다. 화면에는 해석·누적된 영상을 보내지만, 원시 기록에는 해석 전 패킷을 사용한다. 화면 누적 시간을 바꾸더라도 기록된 이벤트 정보는 그 표시 조건에 묶이지 않는다. 장시간 저장에서 실제로 겪은 속도·용량 문제와 쓰기 처리 개선은 <a href="../dataset/01-long-duration-dvs-recording.html">DVS 장시간 녹화 개선</a>에 따로 정리했다.</p>
+          </section>
+
+          <section class="doc-section searchable-section" id="event-decoding" data-search-title="Group AER 프레임 시간과 이벤트 누적">
+            <h3>3. 패킷을 이벤트 영상으로 바꾸기</h3>
+            <p>NRV 센서는 Group AER 형식으로 이벤트를 묶어 보낸다. 32비트 패킷에 그룹 주소와 비트마스크 등을 담아 최대 16개 픽셀의 이벤트를 표현하며, 호스트는 이를 풀어 각 이벤트의 좌표와 극성을 복원한다. 밝아진 변화와 어두워진 변화는 ON·OFF 극성으로 구분한다.</p>
+            <p>시간 정보도 데이터 형식에 맞게 읽어야 한다. NRV의 이벤트 프레임에서는 여러 픽셀이 프레임 단위의 시간 정보를 공유한다. 따라서 USB 패킷이 PC에 도착한 시각을 개별 픽셀의 발생 시각으로 사용하는 대신, 데이터에 포함된 프레임 시간과 이벤트 좌표를 함께 해석한다. 이 구조와 Group AER의 의미는 직접 작성한 <a href="https://nrvcorp.github.io/docs/about-NRV/" target="_blank" rel="noopener noreferrer">NRV 기술 소개</a>에도 설명해 두었다.</p>
+            <p>복원한 이벤트는 관찰 목적에 따라 영상으로 누적한다. 짧은 시간만 모으면 빠른 움직임의 잔상이 줄어들지만 한 화면에 보이는 점도 적어진다. 반대로 오래 모으면 형태를 알아보기 쉬워지는 대신 서로 다른 시각의 움직임이 겹친다. Viewer에서는 시간, 이벤트 수, 센서 프레임 수를 기준으로 누적 조건을 선택할 수 있도록 연결했다.</p>
+            <figure class="doc-figure figure-wide">
+              <a href="../../assets/viewer/delta-viewer.png"><img src="../../assets/viewer/delta-viewer.png" alt="문자 이벤트 누적 영상과 감도, 프레임 속도, 센서 제어 패널을 함께 표시한 DVS Viewer" loading="lazy" /></a>
+              <figcaption>이벤트 영상과 센서 설정을 함께 보며 촬영 조건을 조절한다. 아래 상태 영역에서는 USB 연결, 수신량과 센서 프레임 속도를 확인할 수 있다.</figcaption>
+            </figure>
+            <p>센서 FPS와 화면 갱신 속도, 초당 수신량은 서로 다른 값이다. 센서 FPS는 센서가 이벤트 프레임을 읽어내는 주기를, 수신량은 실제로 전달되는 데이터의 양을 나타낸다. 장면의 움직임과 감도가 달라지면 같은 FPS에서도 이벤트 수가 달라진다. 연결 과정에서는 숫자 하나만 보기보다 촬영 조건과 데이터량, 화면에 나타나는 결과를 함께 살폈다.</p>
+          </section>
+
+          <section class="doc-section searchable-section" id="record-and-replay" data-search-title="원시 이벤트 기록과 공통 재생 처리">
+            <h3>4. 촬영 결과를 다시 분석하기</h3>
+            <p>누적 영상만 저장하면 나중에 누적 시간을 줄이거나 이벤트를 다른 기준으로 나누기 어렵다. 이미 한 장으로 합쳐진 정보에서 개별 이벤트를 다시 꺼낼 수 없기 때문이다. 그래서 <code>.dvs</code> 파일에는 원시 패킷과 모델·시간 설정 정보를 보관하고, 파일을 열 때 실시간 입력과 같은 해석·누적 모듈을 사용하도록 구성했다.</p>
+            <p>이 방식에서는 카메라와 저장 파일이 서로 다른 입력이지만, 그 뒤의 영상 구성 과정은 같다. 촬영할 때 형태가 흐리게 보였더라도 파일을 다시 열고 누적 조건을 조절해 같은 장면을 살펴볼 수 있다. 분석에 사용할 이벤트 자료는 유지하고, 공유할 결과 영상은 BMP나 AVI로 출력하는 식으로 원자료와 표현 결과의 역할을 나눴다.</p>
+            <p>실시간 입력과 재생에 별도 해석 코드를 두면 같은 데이터를 다르게 처리하는 문제가 생기기 쉽다. 공통 모듈을 쓰는 구조를 이해하면서, 기능을 추가할 때도 어느 입력에서 사용할 수 있는지와 저장된 데이터에 어떤 영향을 주는지를 함께 확인하게 됐다.</p>
+          </section>
+
+          <section class="doc-section searchable-section" id="calibration" data-search-title="직접 구현한 캘리브레이션 Rectify 연동">
+            <h3>5. 캘리브레이션과 좌표 보정</h3>
+            <p>직접 구현한 캘리브레이션에서는 점멸 원 격자를 촬영해 카메라 내부 파라미터와 렌즈 왜곡 계수를 구하고, 결과를 YAML 파일로 저장·불러오도록 했다. Viewer에서는 이 결과를 사용해 모노 카메라의 왜곡을 보정하고, 스테레오 영상의 대응점을 같은 높이로 정렬하는 기능을 연결했다.</p>
+            <p>보정은 영상 누적 전에 이벤트 좌표에 적용한다. 이벤트를 보정 좌표로 옮기고 패킷으로 다시 구성한 뒤 표시 처리로 넘기므로, 뒤쪽 처리부에서는 같은 이벤트 형식을 사용할 수 있다. 단일 카메라의 원시 기록은 보정 전에 분기해 수신 패킷을 남기는 구조이다. 관찰용 좌표 보정과 원자료 보관이 어디에서 나뉘는지 확인하며 연동했다.</p>
+            <p>이 과정에서 보정 알고리즘의 계산 결과뿐 아니라, 저장 형식과 실시간 처리 순서까지 맞춰야 실제 촬영 기능으로 사용할 수 있다는 점을 배웠다. 세부 원리와 사용 절차는 <a href="../../index.html#nrv-dvs-calibration">캘리브레이션 설명</a>과 <a href="../../index.html#nrv-dvs-rectify">Rectify 설명</a>에 이어서 정리해 두었다.</p>
+          </section>
+
+          <section class="doc-section searchable-section" id="integration-lessons" data-search-title="팀 협업과 통합 프로그램에서의 역할">
+            <h3>6. 통합 과정에서 배운 점</h3>
+            <p>Viewer 연동은 카메라와 SDK, 처리부와 UI를 팀원들과 맞춰가는 작업이었다. 한 기능이 화면에서 동작하더라도 수신 상태나 파일 재생, 다른 센서 설정과 연결했을 때 같은 방식으로 사용할 수 있어야 했다. 기존 처리 구조를 따라가며 기능을 넣을 위치를 확인하고, 수정한 부분이 다른 모듈에 미치는 영향을 함께 살폈다.</p>
+            <p>제가 맡은 보정과 운용 기능을 연결하면서, 데이터의 의미와 프로그램의 상태를 함께 다루는 방법을 익혔다. 특히 원시 패킷과 누적 영상을 구분하고, 센서에서 바꾸는 설정과 화면에서만 바꾸는 설정을 나누는 관점이 이후 기능 확장에도 이어졌다. 다음 글에서는 센서 설명 시트를 읽고 Viewer에 없던 제어 기능을 직접 추가한 과정을 설명한다.</p>
+          </section>
+
+          <nav class="chapter-switcher chapter-switcher-bottom" aria-label="Viewer 개발 글 이동 하단"><span class="chapter-switcher-label">Viewer 개발 글 목록</span><div>
+            <a class="current" aria-current="page" href="01-camera-viewer-integration.html">1. DELTA 카메라와 Viewer 연동</a>
+            <a href="02-sensor-controls.html">2. 센서 제어 기능 확장</a>
+            <a href="03-documentation-and-website.html">3. 기술 문서와 제품 홈페이지 개선</a>
+          </div></nav>
+          <nav class="article-pager" aria-label="이전 다음 글"><a class="pager-link pager-prev" href="../../index.html#nrv-viewer">← 글묶음으로</a><a class="pager-link pager-next" href="02-sensor-controls.html">다음 글: 센서 제어 기능 확장 →</a></nav>
+          <div class="bottom-author">by jy</div>
+          <footer class="page-footer"><span>Jay Tech Notes · NRV Viewer 개발 노트</span><a href="#top">맨 위로 ↑</a></footer>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>

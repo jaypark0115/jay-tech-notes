@@ -1,7 +1,7 @@
 # Jay Tech Notes
 
 제가 직접 작성하고 정리한 기술 글, 실험 기록, 논문 자료를 모아두는 개인 기술 노트입니다.
-현재 공개 페이지는 메인 화면에 보이는 순서와 동일하게 `LED 모션캡처 기반 드론 비행경로 제어 시스템`, `SNN 연구 노트`, `NRV DVS 캘리브레이션 설명`, `NRV DVS Rectify 설명`, `이벤트 카메라 데이터셋`, `이벤트 비전 스테레오 Depth 카메라`, `NRV FPGA 트러블슈팅 노트`, `사이드 프로젝트 링크`, `SoC/FPGA 학습 노트`, `경진대회 기술 노트` 순서로 구성되어 있습니다.
+현재 공개 페이지는 메인 화면에 보이는 순서와 동일하게 `LED 모션캡처 기반 드론 비행경로 제어 시스템`, `SNN 연구 노트`, `NRV DVS 캘리브레이션 설명`, `NRV DVS Rectify 설명`, `NRV Viewer 개발 노트`, `이벤트 카메라 데이터셋`, `이벤트 비전 스테레오 Depth 카메라`, `NRV FPGA 트러블슈팅 노트`, `사이드 프로젝트 링크`, `SoC/FPGA 학습 노트`, `경진대회 기술 노트` 순서로 구성되어 있습니다.
 
 ## 웹페이지로 보기
 
@@ -59,7 +59,18 @@ NRV DVS 캘리브레이션 구현에 이어, 보정 파라미터를 영상에 �
 3. [Viewer에서 정렬 사용하기](https://jaypark0115.github.io/jay-tech-notes/pages/rectify/03-viewer-rectification.html)
    - Viewer에서 캘리브레이션 파일을 불러오고 실시간 Rectify 결과를 확인하는 절차를 설명합니다.
 
-### 5. 이벤트 카메라 데이터셋 (진행중)
+### 5. NRV Viewer 개발 노트
+
+팀원들과 DELTA 카메라와 Viewer 연동을 진행하고, 센서 설명 시트를 검토해 Viewer에 없던 제어 기능을 직접 추가했습니다. 데이터 수신과 표시·저장의 연결부터 센서 기능 확장, 공식 사용 문서와 제품 홈페이지 개선까지 세 편으로 정리했습니다.
+
+1. [DELTA 카메라와 Viewer 연동](https://jaypark0115.github.io/jay-tech-notes/pages/viewer/01-camera-viewer-integration.html)
+   - 팀원들과 진행한 고속 수신·이벤트 해석·표시·기록의 연결 구조와 보정·파일 재생 연동을 설명합니다.
+2. [센서 제어 기능 확장](https://jaypark0115.github.io/jay-tech-notes/pages/viewer/02-sensor-controls.html)
+   - 센서 설명 시트를 바탕으로 반전·이벤트 극성·ROI와 외부 신호 제어를 직접 추가하고, 레지스터 적용과 UI 상태를 연결한 과정입니다.
+3. [기술 문서와 제품 홈페이지 개선](https://jaypark0115.github.io/jay-tech-notes/pages/viewer/03-documentation-and-website.html)
+   - 직접 작성한 공식 기술 소개·사용 문서·고속 촬영 안내와 홈페이지 애니메이션·제품 사양 정리 작업을 담았습니다.
+
+### 6. 이벤트 카메라 데이터셋 (진행중)
 
 장시간 녹화 환경 개선을 시작으로 망원경 촬영 준비, 누리호 DVS·CIS 촬영, 이벤트·LiDAR·RGB 융합 데이터셋으로 이어지는 과정과 배운 내용을 정리합니다.
 
@@ -73,7 +84,7 @@ NRV DVS 캘리브레이션 구현에 이어, 보정 파라미터를 영상에 �
 4. 이벤트 카메라·LiDAR·RGB 융합 데이터셋
    - 발사체 DVS·CIS 현장 촬영에서 얻은 경험을 바탕으로, 팀원으로 참여 중인 주행·동적 장면의 이벤트·LiDAR 거리·RGB 동기화 기록으로 확장할 계획입니다. 이 데이터셋은 스테레오 Depth와 제로샷 위치 추정 기능 개발에 활용할 계획입니다.
 
-### 6. 이벤트 비전 스테레오 Depth 카메라 (진행중)
+### 7. 이벤트 비전 스테레오 Depth 카메라 (진행중)
 
 FPGA 실시간 스테레오 정렬·보정과 이벤트 카메라·LiDAR·RGB 융합 데이터셋을 연결해 이벤트 스테레오 Depth 카메라와 제로샷 위치 추정 기능을 구현하고 있습니다.
 
@@ -82,14 +93,14 @@ FPGA 실시간 스테레오 정렬·보정과 이벤트 카메라·LiDAR·RGB �
 2. [NRV 이벤트 스테레오 Depth 데모 영상](https://www.youtube.com/watch?v=lGbHEgp9Xqw)
    - NRV 스테레오 이벤트 카메라만으로 Depth를 처리한 영상이며, FPGA 실시간 정렬과 센서 융합 파이프라인을 연결해 이와 같은 결과를 실시간으로 구동하는 것이 목표입니다.
 
-### 7. NRV FPGA 트러블슈팅 노트
+### 8. NRV FPGA 트러블슈팅 노트
 
 1. [FPGA I²C 디바이스 인식 오류](https://jaypark0115.github.io/jay-tech-notes/pages/troubleshooting/02-fpga-i2c-false-ack.html)
    - 블록 디자인에서 미사용으로 제외한 포트를 내부 Verilog가 유효 SDA 변수로 다시 참조해 가짜 ACK가 발생한 원인과 수정 과정을 정리했습니다.
 2. [FX10 외부 SPI 플래시 쓰기 실패](https://jaypark0115.github.io/jay-tech-notes/pages/troubleshooting/01-fx10-external-spi-flash.html)
    - 잘못된 bitstream이 CR3NV[3]을 변경해 hybrid mode가 되었지만 programmer는 uniform mode로 erase해 발생한 readback mismatch와 복구 과정을 정리했습니다.
 
-### 8. 사이드 프로젝트 링크
+### 9. 사이드 프로젝트 링크
 
 1. [blinking-circle-grid-for-dvs-calibration](https://github.com/jaypark0115/blinking-circle-grid-for-dvs-calibration)
    - NRV DVS 캘리브레이션에 사용할 blinking asymmetric circle grid 패턴을 모니터에 표시하기 위한 프로젝트입니다.
@@ -104,7 +115,7 @@ FPGA 실시간 스테레오 정렬·보정과 이벤트 카메라·LiDAR·RGB �
 6. [망원경 카메라 마운트 어댑터](https://github.com/jaypark0115/celestron-camera-mount-adapters)
    - 원거리 데이터셋 촬영을 위해 Celestron 망원경과 M12·C-mount 카메라를 연결하도록 직접 제작한 3D 프린팅 어댑터 4종입니다.
 
-### 9. SoC/FPGA 학습 노트
+### 10. SoC/FPGA 학습 노트
 
 1. [APB Control Bus](https://jaypark0115.github.io/jay-tech-notes/pages/soc/04-apb-bus.html)
    - APB setup/enable phase와 Lab2~4의 register, SRAM, interrupt 실습을 설명합니다.
@@ -115,7 +126,7 @@ FPGA 실시간 스테레오 정렬·보정과 이벤트 카메라·LiDAR·RGB �
 4. [AXI-to-APB Bridge](https://jaypark0115.github.io/jay-tech-notes/pages/soc/07-axi-to-apb-bridge.html)
    - AXI-to-APB protocol conversion, write/read FSM, APB slave, testbench, PASS 로그를 기준으로 최종 프로젝트를 정리했습니다.
 
-### 10. 경진대회 기술 노트
+### 11. 경진대회 기술 노트
 
 제가 참여한 두 경진대회의 문제 정의, 입력 표현, 하드웨어 구조와 검증 결과를 프로젝트별 네 편의 기술 문서로 나누어 설명합니다.
 
