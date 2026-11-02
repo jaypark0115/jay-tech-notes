@@ -160,16 +160,19 @@ body.home-page #top :is(.project-card, .sitemap-card, .competition-card) > p {
 
 body.home-page #top :is(.project-card, .sitemap-card):has(> :is(.project-thumb, .calibration-card-thumb)) > .sitemap-number {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: 24px;
+  left: 24px;
   z-index: 1;
   margin: 0;
   box-shadow: 0 2px 8px rgb(15 23 42 / 12%);
 }
 
 body.home-page #top :is(.project-card, .sitemap-card) > :is(.project-thumb, .calibration-card-thumb) {
-  border-bottom: 8px solid #edf3f2;
-  box-shadow: 0 1px 0 #cddedb;
+  width: calc(100% - 24px);
+  max-width: calc(100% - 24px);
+  margin: 12px 12px 0;
+  border: 1px solid var(--border);
+  box-shadow: none;
 }
 
 body.home-page #top :is(.project-card, .sitemap-card):has(> :is(.project-thumb, .calibration-card-thumb)) > h2 {
