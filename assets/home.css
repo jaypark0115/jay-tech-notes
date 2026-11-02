@@ -159,17 +159,21 @@ body.home-page #top :is(.project-card, .sitemap-card, .competition-card) > p {
 }
 
 body.home-page #top :is(.project-card, .sitemap-card):has(> :is(.project-thumb, .calibration-card-thumb)) > .sitemap-number {
-  display: flex;
-  position: relative;
+  position: absolute;
+  top: 12px;
+  left: 12px;
   z-index: 1;
-  margin: -22px 20px 14px;
-  border: 3px solid #fff;
-  outline: 1px solid #b9e5dc;
+  margin: 0;
   box-shadow: 0 2px 8px rgb(15 23 42 / 12%);
 }
 
 body.home-page #top :is(.project-card, .sitemap-card) > :is(.project-thumb, .calibration-card-thumb) {
-  border-bottom: 2px solid #d7e6e3;
+  border-bottom: 8px solid #edf3f2;
+  box-shadow: 0 1px 0 #cddedb;
+}
+
+body.home-page #top :is(.project-card, .sitemap-card):has(> :is(.project-thumb, .calibration-card-thumb)) > h2 {
+  margin-top: 22px;
 }
 
 body.home-page #top .project-thumb.model-preview {
