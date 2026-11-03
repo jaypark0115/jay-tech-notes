@@ -1,3 +1,4 @@
+<!-- Public RTL reference index -->
 # 경진대회 RTL 참고 코드
 
 이 디렉터리는 기술 케이스 스터디에서 참조하는 RTL 모듈을 포함한다. 전체

@@ -1,3 +1,4 @@
+// Shared page navigation and section tracking.
 const body = document.body;
 
 function repairStaleWebviewDom() {

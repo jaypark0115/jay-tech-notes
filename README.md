@@ -1,3 +1,4 @@
+<!-- Repository index -->
 # Jay Tech Notes
 
 제가 직접 작성하고 정리한 기술 글, 실험 기록, 논문 자료를 모아두는 개인 기술 노트입니다.
