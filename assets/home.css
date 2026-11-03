@@ -12,10 +12,8 @@ body.home-page {
   color: var(--home-ink);
 }
 body.home-page .content-wrap { max-width: 1500px; grid-template-columns: minmax(0, 1020px) 236px; gap: 48px; padding-top: 56px; }
-body.home-page .document-kicker { margin-bottom: 22px; color: var(--home-accent); font-size: 0.7rem; }
-body.home-page .draft-label { padding: 6px 11px; border-radius: 4px; border-color: #bde5d5; background: #f1fcf6; color: #387969; }
 body.home-page h1 { margin-bottom: 20px; padding-bottom: 0; border: 0; color: var(--home-ink); font-size: clamp(2rem, 3vw, 2.8rem); letter-spacing: -0.025em; }
-body.home-page .lead { max-width: 850px; margin-bottom: 32px; color: var(--home-muted); font-size: 0.95rem; line-height: 1.9; }
+body.home-page .lead { max-width: none; margin-bottom: 32px; color: var(--home-muted); font-size: 0.95rem; line-height: 1.9; text-indent: 0; }
 body.home-page .doc-section > p { color: #526c70; line-height: 1.85; }
 body.home-page .doc-section + .doc-section { margin-top: 84px; padding-top: 44px; border-top-color: #d7eae2; }
 body.home-page .doc-section > h2 { margin-bottom: 20px; color: var(--home-ink); font-size: clamp(1.4rem, 1.8vw, 1.8rem); line-height: 1.4; }
@@ -174,8 +172,6 @@ body.home-page .home-page-toc a:focus-visible { outline: 3px solid #0f766e; outl
 }
 @media (max-width: 700px) {
   body.home-page .content-wrap { padding-top: 32px; padding-inline: 24px; }
-  body.home-page .document-kicker { font-size: 0.65rem; }
-  body.home-page .draft-label { padding: 4px 8px; font-size: 0.63rem; }
   body.home-page .collection-overview > summary { padding: 14px 16px; font-size: 0.9rem; }
   body.home-page .doc-section + .doc-section { margin-top: 64px; padding-top: 32px; }
   body.home-page .latest-post-grid { grid-template-columns: 1fr; gap: 16px; }
