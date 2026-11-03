@@ -87,11 +87,6 @@ body.home-page .latest-post-thumb.launch-preview {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-body.home-page .latest-post-thumb .launch-preview-panel img {
-  top: 50%;
-  transform: translateY(-50%);
-}
-
 body.home-page .latest-post-copy {
   padding: 16px 18px 18px;
 }
@@ -191,6 +186,29 @@ body.home-page #top .project-thumb.model-preview {
   background: #f7f9fb;
 }
 
+/* Keep the two camera views side by side instead of overriding them as blocks. */
+body.home-page #top .project-thumb.launch-preview,
+body.home-page #top .latest-post-thumb.launch-preview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* The 873x491 source has a 330px camera area below its 83px title bar. */
+body.home-page #top .launch-preview-panel img {
+  position: absolute;
+  top: -25.151515%;
+  left: 50%;
+  width: auto;
+  max-width: none;
+  height: 148.787879%;
+  max-height: none;
+  transform: translateX(-25.4%);
+}
+
+body.home-page #top .launch-preview-cis img {
+  transform: translateX(-75.6%);
+}
+
 @media (max-width: 700px) {
   body.home-page .latest-post-grid {
     grid-template-columns: 1fr;
@@ -221,14 +239,4 @@ body.home-page #top .project-thumb.model-preview {
     font-size: 0.82rem;
   }
 
-  body.home-page .latest-post-thumb .launch-preview-panel img {
-    height: 150%;
-    width: auto;
-    left: 50%;
-    transform: translate(-25%, -50%);
-  }
-
-  body.home-page .latest-post-thumb .launch-preview-cis img {
-    transform: translate(-75%, -50%);
-  }
 }
