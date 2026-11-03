@@ -103,8 +103,99 @@ body.viewer-doc-page .viewer-code {
   line-height: 1.7;
 }
 
+/* Linked page previews, scoped to the Viewer articles. */
+body.viewer-doc-page .resource-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin: 24px 0 30px;
+}
+
+body.viewer-doc-page .resource-preview {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #d7e2df;
+  background: #f2f8f6;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+body.viewer-doc-page .resource-preview:hover {
+  border-color: #0f766e;
+  box-shadow: 0 8px 24px rgb(15 23 42 / 8%);
+}
+
+body.viewer-doc-page .resource-preview:focus-visible {
+  outline: 3px solid #0f766e;
+  outline-offset: 4px;
+}
+
+body.viewer-doc-page .resource-preview > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top;
+  border-bottom: 1px solid #d7e2df;
+  background: #fff;
+}
+
+body.viewer-doc-page .resource-preview-copy {
+  display: block;
+  padding: 18px 20px 20px;
+}
+
+body.viewer-doc-page .resource-preview-copy > strong {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+body.viewer-doc-page .resource-preview-arrow {
+  flex: none;
+  color: #0f766e;
+}
+
+body.viewer-doc-page .resource-preview-summary {
+  display: block;
+  color: #526579;
+  font-size: 0.88rem;
+  line-height: 1.65;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+body.viewer-doc-page .resource-preview-wide {
+  grid-template-columns: minmax(0, 44%) minmax(0, 1fr);
+  grid-template-rows: 1fr;
+  align-items: center;
+  margin: 24px 0 30px;
+}
+
+body.viewer-doc-page .resource-preview-wide > img {
+  border-bottom: 0;
+  border-right: 1px solid #d7e2df;
+}
+
 @media (max-width: 680px) {
   body.viewer-doc-page .figure-pair {
     grid-template-columns: 1fr;
+  }
+
+  body.viewer-doc-page .resource-preview-grid,
+  body.viewer-doc-page .resource-preview-wide {
+    grid-template-columns: 1fr;
+  }
+
+  body.viewer-doc-page .resource-preview-wide > img {
+    border-right: 0;
+    border-bottom: 1px solid #d7e2df;
   }
 }

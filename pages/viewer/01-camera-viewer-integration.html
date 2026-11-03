@@ -6,7 +6,7 @@
     <meta name="description" content="팀원들과 진행한 DELTA 카메라와 Viewer 연동. 고속 수신, 이벤트 해석, 화면 표시와 기록·재생을 연결한 통합 운용 구조를 설명합니다." />
     <title>DELTA 카메라와 Viewer 연동 — Jay Tech Notes</title>
     <link rel="stylesheet" href="../../styles.css" />
-    <link rel="stylesheet" href="../../assets/viewer/viewer.css" />
+    <link rel="stylesheet" href="../../assets/viewer/viewer.css?v=20261103-doc-previews" />
     <script src="../../script.js" defer></script>
   </head>
   <body class="troubleshooting-page viewer-doc-page">
@@ -69,7 +69,11 @@
             <h3>3. 패킷을 이벤트 영상으로 바꾸기</h3>
             <p>NRV 센서는 Group AER 형식으로 이벤트를 묶어 보낸다. 32비트 패킷에 그룹 주소와 비트마스크 등을 담아 최대 16개 픽셀의 이벤트를 표현하며, 호스트는 이를 풀어 각 이벤트의 좌표와 극성을 복원한다. 밝아진 변화와 어두워진 변화는 ON·OFF 극성으로 구분한다.</p>
             <p>여기서 USB 전송 한 번의 끝과 센서 프레임의 끝은 다르다. 전송 블록 안에는 좌표 기준, 시간 정보, 이벤트 그룹과 프레임 종료 정보가 섞여 들어온다. <code>PacketParser</code>는 헤더로 종류를 구분하고 앞서 읽은 좌표·시간 상태를 유지하면서 다음 이벤트를 해석한다. 따라서 수신 블록마다 한 장의 영상이라고 가정하는 대신, 데이터 안의 프레임 종료 정보를 읽어 센서 프레임을 구분한다.</p>
-            <p>시간 정보도 데이터 형식에 맞게 읽어야 한다. NRV의 이벤트 프레임에서는 여러 픽셀이 프레임 단위의 시간 정보를 공유한다. 따라서 USB 패킷이 PC에 도착한 시각을 개별 픽셀의 발생 시각으로 사용하는 대신, 데이터에 포함된 프레임 시간과 이벤트 좌표를 함께 해석한다. 이 구조와 Group AER의 의미는 직접 작성한 <a href="https://nrvcorp.github.io/docs/about-NRV/" target="_blank" rel="noopener noreferrer">NRV 기술 소개</a>에도 설명해 두었다.</p>
+            <p>시간 정보도 데이터 형식에 맞게 읽어야 한다. NRV의 이벤트 프레임에서는 여러 픽셀이 프레임 단위의 시간 정보를 공유한다. 따라서 USB 패킷이 PC에 도착한 시각을 개별 픽셀의 발생 시각으로 사용하는 대신, 데이터에 포함된 프레임 시간과 이벤트 좌표를 함께 해석한다. 이 구조와 Group AER의 의미는 직접 작성한 NRV 기술 소개에도 설명해 두었다.</p>
+            <a class="resource-preview resource-preview-wide" href="https://nrvcorp.github.io/docs/about-NRV/" target="_blank" rel="noopener noreferrer">
+              <img src="../../assets/viewer/about-nrv-docs.jpg" width="1265" height="712" alt="이벤트 프레임과 Group AER를 설명한 NRV 기술 소개 페이지" loading="lazy" />
+              <span class="resource-preview-copy"><strong>NRV 기술 소개 <span class="resource-preview-arrow" aria-hidden="true">↗</span></strong><span class="resource-preview-summary">이벤트 프레임, Group AER와 Global Reset·Hold의 원리를 직접 정리한 공식 문서.</span></span>
+            </a>
             <p>복원한 이벤트는 관찰 목적에 따라 영상으로 누적한다. 짧은 시간만 모으면 빠른 움직임의 잔상이 줄어들지만 한 화면에 보이는 점도 적어진다. 반대로 오래 모으면 형태를 알아보기 쉬워지는 대신 서로 다른 시각의 움직임이 겹친다. Viewer에서는 시간, 이벤트 수, 센서 프레임 수를 기준으로 누적 조건을 선택할 수 있도록 연결했다.</p>
             <p>세 기준은 같은 장면을 서로 다르게 나눈다. 시간 기준은 일정한 관찰 구간을 유지하고, 이벤트 수 기준은 한 화면에 모이는 정보량을 맞추는 대신 움직임에 따라 한 장이 만들어지는 시간이 달라진다. 센서 프레임 수 기준은 지정한 개수의 프레임 종료를 세어 누적한다. 예를 들어 센서가 2,000 FPS로 동작할 때 20개 프레임을 모으면 약 10 ms의 변화가 한 화면에 들어간다. 이 누적 구간과 실제 모니터를 갱신하는 주기는 별도로 생각해야 한다.</p>
             <figure class="doc-figure figure-wide">
@@ -88,6 +92,11 @@
             <p>재생에 필요한 것은 이벤트 좌표만이 아니다. 파일 헤더에는 모델과 클럭·타임스탬프 단위처럼 패킷을 해석하는 기준도 함께 기록한다. 센서가 보낸 시간 값은 정해진 단위로 환산해야 하므로, 촬영 당시 설정과 분리해서 읽으면 같은 값도 다른 시간 간격으로 해석될 수 있다. 데이터를 남기는 일과 그 데이터를 해석할 조건을 남기는 일을 함께 처리한 것이다.</p>
             <p>파일 탐색에서는 선택 구간만 읽어 한 프레임을 구성하고, 다시 재생할 때는 선택 위치부터 일반 재생으로 이어지도록 한다. 누적 조건을 바꾸어 비교하거나 관심 장면을 반복해서 확인할 수 있어, 매번 카메라로 같은 장면을 다시 만들지 않고도 표시·분석 기능을 점검할 수 있다.</p>
             <p>실시간 입력과 재생에 별도 해석 코드를 두면 같은 데이터를 다르게 처리하는 문제가 생기기 쉽다. 공통 모듈을 쓰는 구조를 이해하면서, 기능을 추가할 때도 어느 입력에서 사용할 수 있는지와 저장된 데이터에 어떤 영향을 주는지를 함께 확인하게 됐다.</p>
+            <p>이 구조를 실제 조작으로 따라갈 수 있도록 Viewer Guide도 직접 작성했다. 카메라를 선택하고 설정 파일을 적용하는 첫 단계부터 이벤트 화면 구성, 녹화와 파일 재생까지 실제 화면과 함께 안내한다.</p>
+            <a class="resource-preview resource-preview-wide" href="https://nrvcorp.github.io/docs/software/viewer-guide/" target="_blank" rel="noopener noreferrer">
+              <img src="../../assets/viewer/viewer-guide-preview.png" width="1440" height="900" alt="연결부터 녹화와 재생까지 안내한 공식 Viewer Guide 미리보기" loading="lazy" />
+              <span class="resource-preview-copy"><strong>Viewer Guide <span class="resource-preview-arrow" aria-hidden="true">↗</span></strong><span class="resource-preview-summary">장치 연결, 설정 적용, 이벤트 화면 설정과 녹화·재생을 실제 조작 순서로 정리한 가이드.</span></span>
+            </a>
           </section>
 
           <section class="doc-section searchable-section" id="calibration" data-search-title="직접 구현한 캘리브레이션 Rectify 연동">
