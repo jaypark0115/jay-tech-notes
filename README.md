@@ -71,7 +71,7 @@ NRV DVS 캘리브레이션 구현에 이어, 보정 파라미터를 영상에 �
 3. [기술 문서와 제품 홈페이지 개선](https://jaypark0115.github.io/jay-tech-notes/pages/viewer/03-documentation-and-website.html)
    - Viewer 연결부터 화면 설정·녹화·파일 재생까지 직접 작성한 사용 가이드와 기능별 문서, 홈페이지 애니메이션·제품 사양 정리 작업을 담았습니다.
 
-   <a href="https://nrvcorp.github.io/docs/software/viewer-guide/"><img src="assets/viewer/viewer-guide-preview.png" alt="직접 작성한 NRV Viewer Guide 미리보기 — 클릭하면 공식 가이드로 이동" width="640"></a>
+   [NRV Viewer 공식 사용 가이드](https://nrvcorp.github.io/docs/software/viewer-guide/)
 
 ### 6. 이벤트 카메라 데이터셋 (진행중)
 
